@@ -12,13 +12,27 @@
 */
 
 /** @var \Illuminate\Database\Eloquent\Factory $factory */
-$factory->define(App\User::class, function (Faker\Generator $faker) {
-    static $password;
+use App\Models\Lesson;
+use App\Models\User;
+use Carbon\Carbon;
+use Faker\Generator;
 
-    return [
-        'name' => $faker->name,
-        'email' => $faker->unique()->safeEmail,
-        'password' => $password ?: $password = bcrypt('secret'),
-        'remember_token' => str_random(10),
-    ];
+$factory->define(User::class, function(Generator $faker) {
+  static $password;
+
+  return [
+      'name'           => $faker->name,
+      'email'          => $faker->unique()->safeEmail,
+      'password'       => $password ?: $password = bcrypt('secret'),
+      'remember_token' => str_random(10),
+  ];
+});
+
+$factory->define(Lesson::class, function(Generator $faker) {
+  $date = Carbon::createFromTimestampUTC($faker->unique()->numberBetween(17100, 17400) * 86400);
+  return [
+      'date'   => $date,
+      'number' => 1,
+      'room'   => $faker->words(1, true)
+  ];
 });
