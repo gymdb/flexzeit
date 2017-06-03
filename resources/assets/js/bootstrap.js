@@ -31,6 +31,7 @@ window.axios.defaults.headers.common = {
     'X-CSRF-TOKEN': window.Laravel.csrfToken,
     'X-Requested-With': 'XMLHttpRequest'
 };
+window.axios.defaults.baseURL = window.Laravel.baseURL;
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
