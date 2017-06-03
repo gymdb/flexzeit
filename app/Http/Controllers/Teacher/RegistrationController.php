@@ -10,7 +10,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Services\ConfigService;
-use App\Services\Implementation\RegistrationService;
+use App\Services\RegistrationService;
 use App\Services\LessonService;
 use App\Services\OffdayService;
 use App\Services\TeacherService;

@@ -11,6 +11,8 @@ use App\Models\Teacher;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
+use App\Services\ConfigService;
+use App\Services\CourseService;
 use App\Services\RegistrationService;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
@@ -18,7 +20,7 @@ use App\Specifications\ObligatorySpecification;
 use App\Validators\DateValidator;
 use Illuminate\Database\Eloquent\Builder;
 
-class CourseService implements \App\Services\CourseService {
+class CourseServiceImpl implements CourseService {
 
   /** @var ConfigService */
   private $configService;

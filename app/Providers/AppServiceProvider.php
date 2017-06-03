@@ -11,6 +11,13 @@ use App\Repositories\SubjectRepository;
 use App\Repositories\TeacherRepository;
 use App\Services\ConfigService;
 use App\Services\CourseService;
+use App\Services\Implementation\ConfigServiceImpl;
+use App\Services\Implementation\CourseServiceImpl;
+use App\Services\Implementation\LessonServiceImpl;
+use App\Services\Implementation\OffdayServiceImpl;
+use App\Services\Implementation\RegistrationServiceImpl;
+use App\Services\Implementation\StudentServiceImpl;
+use App\Services\Implementation\TeacherServiceImpl;
 use App\Services\LessonService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
@@ -49,13 +56,13 @@ class AppServiceProvider extends ServiceProvider {
     $this->app->bind(TeacherRepository::class, \App\Repositories\Eloquent\TeacherRepository::class);
 
     // Bind services
-    $this->app->bind(ConfigService::class, \App\Services\Implementation\ConfigService::class);
-    $this->app->bind(CourseService::class, \App\Services\Implementation\CourseService::class);
-    $this->app->bind(LessonService::class, \App\Services\Implementation\LessonService::class);
-    $this->app->bind(OffdayService::class, \App\Services\Implementation\OffdayService::class);
-    $this->app->bind(RegistrationService::class, \App\Services\Implementation\RegistrationService::class);
-    $this->app->bind(StudentService::class, \App\Services\Implementation\StudentService::class);
-    $this->app->bind(TeacherService::class, \App\Services\Implementation\TeacherService::class);
+    $this->app->bind(ConfigService::class, ConfigServiceImpl::class);
+    $this->app->bind(CourseService::class, CourseServiceImpl::class);
+    $this->app->bind(LessonService::class, LessonServiceImpl::class);
+    $this->app->bind(OffdayService::class, OffdayServiceImpl::class);
+    $this->app->bind(RegistrationService::class, RegistrationServiceImpl::class);
+    $this->app->bind(StudentService::class, StudentServiceImpl::class);
+    $this->app->bind(TeacherService::class, TeacherServiceImpl::class);
   }
 
 }

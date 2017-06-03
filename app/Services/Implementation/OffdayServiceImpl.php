@@ -5,8 +5,9 @@ namespace App\Services\Implementation;
 use App\Helpers\Date;
 use App\Models\Offday;
 use App\Repositories\OffdayRepository;
+use App\Services\OffdayService;
 
-class OffdayService implements \App\Services\OffdayService {
+class OffdayServiceImpl implements OffdayService {
 
   /** @var OffdayRepository */
   private $offdayRepository;

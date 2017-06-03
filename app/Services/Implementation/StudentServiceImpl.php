@@ -13,12 +13,13 @@ use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use App\Services\StudentService;
 use App\Validators\DateValidator;
 use ArrayIterator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-class StudentService implements \App\Services\StudentService {
+class StudentServiceImpl implements StudentService {
 
   /** @var ConfigService */
   private $configService;

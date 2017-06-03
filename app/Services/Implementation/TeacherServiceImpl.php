@@ -2,9 +2,7 @@
 
 namespace App\Services\Implementation;
 
-use App\Helpers\Date;
 use App\Models\Group;
-use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Repositories\GroupRepository;
@@ -14,10 +12,10 @@ use App\Repositories\TeacherRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use App\Services\TeacherService;
 use App\Validators\DateValidator;
-use function foo\func;
 
-class TeacherService implements \App\Services\TeacherService {
+class TeacherServiceImpl implements TeacherService {
 
   /** @var ConfigService */
   private $configService;

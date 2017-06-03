@@ -4,6 +4,7 @@ namespace App\Services\Implementation;
 
 use App\Helpers\Date;
 use App\Repositories\ConfigRepository;
+use App\Services\ConfigService;
 use DateTime;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Cache;
  *
  * @package App\Services
  */
-class ConfigService implements \App\Services\ConfigService {
+class ConfigServiceImpl implements ConfigService {
 
   private $configRepository;
 

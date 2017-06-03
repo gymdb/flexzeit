@@ -11,7 +11,8 @@ use App\Models\Teacher;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
-use App\Services\Implementation\CourseService;
+use App\Services\CourseService;
+use App\Services\Implementation\CourseServiceImpl;
 use App\Services\RegistrationService;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
@@ -59,7 +60,7 @@ class CourseServiceTest extends TestCase {
     $this->mock(['registrations' => RegistrationService::class, 'groups' => GroupRepository::class,
                  'lessons'       => LessonRepository::class, 'offdays' => OffdayRepository::class]);
     $this->courseService = $partialMock
-        ? Mockery::mock(CourseService::class . '[coursePossible,obligatoryPossible]',
+        ? Mockery::mock(CourseServiceImpl::class . '[coursePossible,obligatoryPossible]',
             [$this->getMocked('configService'), $this->getMocked('registrations'), $this->getMocked('groups'),
                 $this->getMocked('lessons'), $this->getMocked('offdays'), $this->app->make(DateValidator::class)])
         : $this->app->make(CourseService::class);

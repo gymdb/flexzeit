@@ -18,10 +18,11 @@ use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
+use App\Services\RegistrationService;
 use App\Validators\DateValidator;
 use Illuminate\Support\Facades\DB;
 
-class RegistrationService implements \App\Services\RegistrationService {
+class RegistrationServiceImpl implements RegistrationService {
 
   /** @var RegistrationRepository */
   private $registrationRepository;

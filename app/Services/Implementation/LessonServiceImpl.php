@@ -8,8 +8,9 @@ use App\Models\Lesson;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use App\Services\ConfigService;
+use App\Services\LessonService;
 
-class LessonService implements \App\Services\LessonService {
+class LessonServiceImpl implements LessonService {
 
   /** @var ConfigService */
   private $configService;

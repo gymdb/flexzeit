@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Student;
-use App\Services\Implementation\RegistrationService;
+use App\Services\RegistrationService;
 use Illuminate\Support\Facades\Auth;
 
 class JsonController extends Controller {
