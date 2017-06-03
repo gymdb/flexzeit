@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Registration;
 use App\Models\Student;
+use Illuminate\Support\Collection;
 
 interface RegistrationService {
 
@@ -27,6 +28,17 @@ interface RegistrationService {
    * @param bool $admin Ignores all restrictions (student already registered somewhere else, course already happened)
    */
   public function registerStudentForCourse(Course $course, Student $student, $force = false, $admin = false);
+
+  /**
+   * Registers a student for a complete course
+   *
+   * @param Course $course Course loaded from the database
+   * @param Student $student Student loaded from the database
+   * @param bool $ignoreDate Don't check if date is within registration period
+   * @param bool $force Ignores course restrictions (year, max participants, assigned groups)
+   * @return int 0 if validation succeeds, error code otherwise
+   */
+  public function validateStudentForCourse(Course $course, Student $student, $ignoreDate = false, $force = false);
 
   /**
    * Registers a student for a single lesson
@@ -58,19 +70,33 @@ interface RegistrationService {
   /**
    * Unregisters a student from a single lesson
    *
-   * @param Lesson $lesson Lesson loaded from the database
-   * @param Student $student Student from the database
+   * @param Registration $registration
    * @param bool $force Also unregister from obligatory courses and after registration period ended
+   * @return
    */
-  public function unregisterStudentFromLesson(Lesson $lesson, Student $student, $force = false);
+  public function unregisterStudentFromLesson(Registration $registration, $force = false);
+
+  /**
+   * Unregisters all students from a single lesson
+   *
+   * @param Lesson $lesson Lesson loaded from the database
+   */
+  public function unregisterAllFromLesson(Lesson $lesson);
 
   /**
    * Set attendance of one student in a given lesson
    *
    * @param Registration $registration
-   * @param bool $present
+   * @param bool $attendance
    */
-  public function setAttendance(Registration $registration, $present);
+  public function setAttendance(Registration $registration, $attendance);
+
+  /**
+   * Set attendance on all associated registrations
+   *
+   * @param Lesson $lesson
+   */
+  public function setAttendanceChecked(Lesson $lesson);
 
   /**
    * Add documentation for a lesson
@@ -78,5 +104,17 @@ interface RegistrationService {
    * @param Registration $registration Registration loaded from the database
    */
   public function documentLesson(Registration $registration);
+
+  /**
+   * @param Lesson $lesson
+   * @return Collection
+   */
+  public function getForLesson(Lesson $lesson);
+
+  /**
+   * @param Course $course
+   * @return Collection
+   */
+  public function getForCourse(Course $course);
 
 }

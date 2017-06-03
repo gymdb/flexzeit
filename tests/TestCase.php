@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Mockery;
 use Mockery\Expectation;
 
 abstract class TestCase extends BaseTestCase {
@@ -12,7 +13,7 @@ abstract class TestCase extends BaseTestCase {
   private $mocks = [];
 
   protected function tearDown() {
-    \Mockery::close();
+    Mockery::close();
     parent::tearDown();
   }
 
@@ -21,8 +22,8 @@ abstract class TestCase extends BaseTestCase {
       if (empty($this->mocks[$key])) {
         $class = is_array($options) ? $options[0] : $options;
         $this->mocks[$key] = is_array($options)
-            ? \Mockery::mock($class . $options[1], $options[2])
-            : \Mockery::mock($class);
+            ? Mockery::mock($class . $options[1], $options[2])
+            : Mockery::mock($class);
         $this->app->instance($class, $this->mocks[$key]);
       }
     }

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Additional data for a form
  *
@@ -23,7 +21,7 @@ class Form extends Model {
   }
 
   public function kv() {
-    return $this->belongsTo(Teacher::class);
+    return $this->belongsTo(Teacher::class, 'kv_id');
   }
 
 }

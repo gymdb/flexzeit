@@ -1,34 +1,37 @@
 <?php
 namespace Tests\Traits;
 
+use App\Helpers\Date;
 use App\Models\Offday;
-use Carbon\Carbon;
-use Illuminate\Database\Query\Builder;
+use App\Repositories\OffdayRepository;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Mockery;
 
 trait MockOffdaysTrait {
 
   use AbstractTrait;
 
-  protected function mockOffdaysInRange(array $dates = [], Builder $query = null) {
+  protected function mockOffdaysInRange(array $dates = [], Relation $relation = null) {
+    $this->mock(['offdays' => OffdayRepository::class]);
     $exp = $this->shouldReceive('offdays', 'inRange')
-        ->andReturnUsing(function(Carbon $start, Carbon $end = null, $dayOfWeek = null) use ($dates) {
+        ->andReturnUsing(function(Date $start, Date $end = null, $dayOfWeek = null) use ($dates) {
           return $this->mockResult(collect($dates)
-              ->filter(function(Carbon $date) use ($start, $end, $dayOfWeek) {
+              ->filter(function(Date $date) use ($start, $end, $dayOfWeek) {
                 return $start <= $date
                     && (is_null($end) ? $start >= $date : $end >= $date)
                     && (is_null($dayOfWeek) || $dayOfWeek === $date->dayOfWeek);
               })
-              ->map(function(Carbon $date) {
+              ->map(function(Date $date) {
                 return $this->mockOffday($date);
               })
           );
         });
-    if (!is_null($query)) {
-      $exp->with(\Mockery::any(), \Mockery::any(), \Mockery::any(), $query);
+    if (!is_null($relation)) {
+      $exp->with(Mockery::any(), Mockery::any(), Mockery::any(), $relation);
     }
   }
 
-  protected function mockOffday(Carbon $date) {
+  protected function mockOffday(Date $date) {
     $offday = $this->mockModel(Offday::class, ['date' => $date]);
 
     /** @noinspection PhpMethodParametersCountMismatchInspection */

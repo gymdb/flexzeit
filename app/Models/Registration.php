@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Representation of a registration for a lesson
  *
@@ -12,13 +10,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property Lesson $lesson
  * @property Student $student
  * @property bool $obligatory
- * @property bool $present
+ * @property bool $attendance
  * @property string $documentation
  */
 class Registration extends Model {
 
   public $timestamps = false;
-  protected $casts = ['obligatory' => 'boolean', 'present' => 'boolean'];
+  protected $casts = ['obligatory' => 'boolean', 'attendance' => 'boolean'];
+  protected $fillable = ['lesson', 'student', 'obligatory'];
 
   public function lesson() {
     return $this->belongsTo(Lesson::class);

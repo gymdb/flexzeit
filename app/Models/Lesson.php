@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use App\Helpers\Date;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Representation of a lesson
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @package App\Models
  * @property int $id
  * @property Teacher $teacher
- * @property Carbon $date
+ * @property Date $date
  * @property int $number
  * @property Course $course
  * @property string $room
@@ -23,8 +22,8 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model {
 
   public $timestamps = false;
-  protected $casts = ['date' => 'date', 'cancelled' => 'boolean'];
-  protected $fillable = ['teacher', 'date', 'number'];
+  protected $casts = ['date' => 'date', 'cancelled' => 'boolean', 'number' => 'int'];
+  protected $fillable = ['teacher', 'date', 'number', 'room'];
 
   public function teacher() {
     return $this->belongsTo(Teacher::class);
@@ -39,7 +38,11 @@ class Lesson extends Model {
   }
 
   public function students() {
-    return $this->hasManyThrough(Student::class, Registration::class);
+    return $this->belongsToMany(Student::class, 'registrations');
+  }
+
+  public function groups() {
+    return $this->belongsToMany(Group::class, 'course_group', 'course_id', 'course_id');
   }
 
 }

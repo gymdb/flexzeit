@@ -2,9 +2,7 @@
 
 namespace App\Exceptions;
 
-use \Exception;
-
-class LessonException extends Exception {
+class LessonException extends ApiException {
 
   const DAY_OF_WEEK = 10;
   const NUMBERS = 11;

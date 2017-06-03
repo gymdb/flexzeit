@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 
 trait AbstractTrait {
 
-  protected abstract function mockModel($class, array $attributes = []);
+  protected abstract function mockModel($class, array $attributes = [], array $associate = []);
 
   protected abstract function mockResult(Collection $result);
 

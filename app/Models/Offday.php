@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use App\Helpers\Date;
 
 /**
  * Representation of a day without school
  *
  * @package App\Models
  * @property int $id
- * @property Carbon $date
+ * @property Date $date
  * @property Group $group
  */
 class Offday extends Model {

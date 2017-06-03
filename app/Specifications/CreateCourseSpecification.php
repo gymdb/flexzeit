@@ -2,30 +2,25 @@
 
 namespace App\Specifications;
 
+use App\Helpers\Date;
 use App\Models\Course;
-use Carbon\Carbon;
 
 interface CreateCourseSpecification {
 
   /**
-   * @return Carbon
+   * @return Date
    */
   public function getFirstDate();
 
   /**
-   * @return Carbon|null
+   * @return Date|null
    */
   public function getLastDate();
 
   /**
    * @return int
    */
-  public function getFirstLesson();
-
-  /**
-   * @return int|null
-   */
-  public function getLastLesson();
+  public function getLessonNumber();
 
   /**
    * Populate a course model with the specified data

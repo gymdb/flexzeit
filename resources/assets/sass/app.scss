@@ -1,9 +1,166 @@
-
 // Fonts
 @import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
-
 // Variables
 @import "variables";
-
 // Bootstrap
-@import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+// Datepicker
+@import "~eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker";
+
+h2.panel-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
+  line-height: inherit;
+}
+
+.panel-body > .table:last-child, .panel-body .table-responsive:last-child .table:last-child {
+  margin-bottom: 0;
+}
+
+.glyphicon.register-link {
+  font-size: 120%;
+}
+
+@media (max-width: 767px) {
+  .table-responsive {
+    .dropdown-menu, .popover {
+      position: static !important;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .table-responsive {
+    overflow: visible;
+  }
+
+  .dl-horizontal {
+    dt {
+      text-align: left;
+    }
+
+    &.dl-narrow {
+      dt {
+        width: 80px;
+      }
+
+      dd {
+        margin-left: 100px;
+      }
+    }
+  }
+}
+
+dt:after {
+  content: ":";
+}
+
+.bootstrap-datetimepicker-widget table td.today:before {
+  content: inherit;
+  display: none;
+  border: none;
+}
+
+.bootstrap-datetimepicker-widget table th.disabled,
+.bootstrap-datetimepicker-widget table th.disabled:hover,
+.bootstrap-datetimepicker-widget table td.disabled,
+.bootstrap-datetimepicker-widget table td.disabled:hover,
+.bootstrap-datetimepicker-widget table td span.disabled,
+.bootstrap-datetimepicker-widget table td span.disabled:hover {
+  color: #cccccc;
+}
+
+.date .form-control[readonly]:not([disabled]) {
+  background: #ffffff;
+}
+
+.input-group.disabled .input-group-addon {
+  cursor: $cursor-disabled;
+}
+
+.form-group.required > label:after {
+  content: " *";
+  font-weight: 900;
+  font-family: sans-serif;
+  color: $state-danger-text;
+}
+
+.table-squeezed td {
+  white-space: nowrap;
+
+  &:last-child {
+    width: 99%;
+  }
+}
+
+table .popover-container {
+  position: relative;
+
+  .popover {
+    z-index: 1200;
+  }
+}
+
+.student-image {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+@media (max-width: 423px) {
+  .date-range .date-range-connector {
+    display: none;
+  }
+}
+
+@media (min-width: 424px) {
+  .date-range {
+    //display: table;
+    width: 100%;
+    vertical-align: bottom;
+
+    .form-group {
+      width: calc(50% - 15px);
+      float: left;
+
+      .input-group {
+        z-index: 2;
+      }
+    }
+
+    .date-range-connector {
+      width: 30px;
+      float: left;
+
+      div {
+        margin-left: -0.5px;
+        z-index: 1;
+        padding: 10px $padding-base-horizontal;
+        font-size: $font-size-base;
+        font-weight: normal;
+        line-height: 1;
+        color: $input-color;
+        text-align: center;
+        background-color: $input-group-addon-bg;
+        border-top: 1px solid $input-group-addon-border-color;
+        border-bottom: 1px solid $input-group-addon-border-color;
+        position: relative;
+        top: 27.33px;
+
+        &.labels-hidden {
+          top: 0;
+        }
+      }
+    }
+
+    & > :first-child .input-group .input-group-addon:last-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    & > :last-child .input-group .form-control:first-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+}

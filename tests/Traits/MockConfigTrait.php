@@ -3,6 +3,7 @@ namespace Tests\Traits;
 
 use App\Repositories\ConfigRepository;
 use App\Services\Implementation\ConfigService;
+use Mockery;
 
 trait MockConfigTrait {
 
@@ -11,7 +12,7 @@ trait MockConfigTrait {
   protected abstract function mock(array $classes);
 
   protected function mockConfig(array $config) {
-    $this->mock(['configService' => [ConfigService::class, '[get]', [\Mockery::mock(ConfigRepository::class)]]]);
+    $this->mock(['configService' => [ConfigService::class, '[get]', [Mockery::mock(ConfigRepository::class)]]]);
     $this->mockedConfig = array_merge($this->mockedConfig, $config);
     $this->shouldReceive('configService', 'get')
         ->andReturnUsing(function($key) {

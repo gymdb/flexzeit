@@ -13,17 +13,9 @@ use Illuminate\Database\Eloquent\Collection;
 interface GroupRepository {
 
   /**
-   * @param int $id
-   * @return Group|null
+   * @return \Illuminate\Database\Eloquent\Builder
    */
-  public function find($id);
-
-  /**
-   * @return Group[]|Collection
-   */
-  public function all();
-
-
+  public function query();
 
   /**
    * @param int|int[] $ids

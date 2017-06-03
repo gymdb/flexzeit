@@ -2,7 +2,10 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\DateMiddleware;
+use App\Http\Middleware\ParametersMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\StripTags;
 use App\Http\Middleware\TrimStrings;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -32,8 +35,20 @@ class Kernel extends HttpKernel {
   protected $middleware = [
       CheckForMaintenanceMode::class,
       ValidatePostSize::class,
+      StripTags::class,
       TrimStrings::class,
       ConvertEmptyStringsToNull::class,
+  ];
+
+  /**
+   * This specifies the order in which the given middleware must run
+   *
+   * @var array
+   */
+  protected $middlewarePriority = [
+      ParametersMiddleware::class,
+      SubstituteBindings::class,
+      DateMiddleware::class
   ];
 
   /**
@@ -50,6 +65,7 @@ class Kernel extends HttpKernel {
           ShareErrorsFromSession::class,
           VerifyCsrfToken::class,
           SubstituteBindings::class,
+          DateMiddleware::class
       ],
 
       'api' => [
@@ -72,5 +88,6 @@ class Kernel extends HttpKernel {
       'can'        => Authorize::class,
       'guest'      => RedirectIfAuthenticated::class,
       'throttle'   => ThrottleRequests::class,
+      'params'     => ParametersMiddleware::class
   ];
 }

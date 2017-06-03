@@ -2,8 +2,8 @@
 
 namespace App\Specifications;
 
+use App\Helpers\Date;
 use App\Models\Course;
-use Carbon\Carbon;
 
 interface EditCourseSpecification {
 
@@ -13,7 +13,7 @@ interface EditCourseSpecification {
   public function getId();
 
   /**
-   * @return Carbon|null
+   * @return Date|null
    */
   public function getLastDate();
 

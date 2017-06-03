@@ -2,12 +2,12 @@
 
 namespace App\Services\Implementation;
 
-use App\Exceptions\LessonException;
+use App\Helpers\Date;
+use App\Models\Course;
+use App\Models\Lesson;
 use App\Models\Teacher;
-use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Services\ConfigService;
-use Carbon\Carbon;
 
 class LessonService implements \App\Services\LessonService {
 
@@ -17,47 +17,94 @@ class LessonService implements \App\Services\LessonService {
   /** @var LessonRepository */
   private $lessonRepository;
 
-  /** @var GroupRepository */
-  private $groupRepository;
-
   /**
    * LessonService constructor for injecting dependencies.
    *
    * @param ConfigService $configService
    * @param LessonRepository $lessonRepository
-   * @param GroupRepository $groupRepository
    */
-  public function __construct(ConfigService $configService, LessonRepository $lessonRepository, GroupRepository $groupRepository) {
+  public function __construct(ConfigService $configService, LessonRepository $lessonRepository) {
     $this->configService = $configService;
     $this->lessonRepository = $lessonRepository;
-    $this->groupRepository = $groupRepository;
   }
 
-  public function getLessonsForDay($dayOfWeek, $firstLesson = 1, $lastLesson = null) {
-    // Check if there are any lessons on the given start date
-    $lessonCount = $this->configService->getAsInt('lesson.count.' . $dayOfWeek);
-    if (empty($lessonCount)) {
-      throw new LessonException(LessonException::DAY_OF_WEEK);
-    }
-
-    // Check if the lesson range given is possible
-    if (is_null($lastLesson)) {
-      $lastLesson = $lessonCount;
-    }
-    if ($firstLesson <= 0 || $firstLesson > $lastLesson || $lastLesson > $lessonCount) {
-      throw new LessonException(LessonException::NUMBERS);
-    }
-
-    return range($firstLesson, $lastLesson);
+  public function getForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, array $numbers = null, $showCancelled = false, $withCourse = false) {
+    $lessons = $this->lessonRepository
+        ->forTeacher($teacher, $start, $end, $dayOfWeek, $numbers, $showCancelled, $withCourse)
+        ->orderBy('lessons.number')
+        ->with('course')
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.cancelled', 'lessons.course_id']);
+    $lessons->each(function(Lesson $lesson) {
+      $this->setTimes($lesson);
+    });
+    return $lessons;
   }
 
-  public function forTeacher(Teacher $teacher, Carbon $start, Carbon $end = null, $dayOfWeek = null, array $numbers = null, $showCancelled = false, $withCourse = false) {
-    return $this->lessonRepository->inRange($start, $end, $dayOfWeek, $numbers, $showCancelled, $withCourse, $teacher->lessons());
+  public function getForDay(Teacher $teacher, Date $date = null) {
+    return $this->getForTeacher($teacher, $date ?: Date::today(), null, null, null, true);
   }
 
-  public function forGroups(array $groups, Carbon $start, Carbon $end = null, $dayOfWeek = null, array $numbers = null, $showCancelled = false) {
-    return $this->lessonRepository->inRange($start, $end, $dayOfWeek, $numbers, $showCancelled,
-        $this->groupRepository->queryById($groups)->lessons());
+  public function getForCourse(Course $course) {
+    $lessons = $course->lessons()
+        ->orderBy('date')
+        ->orderBy('number')
+        ->get(['id', 'date', 'number', 'cancelled']);
+    $lessons->each(function(Lesson $lesson) {
+      $this->setTimes($lesson);
+    });
+    return $lessons;
+  }
+
+  public function getLessonCount(Date $date) {
+    return $this->configService->getAsInt('lesson.count.' . $date->dayOfWeek, 0);
+  }
+
+  public function getAllLessonTimes() {
+    $lessons = [];
+    for ($d = 0; $d < 7; $d++) {
+      $n = $this->configService->getAsInt('lesson.count.' . $d);
+      if ($n > 0) {
+        $lessons[$d] = [];
+        for ($l = 1; $l <= $n; $l++) {
+          $lessons[$d][$l] = [
+              'start' => $this->configService->getAsString('lesson.start.' . $d . '.' . $l),
+              'end'   => $this->configService->getAsString('lesson.end.' . $d . '.' . $l)
+          ];
+        }
+      }
+    }
+    return $lessons;
+  }
+
+  public function getDaysWithoutLessons($lessons = null) {
+    $daysWithoutLessons = [];
+    for ($d = 0; $d < 7; $d++) {
+      if ($lessons) {
+        if (empty($lessons[$d])) {
+          $daysWithoutLessons[] = $d;
+        }
+      } else if (!$this->configService->getAsInt('lesson.count.' . $d)) {
+        $daysWithoutLessons[] = $d;
+      }
+    }
+    return $daysWithoutLessons;
+  }
+
+  public function getStart(Date $date, $number) {
+    return $this->configService->getAsString('lesson.start.' . $date->dayOfWeek . '.' . $number);
+  }
+
+  public function getEnd(Date $date, $number) {
+    return $this->configService->getAsString('lesson.end.' . $date->dayOfWeek . '.' . $number);
+  }
+
+  public function isAttendanceChecked(Lesson $lesson) {
+    return !$lesson->registrations()->whereNull('attendance')->exists();
+  }
+
+  public function setTimes(Lesson $lesson) {
+    $lesson->start = $this->getStart($lesson->date, $lesson->number);
+    $lesson->end = $this->getEnd($lesson->date, $lesson->number);
   }
 
 }

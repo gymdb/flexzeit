@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
+use App\Helpers\Date;
 
 /**
  * Service for accessing config option values from database while using caches
@@ -49,10 +49,10 @@ interface ConfigService {
    * Load the config option associated with the given key as a datetime object
    *
    * @param string $key
-   * @param Carbon $default
-   * @return Carbon|null
+   * @param Date|null $default
+   * @return Date|null
    */
-  public function getAsDate($key, $default = null);
+  public function getAsDate($key, Date $default = null);
 
   /**
    * Write the new config value to database

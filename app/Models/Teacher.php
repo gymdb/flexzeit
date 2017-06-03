@@ -8,11 +8,6 @@ use Illuminate\Database\Eloquent\Collection;
  * Representation of a teacher
  *
  * @package App\Models
- * @property int $id
- * @property string $firstname
- * @property string $lastname
- * @property string $username
- * @property string $password
  * @property bool $admin
  * @property Form $form The form of which the teacher is the head
  * @property Collection $groups
@@ -28,8 +23,12 @@ class Teacher extends User {
     return 'teacher';
   }
 
+  public function isTeacher() {
+    return true;
+  }
+
   public function form() {
-    return $this->hasOne(Form::class);
+    return $this->hasOne(Form::class, 'kv_id');
   }
 
   public function groups() {

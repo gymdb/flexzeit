@@ -1,20 +1,32 @@
-
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
-
 require('./bootstrap');
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
+import axios from 'axios';
+import VueAxios from 'vue-axios';
+Vue.use(VueAxios, axios);
 
-Vue.component('example', require('./components/Example.vue'));
+// Register general components
+Vue.component('datepicker', require('./components/Datepicker.vue'));
+Vue.component('daterange', require('./components/Daterange.vue'));
+Vue.component('error', require('./components/Error.vue'));
+Vue.component('error-container', require('./components/ErrorContainer.vue'));
+Vue.component('filter-options', require('./components/Filter.vue'));
+Vue.component('unregister', require('./components/Unregister.vue'));
+
+// Register components for teacher pages
+Vue.component('attendance', require('./components/teacher/Attendance.vue'));
+Vue.component('documentation', require('./components/teacher/Documentation.vue'));
+Vue.component('feedback-edit', require('./components/teacher/Feedback.vue'));
+Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
+Vue.component('course-create', require('./components/course/Create.vue'));
+
+// Register components for student pages
+Vue.component('student-register', require('./components/StudentRegister.vue'));
+
+// Register vue-strap components
+Vue.component('dropdown', require('vue-strap/src/Dropdown.vue'));
+Vue.component('modal', require('vue-strap/src/Modal.vue'));
+Vue.component('popover', require('vue-strap/src/Popover.vue'));
 
 const app = new Vue({
-    el: '#app'
+  el: '#app'
 });

@@ -4,7 +4,7 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder {
 
-  protected $seeders = [UserSeeder::class, LessonSeeder::class];
+  protected $seeders = [ConfigSeeder::class, SubjectSeeder::class, DummySeeder::class, LessonSeeder::class];
 
   /**
    * Run the database seeds.

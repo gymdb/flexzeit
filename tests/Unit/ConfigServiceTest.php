@@ -2,10 +2,11 @@
 
 namespace Tests\Unit;
 
+use App\Helpers\Date;
 use App\Models\ConfigOption;
 use App\Repositories\ConfigRepository;
 use App\Services\ConfigService;
-use Carbon\Carbon;
+use Mockery;
 use Tests\TestCase;
 use Tests\Traits\MockDbTrait;
 
@@ -41,7 +42,7 @@ class ConfigTest extends TestCase {
    * @param $value
    */
   private function setOption($key, $value) {
-    $option = \Mockery::mock(ConfigOption::class);
+    $option = Mockery::mock(ConfigOption::class);
 
     /** @noinspection PhpMethodParametersCountMismatchInspection */
     $option->shouldReceive('setAttribute')
@@ -146,11 +147,11 @@ class ConfigTest extends TestCase {
     $this->getDefault('nonexistent', 'test', 'get', false);
     $this->getDefault('nonexistent', 'test', 'getAsString', false);
     $this->getDefault('nonexistent', 5, 'getAsInt', false);
-    $this->getDefault('nonexistent', Carbon::now(), 'getAsDate', false);
+    $this->getDefault('nonexistent', Date::today(), 'getAsDate', false);
   }
 
   public function testDate() {
-    $date = Carbon::create(2017, 12, 03)->startOfDay();
+    $date = Date::create(2017, 12, 03);
     $this->getOption('date_object', $date, 'getAsDate', false);
     $this->getOption('date_string', $date->toDateTimeString(), 'get', false);
     $this->getOption('date_string', $date, 'getAsDate');

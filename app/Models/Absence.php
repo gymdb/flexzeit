@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use App\Helpers\Date;
 
 /**
  * Absence of a student on a certain day
  *
  * @package App\Models
  * @property Student $student
- * @property Carbon $date
+ * @property Date $date
  */
 class Absence extends Model {
 

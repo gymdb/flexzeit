@@ -1,8 +1,19 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Representation of a User (teacher or student)
+ *
+ * @package App\Models
+ * @property int $id
+ * @property string $firstname
+ * @property string $lastname
+ * @property string $username
+ * @property string $password
+ */
 abstract class User extends AuthUser {
 
   protected $hidden = ['password'];
@@ -13,5 +24,17 @@ abstract class User extends AuthUser {
   }
 
   abstract public function typeString();
+
+  public function isStudent() {
+    return false;
+  }
+
+  public function isTeacher() {
+    return false;
+  }
+
+  public function name() {
+    return $this->lastname . ' ' . $this->firstname;
+  }
 
 }

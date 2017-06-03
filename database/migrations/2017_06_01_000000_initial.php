@@ -4,17 +4,17 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Create extends Migration {
+class Initial extends Migration {
 
   /**
-   * Run the migrations.
+   * Create the initial tables
    *
    * @return void
    */
   public function up() {
-    // First create all tables without foreign key relations
+    // First create all tables that don't have foreign key relations
     Schema::create('config', function(Blueprint $table) {
-      $table->string('key', 30);
+      $table->string('key', 32);
       $table->json('value');
 
       $table->primary('key');
@@ -22,30 +22,31 @@ class Create extends Migration {
 
     Schema::create('groups', function(Blueprint $table) {
       $table->increments('id');
-      $table->string('name')->unique();
+      $table->string('name', 32)->unique();
     });
 
     Schema::create('students', function(Blueprint $table) {
       $table->increments('id');
-      $table->string('firstname', 50);
-      $table->string('lastname', 50);
-      $table->string('username', 50)->unique();
+      $table->string('firstname', 32);
+      $table->string('lastname', 32);
+      $table->string('username', 32)->unique();
       $table->string('password');
-      $table->string('image');
+      $table->string('image')->nullable();
     });
 
     Schema::create('subjects', function(Blueprint $table) {
       $table->increments('id');
-      $table->string('name', 20)->unique();
+      $table->string('name', 32)->unique();
     });
 
     Schema::create('teachers', function(Blueprint $table) {
       $table->increments('id');
-      $table->string('firstname', 50);
-      $table->string('lastname', 50);
-      $table->string('username', 50)->unique();
+      $table->string('firstname', 32);
+      $table->string('lastname', 32);
+      $table->string('username', 32)->unique();
       $table->string('password');
-      $table->boolean('admin');
+      $table->boolean('admin')->default(false);
+      $table->string('info', 32)->nullable();
     });
 
     // Now create tables with foreign key relations to the previously created ones
@@ -55,6 +56,19 @@ class Create extends Migration {
 
       $table->primary(['student_id', 'date']);
       $table->foreign('student_id')->references('id')->on('students');
+    });
+
+    Schema::create('courses', function(Blueprint $table) {
+      $table->increments('id');
+      $table->string('name', 64);
+      $table->text('description');
+      $table->string('room', 32);
+      $table->unsignedInteger('subject_id')->nullable();
+      $table->unsignedSmallInteger('maxstudents')->nullable();
+      $table->unsignedTinyInteger('yearfrom')->nullable();
+      $table->unsignedTinyInteger('yearto')->nullable();
+
+      $table->foreign('subject_id')->references('id')->on('subjects');
     });
 
     Schema::create('forms', function(Blueprint $table) {
@@ -67,31 +81,19 @@ class Create extends Migration {
       $table->foreign('kv_id')->references('id')->on('teachers');
     });
 
-    Schema::create('courses', function(Blueprint $table) {
-      $table->increments('id');
-      $table->string('name');
-      $table->text('description');
-      $table->unsignedInteger('subject_id')->nullable();
-      $table->unsignedSmallInteger('maxstudents')->nullable();
-      $table->string('room')->nullable();
-      $table->unsignedTinyInteger('yearfrom')->nullable();
-      $table->unsignedTinyInteger('yearto')->nullable();
-
-      $table->foreign('subject_id')->references('id')->on('subjects');
-    });
-
     Schema::create('lessons', function(Blueprint $table) {
       $table->increments('id');
-      $table->unsignedInteger('teacher_id');
       $table->date('date');
       $table->unsignedTinyInteger('number');
-      $table->unsignedInteger('course_id')->nullable();
-      $table->string('room');
+      $table->string('room', 32);
       $table->boolean('cancelled')->default(false);
+      $table->unsignedInteger('teacher_id');
+      $table->unsignedInteger('course_id')->nullable();
 
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('course_id')->references('id')->on('courses');
       $table->unique(['teacher_id', 'date', 'number']);
+      $table->index(['date', 'number', 'cancelled']);
     });
 
     Schema::create('offdays', function(Blueprint $table) {
@@ -108,8 +110,9 @@ class Create extends Migration {
       $table->unsignedInteger('lesson_id');
       $table->unsignedInteger('student_id');
       $table->boolean('obligatory');
-      $table->boolean('present')->nullable();
-      $table->text('documentation');
+      $table->boolean('attendance')->nullable();
+      $table->text('documentation')->nullable();
+      $table->text('feedback')->nullable();
 
       $table->foreign('lesson_id')->references('id')->on('lessons');
       $table->foreign('student_id')->references('id')->on('students');
@@ -155,7 +158,7 @@ class Create extends Migration {
   }
 
   /**
-   * Reverse the migrations.
+   * Drop the tables
    *
    * @return void
    */

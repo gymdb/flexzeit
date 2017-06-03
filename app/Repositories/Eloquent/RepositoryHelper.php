@@ -1,9 +1,9 @@
 <?php
 namespace App\Repositories\Eloquent;
 
+use App\Helpers\Date;
 use App\Helpers\DateRange;
-use Carbon\Carbon;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class RepositoryHelper {
 
@@ -11,12 +11,12 @@ class RepositoryHelper {
    * Restrict a query to a date, range of dates or day of week within a range of dates
    *
    * @param Builder $query
-   * @param Carbon $from
-   * @param Carbon|null $to
+   * @param Date $from
+   * @param Date|null $to
    * @param int|null $dayOfWeek
    * @return Builder
    */
-  public static function inRange(Builder $query, Carbon $from, Carbon $to = null, $dayOfWeek = null) {
+  public static function inRange(Builder $query, Date $from, Date $to = null, $dayOfWeek = null) {
     if (is_null($to)) {
       return $query->where('date', $from);
     }

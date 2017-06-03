@@ -2,11 +2,17 @@
 
 namespace App\Http\Requests\Course;
 
+use App\Helpers\Date;
 use App\Models\Course;
-use Carbon\Carbon;
+use DateTime;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 abstract class CourseRequest extends FormRequest {
+
+  private $parsed = false;
+
+  protected $dateFields = ['lastDate'];
 
   /**
    * @return array
@@ -19,6 +25,11 @@ abstract class CourseRequest extends FormRequest {
    */
   abstract protected function typeSpecificPopulate(Course $course);
 
+  public function authorize() {
+    // Authorization is done by controller
+    return true;
+  }
+
   /**
    * Get the validation rules that apply to the request.
    *
@@ -26,18 +37,19 @@ abstract class CourseRequest extends FormRequest {
    */
   public function rules() {
     return array_merge([
-        'name'        => 'required|string|max:255',
+        'name'        => 'required|string|max:50',
         'description' => 'nullable|string',
-        'room'        => 'required|string|max:255',
-        'lastDate'    => 'nullable|date|after:today'
+        'room'        => 'required|string|max:50',
+        'lastDate'    => 'nullable|bail|date|after:today|in_year'
     ], $this->typeSpecificRules());
   }
 
   /**
-   * @return Carbon|null
+   * @return Date|null
    */
   public function getLastDate() {
-    return ($input = $this->input('lastDate')) ? Carbon::parse($input) : null;
+    $input = $this->input('lastDate');
+    return $input instanceof Date ? $input : null;
   }
 
   /**
@@ -48,10 +60,30 @@ abstract class CourseRequest extends FormRequest {
    */
   public function populateCourse(Course $course) {
     $course->name = $this->input('name');
-    $course->description = $this->input('description');
+    $course->description = $this->input('description') ?: "";
     $course->room = $this->input('room');
 
     return $this->typeSpecificPopulate($course);
+  }
+
+  protected function validationData() {
+    $this->parseParameters();
+    return parent::validationData();
+  }
+
+  protected function parseParameters() {
+    if (!$this->parsed) {
+      $this->parsed = true;
+      $this->parse($this->getInputSource());
+    }
+  }
+
+  protected function parse(ParameterBag $source) {
+    foreach ($this->dateFields as $field) {
+      if ($source->has($field) && ($value = $source->get($field)) && ($date = Date::checkedCreate($value))) {
+        $source->set($field, $date);
+      }
+    }
   }
 
 }

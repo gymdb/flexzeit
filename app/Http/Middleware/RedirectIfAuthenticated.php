@@ -6,6 +6,11 @@ use App\Models\User;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Middleware for redirecting already authenticated users
+ *
+ * @package App\Http\Middleware
+ */
 class RedirectIfAuthenticated {
 
   /**
@@ -22,7 +27,7 @@ class RedirectIfAuthenticated {
 
       /** @var User $user */
       $user = Auth::guard($guard)->user();
-      return redirect()->route($user ? $user->typeString() : 'login');
+      return redirect()->route($user ? $user->typeString() . '.dashboard' : 'login');
     }
 
     return $next($request);

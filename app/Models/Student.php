@@ -2,17 +2,13 @@
 
 namespace App\Models;
 
+use App\Helpers\BelongsToManyKey;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Representation of a student
  *
  * @package App\Models
- * @property int $id
- * @property string $firstname
- * @property string $lastname
- * @property string $username
- * @property string $password
  * @property string $image
  * @property Collection $absences
  * @property Collection $groups
@@ -27,6 +23,10 @@ class Student extends User {
     return 'student';
   }
 
+  public function isStudent() {
+    return true;
+  }
+
   public function absences() {
     return $this->hasMany(Absence::class);
   }
@@ -35,12 +35,24 @@ class Student extends User {
     return $this->belongsToMany(Group::class);
   }
 
+  public function forms() {
+    return new BelongsToManyKey(
+        (new Form())->newQuery(), $this, 'group_student', 'student_id', 'group_id', $this->guessBelongsToManyRelation()
+    );
+  }
+
   public function registrations() {
     return $this->hasMany(Registration::class);
   }
 
   public function lessons() {
-    return $this->hasManyThrough(Lesson::class, Registration::class);
+    return $this->belongsToMany(Lesson::class, "registrations");
+  }
+
+  public function offdays() {
+    return new BelongsToManyKey(
+        (new Offday())->newQuery(), $this, 'group_student', 'student_id', 'group_id', $this->guessBelongsToManyRelation()
+    );
   }
 
 }

@@ -3,29 +3,25 @@
 namespace App\Services\Implementation;
 
 use App\Exceptions\CourseException;
-use App\Helpers\DateRange;
+use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
-use App\Models\Offday;
 use App\Models\Teacher;
 use App\Repositories\GroupRepository;
+use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
-use App\Services\ConfigService;
-use App\Services\LessonService;
 use App\Services\RegistrationService;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
 use App\Specifications\ObligatorySpecification;
-use Carbon\Carbon;
+use App\Validators\DateValidator;
+use Illuminate\Database\Eloquent\Builder;
 
 class CourseService implements \App\Services\CourseService {
 
   /** @var ConfigService */
   private $configService;
-
-  /** @var LessonService */
-  private $lessonService;
 
   /** @var RegistrationService */
   private $registrationService;
@@ -33,82 +29,77 @@ class CourseService implements \App\Services\CourseService {
   /** @var  GroupRepository */
   private $groupRepository;
 
+  /** @var LessonRepository */
+  private $lessonRepository;
+
   /** @var  OffdayRepository */
   private $offdayRepository;
 
-  function __construct(ConfigService $configService, LessonService $lessonService, RegistrationService $registrationService,
-      GroupRepository $groupRepository, OffdayRepository $offdayRepository) {
+  /** @var  DateValidator */
+  private $dateValidator;
+
+  function __construct(ConfigService $configService, RegistrationService $registrationService, GroupRepository $groupRepository,
+      LessonRepository $lessonRepository, OffdayRepository $offdayRepository, DateValidator $dateValidator) {
     $this->configService = $configService;
-    $this->lessonService = $lessonService;
     $this->registrationService = $registrationService;
     $this->groupRepository = $groupRepository;
+    $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
+    $this->dateValidator = $dateValidator;
   }
 
-  public function validateDates(Carbon $firstDate, Carbon $lastDate = null) {
-    // Check if last date is before first date
-    if (!is_null($lastDate) && $lastDate < $firstDate) {
-      throw new CourseException(CourseException::INVALID_END_DATE);
-    }
-
-    // Check if both start and end date are within the school year
-    $yearStart = $this->configService->getAsDate('year.start');
-    $yearEnd = $this->configService->getAsDate('year.end');
-    if (!$firstDate->between($yearStart, $yearEnd) || (!is_null($lastDate) && !$lastDate->between($yearStart, $yearEnd))) {
-      throw new CourseException(CourseException::DATE_NOT_IN_YEAR);
-    }
-
-    // Check if a course can still be created for the start date
-    $createDay = $this->configService->getAsInt('course.create.day');
-    if (is_null($createDay)) {
-      $createDay = 1;
-      $createWeek = 0;
-    } else {
-      $createWeek = $this->configService->getAsInt('course.create.week');
-    }
-    $today = Carbon::now()->startOfDay();
-
-    if ($createWeek <= 0 && $today->diffInDays($firstDate, false) < $createDay) {
-      // Allow creation up to given days before the date
-      throw new CourseException(CourseException::CREATE_PERIOD_ENDED);
-    }
-
-    if ($createWeek > 0 && $today->modify(DateRange::getDay($createDay))->startOfWeek()->diffInWeeks($firstDate) < $createWeek) {
-      // Allow creation up to given weeks before the date, in relation to the start of the week for the given day of week
-      throw new CourseException(CourseException::CREATE_PERIOD_ENDED);
-    }
-
-    // Check if first course day is offday
-    if ($this->offdayRepository->inRange($firstDate)->exists()) {
-      throw new CourseException(CourseException::OFFDAY);
-    }
-  }
-
-  public function coursePossible(Teacher $teacher, Carbon $firstDate, Carbon $lastDate = null, array $numbers) {
-    if ($this->lessonService->forTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $numbers, false, true)->exists()) {
+  public function coursePossible(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
+    if ($this->buildLessonsWithCourse($teacher, $firstDate, $lastDate, $numbers)->exists()) {
       throw new CourseException(CourseException::EXISTS);
     }
   }
 
-  public function obligatoryPossible(array $groups, Carbon $firstDate, Carbon $lastDate = null, array $numbers) {
-    if ($this->lessonService->forGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $numbers)->exists()) {
+  public function obligatoryPossible(Builder $groups, Date $firstDate, Date $lastDate = null, $numbers) {
+    if ($this->lessonRepository->forGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $numbers)->exists()) {
       throw new CourseException(CourseException::OBLIGATORY_EXISTS);
     }
+  }
+
+  public function getLessonsWithCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
+    return $this->buildLessonsWithCourse($teacher, $firstDate, $lastDate, $numbers)
+        ->orderBy('date')
+        ->orderBy('number')
+        ->with('course')
+        ->get(['date', 'number', 'course_id'])
+        ->map(function(Lesson $lesson) {
+          return [
+              'date'   => (string)$lesson->date,
+              'number' => $lesson->number,
+              'course' => $lesson->course->name
+          ];
+        });
+  }
+
+  public function getLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
+    return $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $numbers)
+        ->sortBy('date')
+        ->map(function(Lesson $lesson) {
+          return [
+              'date'   => (string)$lesson->date,
+              'number' => $lesson->number,
+              'room'   => $lesson->room
+          ];
+        })->values();
   }
 
   public function createCourse(CreateCourseSpecification $spec, Teacher $teacher) {
     $firstDate = $spec->getFirstDate();
     $lastDate = $spec->getLastDate();
-    $dayOfWeek = $firstDate->dayOfWeek;
-
-    $numbers = $this->lessonService->getLessonsForDay($dayOfWeek, $spec->getFirstLesson(), $spec->getLastLesson());
-    $this->validateDates($firstDate, $lastDate);
+    $numbers = $spec->getLessonNumber();
 
     // Check for existing courses on one of the lessons
     $this->coursePossible($teacher, $firstDate, $lastDate, $numbers);
 
+    $groups = null;
     if ($spec instanceof ObligatorySpecification) {
-      $this->obligatoryPossible($spec->getGroups(), $firstDate, $lastDate, $numbers);
+      // Check for existing courses for one of the groups
+      $groups = $this->groupRepository->queryById($spec->getGroups());
+      $this->obligatoryPossible($groups, $firstDate, $lastDate, $numbers);
     }
 
     $course = $spec->populateCourse();
@@ -117,35 +108,23 @@ class CourseService implements \App\Services\CourseService {
     }
 
     // Load all of the teachers lessons for the given slot
-    $lessons = $this->lessonService->forTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)->get(['date', 'number']);
-
-    if (!$lessons->contains($this->lessonMatcher($firstDate, null, false))) {
-      // Teacher has no lesson at the first course date, so create them for all days except offdays
-      $offdays = $this->offdayRepository->inRange($firstDate, $lastDate, $dayOfWeek)->get(['date']);
-
-      for ($d = $firstDate; $d <= $lastDate; $d = $d->copy()->addWeek()) {
-        if ($offdays->contains($this->offdayMatcher($d))) {
-          continue;
-        }
-
-        foreach ($numbers as $n) {
-          if (!$lessons->contains($this->lessonMatcher($d, $n))) {
-            $lessons->push(new Lesson(['teacher' => $teacher, 'date' => $d, 'number' => $n]));
-          }
-        }
+    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $numbers);
+    $lessons->each(function(Lesson $lesson) use ($course) {
+      if ($lesson->exists) {
+        $lesson->course()->associate($course);
+        $lesson->save();
+      } else {
+        $course->lessons()->save($lesson);
       }
-    }
-
-    $course->lessons()->saveMany($lessons->filter(function(Lesson $lesson) {
-      return empty($lesson->cancelled);
-    }));
+    });
 
     if ($spec instanceof ObligatorySpecification) {
-      $this->groupRepository->queryById($spec->getGroups())->get()
-          ->each(function(Group $group) use ($course) {
-            $this->registrationService->registerGroupForCourse($course, $group);
-          });
+      $groups->get()->each(function(Group $group) use ($course) {
+        $this->registrationService->registerGroupForCourse($course, $group);
+      });
     }
+
+    return $course;
   }
 
   public function editCourse(EditCourseSpecification $course) {
@@ -156,17 +135,65 @@ class CourseService implements \App\Services\CourseService {
     // TODO Implement
   }
 
-  private function lessonMatcher(Carbon $date, $number = null, $cancelled = null) {
-    return function(Lesson $lesson) use ($date, $number, $cancelled) {
-      return $lesson->date == $date && (is_null($number) || $lesson->number === $number)
-          && (is_null($cancelled) || $lesson->cancelled === $cancelled);
-    };
+  public function getFirstCreateDate() {
+    return max($this->configService->getAsDate('year.start'), $this->dateValidator->getDateBound('course.create'));
   }
 
-  private function offdayMatcher(Carbon $date) {
-    return function(Offday $offday) use ($date) {
-      return $offday->date == $date;
-    };
+  public function getLastCreateDate() {
+    return $this->configService->getAsDate('year.end');
   }
 
+  public function getMinYear() {
+    return $this->configService->getAsInt('year.min', 1);
+  }
+
+  public function getMaxYear() {
+    return $this->configService->getAsInt('year.max', 1);
+  }
+
+  private function buildLessonsWithCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
+    return $this->lessonRepository->forTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $numbers, false, true);
+  }
+
+  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
+    if (is_scalar($numbers)) {
+      $numbers = [$numbers];
+    }
+    $dayOfWeek = $firstDate->dayOfWeek;
+
+    $lessons = $this->lessonRepository
+        ->forTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)
+        ->get(['id', 'date', 'number', 'cancelled', 'room']);
+
+    if (!$lessons->contains($this->matcher($firstDate, null, false))) {
+      // Teacher has no lesson at the first course date, so create them for all days except offdays
+      $offdays = $this->offdayRepository->inRange($firstDate, $lastDate, $dayOfWeek)->get(['date']);
+
+      for ($d = $firstDate; $d <= ($lastDate ?: $firstDate); $d = $d->copy()->addWeek()) {
+        if ($offdays->contains($this->matcher($d))) {
+          continue;
+        }
+
+        foreach ($numbers as $n) {
+          if (!$lessons->contains($this->matcher($d, $n))) {
+            $lesson = new Lesson(['date' => $d, 'number' => $n, 'room' => '']);
+            $lesson->teacher()->associate($teacher);
+            $lessons->push($lesson);
+          }
+        }
+      }
+    }
+
+    return $lessons->filter(function(Lesson $lesson) {
+      return empty($lesson->cancelled);
+    });
+  }
+
+  private function matcher(Date $date, $number = null, $cancelled = null) {
+    return function($item) use ($date, $number, $cancelled) {
+      return $item->date == $date
+          && (is_null($number) || $item->number === $number)
+          && (is_null($cancelled) || $item->cancelled === $cancelled);
+    };
+  }
 }

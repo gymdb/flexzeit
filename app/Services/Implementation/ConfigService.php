@@ -2,8 +2,9 @@
 
 namespace App\Services\Implementation;
 
+use App\Helpers\Date;
 use App\Repositories\ConfigRepository;
-use Carbon\Carbon;
+use DateTime;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -23,17 +24,18 @@ class ConfigService implements \App\Services\ConfigService {
 
   public function invalidateCache($key = null) {
     if (is_null($key)) {
-      Cache::tags($this->prefix)->flush();
+      $this->getCache()->flush();
     } else {
-      Cache::tags($this->prefix)->forget($this->prefix . '.' . $key);
+      $this->getCache()->forget($this->prefix . '.' . $key);
     }
   }
 
   public function get($key, $default = null) {
-    return Cache::tags($this->prefix)->rememberForever($this->prefix . '.' . $key, function() use ($key) {
+    $value = $this->getCache()->rememberForever($this->prefix . '.' . $key, function() use ($key) {
       $configOption = $this->configRepository->find($key);
       return $configOption ? $configOption->value : null;
-    }) ?: $default;
+    });
+    return is_null($value) ? $default : $value;
   }
 
   public function getAsString($key, $default = null) {
@@ -46,22 +48,26 @@ class ConfigService implements \App\Services\ConfigService {
     return is_null($value) ? $default : (int)$value;
   }
 
-  public function getAsDate($key, $default = null) {
+  public function getAsDate($key, Date $default = null) {
     $value = $this->get($key);
     if (is_null($value)) {
       return $default;
     }
-    if ($value instanceof \DateTime) {
-      return Carbon::instance($value);
-    }
-    if (is_array($value) && isset($value['date'])) {
-      return isset($value['timezone']) ? new Carbon($value['date'], $value['timezone']) : new Carbon($value['date']);
+    if ($value instanceof DateTime) {
+      return Date::instance($value);
     }
     if (is_int($value)) {
-      return Carbon::createFromTimestampUTC($value);
+      return Date::createFromTimestampUTC($value);
+    }
+    $tz = null;
+    if (is_array($value) && isset($value['date'])) {
+      if (isset($value['timezone'])) {
+        $tz = $value['timezone'];
+      }
+      $value = $value['date'];
     }
     if (is_string($value)) {
-      return Carbon::parse($value);
+      return Date::parse($value, $tz);
     }
 
     return null;
@@ -69,7 +75,7 @@ class ConfigService implements \App\Services\ConfigService {
 
   public function set($key, $value) {
     $configOption = $this->configRepository->findOrNew($key);
-    $configOption->value = $value instanceof \DateTime ? $value->format('c') : $value;
+    $configOption->value = $value instanceof DateTime ? $value->format('c') : $value;
     $configOption->save();
     $this->invalidateCache($key);
   }
@@ -77,6 +83,10 @@ class ConfigService implements \App\Services\ConfigService {
   public function destroy($key) {
     $this->configRepository->destroy($key);
     $this->invalidateCache($key);
+  }
+
+  protected function getCache() {
+    return Cache::tags($this->prefix);
   }
 
 }

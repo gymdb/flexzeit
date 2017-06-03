@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Representation of a course
@@ -19,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $yearto
  * @property Collection $groups
  * @property Collection $lessons
+ * @property Lesson $firstLesson
  */
 class Course extends Model {
 
@@ -32,8 +32,16 @@ class Course extends Model {
     return $this->hasMany(Lesson::class);
   }
 
+  public function firstLesson() {
+    return $this->lessons()->orderBy("date")->orderBy("number")->first();
+  }
+
   public function subject() {
     return $this->belongsTo(Subject::class);
+  }
+
+  public function registrations() {
+    return $this->hasManyThrough(Registration::class, Lesson::class);
   }
 
 }

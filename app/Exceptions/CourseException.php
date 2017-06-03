@@ -2,9 +2,7 @@
 
 namespace App\Exceptions;
 
-use \Exception;
-
-class CourseException extends Exception {
+class CourseException extends ApiException {
 
   const DATE_NOT_IN_YEAR = 1;
   const CREATE_PERIOD_ENDED = 2;
@@ -13,6 +11,7 @@ class CourseException extends Exception {
   const EXISTS = 5;
   const SAVE_FAILED = 6;
   const OBLIGATORY_EXISTS = 7;
+  const NOT_FOUND = 8;
 
   /**
    * CourseException constructor.

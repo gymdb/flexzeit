@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Helpers\Date;
 use App\Helpers\DateRange;
-use Carbon\Carbon;
 use Tests\TestCase;
 
 /**
@@ -14,14 +14,14 @@ use Tests\TestCase;
 class DateRangeTest extends TestCase {
 
   public function testEmptyRange() {
-    $range = new DateRange(Carbon::createFromDate(2017, 2, 28), Carbon::createFromDate(2017, 2, 27));
+    $range = new DateRange(Date::createFromDate(2017, 2, 28), Date::createFromDate(2017, 2, 27));
     $this->checkCount($range, 0);
   }
 
   public function testEmptyDayOfWeek() {
-    $start = Carbon::createFromDate(2017, 2, 27);
-    $end = Carbon::createFromDate(2017, 3, 4);
-    $dayOfWeek = Carbon::SUNDAY;
+    $start = Date::createFromDate(2017, 2, 27);
+    $end = Date::createFromDate(2017, 3, 4);
+    $dayOfWeek = Date::SUNDAY;
 
     for ($i = 0; $i < 7; $i++) {
       $this->checkCount(new DateRange($start, $end, $dayOfWeek), 0);
@@ -32,19 +32,19 @@ class DateRangeTest extends TestCase {
   }
 
   public function testSingleDate() {
-    $range = new DateRange(Carbon::createFromDate(2017, 2, 28), Carbon::createFromDate(2017, 2, 28));
+    $range = new DateRange(Date::createFromDate(2017, 2, 28), Date::createFromDate(2017, 2, 28));
     $this->checkCount($range, 1);
   }
 
   public function testMultipleDates() {
-    $range = new DateRange(Carbon::createFromDate(2017, 2, 28), Carbon::createFromDate(2017, 3, 8));
+    $range = new DateRange(Date::createFromDate(2017, 2, 28), Date::createFromDate(2017, 3, 8));
     $this->checkCount($range, 9);
   }
 
   public function testMultipleDayOfWeek() {
-    $start = Carbon::createFromDate(2017, 2, 27);
-    $end = Carbon::createFromDate(2017, 3, 19);
-    $dayOfWeek = Carbon::SUNDAY;
+    $start = Date::createFromDate(2017, 2, 27);
+    $end = Date::createFromDate(2017, 3, 19);
+    $dayOfWeek = Date::SUNDAY;
 
     for ($i = 0; $i < 7; $i++) {
       $this->checkCount(new DateRange($start, $end, $dayOfWeek), 3);
@@ -55,7 +55,7 @@ class DateRangeTest extends TestCase {
   }
 
   public function testToArray() {
-    $range = new DateRange(Carbon::createFromDate(2017, 2, 28), Carbon::createFromDate(2017, 3, 8));
+    $range = new DateRange(Date::createFromDate(2017, 2, 28), Date::createFromDate(2017, 3, 8));
     $this->checkArray($range->toArray(), 9);
   }
 
