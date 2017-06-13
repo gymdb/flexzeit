@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'lessons'       => 'Einheiten',
+    'my'            => 'Meine Einheiten',
     'none'          => 'Heute gibt es keine Einheiten.',
     'cancelled'     => [
         'short' => 'Abgesagt',
@@ -34,5 +36,10 @@ return [
         'save'      => 'Rückmeldung speichern',
         'loadError' => 'Fehler beim Laden der Rückmeldung.',
         'saveError' => 'Fehler beim Speichern der Rückmeldung.'
-    ]
+    ],
+    'list'          => [
+        'header'     => 'Einheiten',
+        'noMatching' => 'Keine Einheiten im ausgewählten Zeitraum.'
+    ],
+    'details'       => 'Details zu Einheit'
 ];

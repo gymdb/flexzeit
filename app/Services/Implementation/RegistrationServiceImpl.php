@@ -233,7 +233,7 @@ class RegistrationServiceImpl implements RegistrationService {
         ->update(['attendance' => DB::raw('not exists(' . $sub . ')')]);
   }
 
-  public function documentLesson(Registration $registration) {
+  public function documentLesson(Registration $registration, $documentation) {
     // TODO
   }
 
@@ -265,9 +265,10 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function getDocumentation(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
-    return $this->registrationRepository->forStudent($student, $start ?: Date::today()->addYear(-1), Date::today()->addYear(1))
+    return $this->registrationRepository
+        ->forStudent($student, $start ?: $this->configService->getAsDate('year.start'), $end ?: Date::today(), null, $teacher, $subject)
         ->with('lesson', 'lesson.teacher')
-        ->get()
+        ->get(['documentation', 'lesson_id'])
         ->map(function(Registration $reg) {
           $this->lessonService->setTimes($reg->lesson);
           return [

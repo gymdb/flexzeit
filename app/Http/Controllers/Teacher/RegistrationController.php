@@ -10,10 +10,10 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Services\ConfigService;
+use App\Services\MiscService;
 use App\Services\RegistrationService;
 use App\Services\LessonService;
 use App\Services\OffdayService;
-use App\Services\TeacherService;
 use Illuminate\Http\JsonResponse;
 
 class RegistrationController extends Controller {
@@ -30,8 +30,8 @@ class RegistrationController extends Controller {
   /** @var RegistrationService */
   private $registrationService;
 
-  /** @var TeacherService */
-  private $teacherService;
+  /** @var MiscService */
+  private $miscService;
 
   /**
    * Create a new controller instance.
@@ -40,15 +40,15 @@ class RegistrationController extends Controller {
    * @param LessonService $lessonService
    * @param OffdayService $offdayService
    * @param RegistrationService $registrationService
-   * @param TeacherService $teacherService
+   * @param MiscService $miscService
    */
   public function __construct(ConfigService $configService, LessonService $lessonService, OffdayService $offdayService,
-      RegistrationService $registrationService, TeacherService $teacherService) {
+      RegistrationService $registrationService, MiscService $miscService) {
     $this->configService = $configService;
     $this->lessonService = $lessonService;
     $this->offdayService = $offdayService;
     $this->registrationService = $registrationService;
-    $this->teacherService = $teacherService;
+    $this->miscService = $miscService;
   }
 
   /**
@@ -57,16 +57,16 @@ class RegistrationController extends Controller {
    * @return \Illuminate\Http\Response
    */
   public function showDocumentation() {
-    $teachers = $this->teacherService->getAll();
-    $groups = $this->teacherService->getGroups();
-    $subjects = $this->teacherService->getSubjects();
+    $groups = $this->miscService->getGroups();
+    $subjects = $this->miscService->getSubjects();
+    $teachers = $this->miscService->getTeachers();
 
     $minDate = $this->configService->getAsDate('year.start');
-    $maxDate = $this->configService->getAsDate('year.end');
+    $maxDate = min($this->configService->getAsDate('year.end'), Date::today());
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->lessonService->getDaysWithoutLessons();
 
-    return view('teacher.documentation', compact('teachers', 'groups', 'subjects', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.documentation', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**

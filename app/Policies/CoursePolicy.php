@@ -65,7 +65,6 @@ class CoursePolicy {
       return false;
     }
     $lesson = $course->lessons->first();
-    dump($course->lessons);
     return $lesson && $lesson->teacher->id === $user->id;
   }
 

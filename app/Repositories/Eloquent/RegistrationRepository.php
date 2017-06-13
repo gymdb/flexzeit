@@ -25,8 +25,11 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   public function forStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, Teacher $teacher = null, Subject $subject = null) {
     $query = $this->inRange($start, $end, $dayOfWeek, $student->registrations());
     if ($teacher) {
-      $query->join('lessons', 'lessons.id', 'registrations.registration_id')
-          ->where('lessons.teacher_id', $teacher->id);
+      $query->where('lessons.teacher_id', $teacher->id);
+    }
+    if ($subject) {
+      $query->join('courses', 'courses.id', 'lessons.course_id')
+          ->where('courses.subject_id', $subject->id);
     }
     return $query;
   }

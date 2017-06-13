@@ -84,6 +84,14 @@ interface RegistrationService {
   public function unregisterAllFromLesson(Lesson $lesson);
 
   /**
+   * Give feedback for a particular registration
+   *
+   * @param Registration $registration
+   * @param string $feedback
+   */
+  public function setFeedback(Registration $registration, $feedback);
+
+  /**
    * Set attendance of one student in a given lesson
    *
    * @param Registration $registration
@@ -102,8 +110,9 @@ interface RegistrationService {
    * Add documentation for a lesson
    *
    * @param Registration $registration Registration loaded from the database
+   * @param string $documentation
    */
-  public function documentLesson(Registration $registration);
+  public function documentLesson(Registration $registration, $documentation);
 
   /**
    * @param Lesson $lesson

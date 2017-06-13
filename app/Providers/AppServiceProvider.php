@@ -14,16 +14,19 @@ use App\Services\CourseService;
 use App\Services\Implementation\ConfigServiceImpl;
 use App\Services\Implementation\CourseServiceImpl;
 use App\Services\Implementation\LessonServiceImpl;
+use App\Services\Implementation\MiscServiceImpl;
 use App\Services\Implementation\OffdayServiceImpl;
 use App\Services\Implementation\RegistrationServiceImpl;
 use App\Services\Implementation\StudentServiceImpl;
 use App\Services\Implementation\TeacherServiceImpl;
 use App\Services\LessonService;
+use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use App\Services\StudentService;
 use App\Services\TeacherService;
 use App\Validators\DateValidator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,9 +38,13 @@ class AppServiceProvider extends ServiceProvider {
    * @return void
    */
   public function boot() {
-    Validator::extend('in_year', DateValidator::class.'@validateInYear');
-    Validator::extend('create_allowed', DateValidator::class.'@validateCreateAllowed');
-    Validator::extend('school_day', DateValidator::class.'@validateSchoolDay');
+    Validator::extend('in_year', DateValidator::class . '@validateInYear');
+    Validator::extend('create_allowed', DateValidator::class . '@validateCreateAllowed');
+    Validator::extend('school_day', DateValidator::class . '@validateSchoolDay');
+
+    Blade::directive('json', function($expression) {
+      return "<?php echo htmlspecialchars(json_encode($expression, JSON_HEX_APOS | JSON_HEX_QUOT), ENT_NOQUOTES, 'UTF-8', false); ?>";
+    });
   }
 
   /**
@@ -59,6 +66,7 @@ class AppServiceProvider extends ServiceProvider {
     $this->app->bind(ConfigService::class, ConfigServiceImpl::class);
     $this->app->bind(CourseService::class, CourseServiceImpl::class);
     $this->app->bind(LessonService::class, LessonServiceImpl::class);
+    $this->app->bind(MiscService::class, MiscServiceImpl::class);
     $this->app->bind(OffdayService::class, OffdayServiceImpl::class);
     $this->app->bind(RegistrationService::class, RegistrationServiceImpl::class);
     $this->app->bind(StudentService::class, StudentServiceImpl::class);

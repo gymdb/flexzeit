@@ -1,5 +1,5 @@
 <template>
-  <div class="row clearfix">
+  <div class="row clearfix hidden-print">
     <div class="col-xs-12">
       <error :error="error">{{errorText}}</error>
     </div>
@@ -7,7 +7,7 @@
     <div v-if="showGroup" class="form-group col-sm-3 col-xs-6">
       <label for="group" class="sr-only">{{groupLabel}}</label>
       <select class="form-control" id="group" v-model="group">
-        <option :value="null" disabled>{{groupLabel}}</option>
+        <option :value="null">{{groupLabel}}</option>
         <option v-for="g in groups" :value="g.id">{{g.name}}</option>
       </select>
     </div>
@@ -15,7 +15,7 @@
     <div v-if="groups" class="form-group col-sm-3 col-xs-6">
       <label for="student" class="sr-only">{{studentLabel}}</label>
       <select class="form-control" id="student" :disabled="!group" v-model="student">
-        <option :value="null" disabled>{{studentLabel}}</option>
+        <option :value="null">{{studentLabel}}</option>
         <option v-for="s in students" :value="s.id">{{s.name}}</option>
       </select>
     </div>
@@ -23,7 +23,7 @@
     <div v-if="teachers" class="form-group col-sm-3 col-xs-6">
       <label for="teacher" class="sr-only">{{teacherLabel}}</label>
       <select class="form-control" id="teacher" v-model="teacher">
-        <option :value="null" disabled>{{teacherLabel}}</option>
+        <option :value="null">{{teacherLabel}}</option>
         <option v-for="t in teachers" :value="t.id">{{t.name}}</option>
       </select>
     </div>
@@ -31,7 +31,7 @@
     <div v-if="subjects" class="form-group col-sm-3 col-xs-6">
       <label for="subject" class="sr-only">{{subjectLabel}}</label>
       <select class="form-control" id="subject" v-model="subject">
-        <option :value="null" disabled>{{subjectLabel}}</option>
+        <option :value="null">{{subjectLabel}}</option>
         <option v-for="s in subjects" :value="s.id">{{s.name}}</option>
       </select>
     </div>
@@ -57,6 +57,10 @@
   export default {
     data() {
       return {
+        // Workaround for some weird behaviour: Property fires change event on parent re-rendering
+        groupsList: this.groups,
+        subjectsList: this.subjects,
+        teachersList: this.teachers,
         teacher: null,
         group: this.groups && this.groups.length === 1 ? this.groups[0].id : null,
         student: null,
@@ -151,25 +155,28 @@
         this.$emit('filter', filter);
       }, 50)
     },
+    created() {
+      this.$emit('filter', this.filter);
+    },
     computed: {
       showGroup() {
         return this.groups && this.groups.length > 1;
       },
       filter() {
-        if (this.groups && (!this.group || !this.student)) {
+        if (this.groupsList && (!this.group || !this.student)) {
           return null;
         }
 
         let filter = {};
 
-        if (this.groups) {
+        if (this.groupsList) {
           filter.group = this.group;
           filter.student = this.student;
         }
-        if (this.teachers) {
+        if (this.teachersList) {
           filter.teacher = this.teacher;
         }
-        if (this.subjects) {
+        if (this.subjectsList) {
           filter.subject = this.subject;
         }
         if (this.minDate) {

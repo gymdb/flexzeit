@@ -89,6 +89,10 @@ dt:after {
 .table-squeezed td {
   white-space: nowrap;
 
+  &.wrap {
+    white-space: normal;
+  }
+
   &:last-child {
     width: 99%;
   }
@@ -162,5 +166,11 @@ table .popover-container {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
+  }
+}
+
+@media print {
+  .panel {
+    border: 0;
   }
 }

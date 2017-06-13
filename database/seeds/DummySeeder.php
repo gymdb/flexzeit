@@ -70,8 +70,14 @@ class DummySeeder extends Seeder {
       $teacher->subjects()->attach($subjects->random(2));
       $teacher->groups()->attach($groups->random(5));
       if ($teacher->form) {
-        $teacher->groups()->syncWithoutDetaching($teacher->form->group_id);
+        $teacher->groups()->syncWithoutDetaching([$teacher->form->group_id]);
       }
     });
+
+    factory(Teacher::class)->create([
+        'username' => 'admin',
+        'password' => Hash::make('admin'),
+        'admin'    => true
+    ]);
   }
 }

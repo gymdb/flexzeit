@@ -42,7 +42,7 @@
         firstDate: this.oldFirstDate ? moment(this.oldFirstDate, 'YYYY-MM-DD', true) : null,
         lastDate: this.oldLastDate ? moment(this.oldLastDate, 'YYYY-MM-DD', true) : null,
         minDateMoment: this.minDate ? moment(this.minDate, 'YYYY-MM-DD', true) : null,
-        maxDateMoment: this.maxDate ? moment(this.maxDate, 'YYYY-MM-DD', true) : null,
+        maxDateMoment: this.maxDate ? moment(this.maxDate, 'YYYY-MM-DD', true).endOf('day') : null,
         disabledDatesMoment: this.disabledDates.map(function (date) {
           return moment(date, 'YYYY-MM-DD', true);
         })
@@ -104,7 +104,7 @@
     },
     computed: {
       maxFirstDate() {
-        return this.type === 0 || !this.lastDate ? this.maxDateMoment : this.lastDate;
+        return this.type === 0 || !this.lastDate ? this.maxDateMoment : this.lastDate.clone().endOf('day');
       },
       minLastDate() {
         if (this.firstDate) {

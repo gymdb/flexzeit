@@ -47,7 +47,7 @@ class LessonSeeder extends Seeder {
 
       $lessons = [];
       foreach ($teachers as $teacher) {
-        if ($date->dayOfWeek - 1 === $teacher->id % 5) {
+        if ($teacher->admin || $date->dayOfWeek - 1 === $teacher->id % 5) {
           continue;
         }
         $lessons[] = factory(Lesson::class)->create(['date' => $date, 'number' => 1, 'teacher_id' => $teacher->id]);

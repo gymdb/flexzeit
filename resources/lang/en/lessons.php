@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'lessons'       => 'Lessons',
+    'my'            => 'My lessons',
     'none'          => 'There are no lessons today.',
     'cancelled'     => [
         'short' => 'Cancelled',
@@ -34,5 +36,10 @@ return [
         'save'      => 'Save feedback',
         'loadError' => 'Error loading feedback.',
         'saveError' => 'Error saving feedback.'
-    ]
+    ],
+    'list'          => [
+        'header'     => 'Lessons',
+        'noMatching' => 'There are no lessons to show.'
+    ],
+    'details'       => 'Details for lesson'
 ];

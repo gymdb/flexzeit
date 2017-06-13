@@ -51,13 +51,23 @@
             <ul class="nav navbar-nav">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-                  @lang('courses.courses') <span class="caret"></span>
+                  @lang('lessons.lessons') <span class="caret"></span>
                 </a>
-
                 <ul class="dropdown-menu" role="menu">
                   <li>
-                    <a href="{{route('teacher.courses.index')}}">@lang('courses.my')</a>
+                    <a href="{{route('teacher.lessons.index')}}">@lang('lessons.my')</a>
                     <a href="{{route('teacher.courses.create')}}">@lang('courses.create')</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                  @lang('messages.reports') <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                  <li>
+                    <a href="{{route('teacher.documentation')}}">@lang('messages.documentation.link')</a>
                   </li>
                 </ul>
               </li>

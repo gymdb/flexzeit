@@ -44414,6 +44414,10 @@ __webpack_require__(166);
 
 
 
+
+Vue.config.debug = true;
+Vue.config.devtools = true;
+
 Vue.use(__WEBPACK_IMPORTED_MODULE_1_vue_axios___default.a, __WEBPACK_IMPORTED_MODULE_0_axios___default.a);
 
 // Register general components
@@ -44429,6 +44433,7 @@ Vue.component('attendance', __webpack_require__(185));
 Vue.component('documentation', __webpack_require__(186));
 Vue.component('feedback-edit', __webpack_require__(187));
 Vue.component('teacher-lesson', __webpack_require__(188));
+Vue.component('teacher-lessons', __webpack_require__(216));
 Vue.component('course-create', __webpack_require__(184));
 
 // Register components for student pages
@@ -45728,7 +45733,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       firstDate: this.oldFirstDate ? __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.oldFirstDate, 'YYYY-MM-DD', true) : null,
       lastDate: this.oldLastDate ? __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.oldLastDate, 'YYYY-MM-DD', true) : null,
       minDateMoment: this.minDate ? __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.minDate, 'YYYY-MM-DD', true) : null,
-      maxDateMoment: this.maxDate ? __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.maxDate, 'YYYY-MM-DD', true) : null,
+      maxDateMoment: this.maxDate ? __WEBPACK_IMPORTED_MODULE_0_moment___default()(this.maxDate, 'YYYY-MM-DD', true).endOf('day') : null,
       disabledDatesMoment: this.disabledDates.map(function (date) {
         return __WEBPACK_IMPORTED_MODULE_0_moment___default()(date, 'YYYY-MM-DD', true);
       })
@@ -45791,7 +45796,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   computed: {
     maxFirstDate: function maxFirstDate() {
-      return this.type === 0 || !this.lastDate ? this.maxDateMoment : this.lastDate;
+      return this.type === 0 || !this.lastDate ? this.maxDateMoment : this.lastDate.clone().endOf('day');
     },
     minLastDate: function minLastDate() {
       if (this.firstDate) {
@@ -45932,6 +45937,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      // Workaround for some weird behaviour: Property fires change event on parent re-rendering
+      groupsList: this.groups,
+      subjectsList: this.subjects,
+      teachersList: this.teachers,
       teacher: null,
       group: this.groups && this.groups.length === 1 ? this.groups[0].id : null,
       student: null,
@@ -46028,25 +46037,29 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$emit('filter', filter);
     }, 50)
   },
+  created: function created() {
+    this.$emit('filter', this.filter);
+  },
+
   computed: {
     showGroup: function showGroup() {
       return this.groups && this.groups.length > 1;
     },
     filter: function filter() {
-      if (this.groups && (!this.group || !this.student)) {
+      if (this.groupsList && (!this.group || !this.student)) {
         return null;
       }
 
       var filter = {};
 
-      if (this.groups) {
+      if (this.groupsList) {
         filter.group = this.group;
         filter.student = this.student;
       }
-      if (this.teachers) {
+      if (this.teachersList) {
         filter.teacher = this.teacher;
       }
-      if (this.subjects) {
+      if (this.subjectsList) {
         filter.subject = this.subject;
       }
       if (this.minDate) {
@@ -46597,7 +46610,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.show = !!this.id;
     },
     cancel: function cancel(p) {
-      this.id = null;
       this.show = false;
     },
     save: function save() {
@@ -49987,7 +49999,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
             setValue = function (targetMoment) {
                 var oldDate = unset ? null : date;
-
                 // case of calling setValue(null or false)
                 if (!targetMoment) {
                     unset = true;
@@ -53228,7 +53239,7 @@ if (false) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
   return _c('div', {
-    staticClass: "row clearfix"
+    staticClass: "row clearfix hidden-print"
   }, [_c('div', {
     staticClass: "col-xs-12"
   }, [_c('error', {
@@ -53265,9 +53276,6 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       }
     }
   }, [_c('option', {
-    attrs: {
-      "disabled": ""
-    },
     domProps: {
       "value": null
     }
@@ -53308,9 +53316,6 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       }
     }
   }, [_c('option', {
-    attrs: {
-      "disabled": ""
-    },
     domProps: {
       "value": null
     }
@@ -53350,9 +53355,6 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       }
     }
   }, [_c('option', {
-    attrs: {
-      "disabled": ""
-    },
     domProps: {
       "value": null
     }
@@ -53392,9 +53394,6 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
       }
     }
   }, [_c('option', {
-    attrs: {
-      "disabled": ""
-    },
     domProps: {
       "value": null
     }
@@ -63800,6 +63799,79 @@ module.exports = Vue$3;
 
 __webpack_require__(132);
 module.exports = __webpack_require__(133);
+
+
+/***/ }),
+/* 208 */,
+/* 209 */,
+/* 210 */,
+/* 211 */,
+/* 212 */,
+/* 213 */,
+/* 214 */,
+/* 215 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      lessons: null,
+      error: null
+    };
+  },
+
+  methods: {
+    loadData: function loadData(filter) {
+      if (!filter) {
+        this.lessons = null;
+        this.error = null;
+      } else {
+        var self = this;
+        this.$http.get('/teacher/api/lessons', { params: filter }).then(function (response) {
+          self.error = null;
+          self.lessons = response.data;
+        }).catch(function (error) {
+          self.error = error.response ? error.response.status : 100;
+        });
+      }
+    }
+  }
+});
+
+/***/ }),
+/* 216 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(1)(
+  /* script */
+  __webpack_require__(215),
+  /* template */
+  null,
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "/media/data/www/flexzeit/resources/assets/js/components/teacher/Lessons.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-6b5e440a", Component.options)
+  } else {
+    hotAPI.reload("data-v-6b5e440a", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
 
 
 /***/ })

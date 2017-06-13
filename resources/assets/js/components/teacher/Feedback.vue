@@ -93,7 +93,6 @@
         this.show = !!this.id;
       },
       cancel(p) {
-        this.id = null;
         this.show = false;
       },
       save() {

@@ -24,7 +24,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/course/lessonsForCreate', 'CourseController@getLessonsForCreate')->middleware('params:firstDate;d|lastDate?;d|number;i');
 
     // Lesson related API methods
-    Route::get('/lessons', 'LessonController@getLessons')->middleware('params:teacher;i|start?;d|end?;d');
+    Route::get('/lessons', 'LessonController@getLessons')->middleware('params:teacher?;i|start?;d|end?;d');
 
     // Registration related API methods
     Route::get('/feedback/{registration}', 'RegistrationController@getFeedback');
@@ -35,8 +35,10 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 
     Route::post('/unregister/lesson/{registration}', 'RegistrationController@unregisterLesson');
 
-    Route::get('documentation', 'RegistrationController@getDocumentation')->middleware('params:student;i|subject?;i|start?;d|end?;d');
-    Route::get('students', 'TeacherController@getStudents')->middleware('params:group;i');
+    Route::get('documentation', 'RegistrationController@getDocumentation')->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+
+    // Students for filter
+    Route::get('students', 'FilterController@getStudents')->middleware('params:group;i');
   });
 });
 

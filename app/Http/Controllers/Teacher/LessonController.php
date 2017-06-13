@@ -8,8 +8,9 @@ use App\Models\Lesson;
 use App\Models\Teacher;
 use App\Services\ConfigService;
 use App\Services\LessonService;
+use App\Services\MiscService;
+use App\Services\OffdayService;
 use App\Services\RegistrationService;
-use App\Services\TeacherService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
@@ -26,26 +27,31 @@ class LessonController extends Controller {
   /** @var LessonService */
   private $lessonService;
 
+  /** @var MiscService */
+  private $miscService;
+
+  /** @var OffdayService */
+  private $offdayService;
+
   /** @var RegistrationService */
   private $registrationService;
-
-  /** @var TeacherService */
-  private $teacherService;
 
   /**
    * Constructor for injecting services
    *
    * @param ConfigService $configService
    * @param LessonService $lessonService
+   * @param MiscService $miscService
+   * @param OffdayService $offdayService
    * @param RegistrationService $registrationService
-   * @param TeacherService $teacherService
    */
-  public function __construct(ConfigService $configService, LessonService $lessonService, RegistrationService $registrationService,
-      TeacherService $teacherService) {
+  public function __construct(ConfigService $configService, LessonService $lessonService,  MiscService $miscService,
+      OffdayService $offdayService, RegistrationService $registrationService) {
     $this->configService = $configService;
     $this->lessonService = $lessonService;
+    $this->miscService = $miscService;
+    $this->offdayService = $offdayService;
     $this->registrationService = $registrationService;
-    $this->teacherService = $teacherService;
   }
 
   /**
@@ -65,11 +71,14 @@ class LessonController extends Controller {
    */
   public function index() {
     $isAdmin = $this->getTeacher()->admin;
+    $teachers = $isAdmin ? $this->miscService->getTeachers() : null;
+
     $minDate = $this->configService->getAsDate('year.start');
     $maxDate = $this->configService->getAsDate('year.end');
-    $teachers = $isAdmin ? $this->teacherService->getAll() : collect([]);
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate);
+    $disabledDaysOfWeek = $this->lessonService->getDaysWithoutLessons();
 
-    return view('teacher.lessons.index', compact('isAdmin', 'minDate', 'maxDate', 'teachers'));
+    return view('teacher.lessons.index', compact('isAdmin', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -103,13 +112,13 @@ class LessonController extends Controller {
    * @param Date $end
    * @return JsonResponse
    */
-  public function getLessons(Teacher $teacher = null, Date $start, Date $end) {
+  public function getLessons(Teacher $teacher = null, Date $start = null, Date $end = null) {
     if (!$teacher) {
       $teacher = $this->getTeacher();
     }
     $this->authorize('viewLessons', $teacher);
 
-    $lessons = $this->lessonService->getForTeacher($teacher, $start, $end);
+    $lessons = $this->lessonService->getForTeacher($teacher, $start ?: Date::today()->addWeek(-1), $end ?: Date::today()->addWeek());
     return response()->json($lessons);
   }
 

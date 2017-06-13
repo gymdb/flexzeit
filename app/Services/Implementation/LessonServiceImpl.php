@@ -33,12 +33,27 @@ class LessonServiceImpl implements LessonService {
     $lessons = $this->lessonRepository
         ->forTeacher($teacher, $start, $end, $dayOfWeek, $numbers, $showCancelled, $withCourse)
         ->orderBy('lessons.number')
-        ->with('course')
-        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.cancelled', 'lessons.course_id']);
-    $lessons->each(function(Lesson $lesson) {
+        ->with('course', 'teacher')
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.cancelled', 'lessons.course_id', 'lessons.teacher_id']);
+    return $lessons->map(function(Lesson $lesson) {
       $this->setTimes($lesson);
+      $data = [
+          'id'      => $lesson->id,
+          'date'    => (string)$lesson->date,
+          'start'   => $lesson->start,
+          'end'     => $lesson->end,
+          'room'    => $lesson->room,
+          'teacher' => $lesson->teacher->name()
+      ];
+      if ($lesson->course) {
+        $data['course'] = [
+            'id'   => $lesson->course->id,
+            'name' => $lesson->course->name,
+            'room' => $lesson->course->room
+        ];
+      }
+      return $data;
     });
-    return $lessons;
   }
 
   public function getForDay(Teacher $teacher, Date $date = null) {

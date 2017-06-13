@@ -2,6 +2,10 @@ require('./bootstrap');
 
 import axios from 'axios';
 import VueAxios from 'vue-axios';
+
+Vue.config.debug = true;
+Vue.config.devtools = true;
+
 Vue.use(VueAxios, axios);
 
 // Register general components
@@ -17,6 +21,7 @@ Vue.component('attendance', require('./components/teacher/Attendance.vue'));
 Vue.component('documentation', require('./components/teacher/Documentation.vue'));
 Vue.component('feedback-edit', require('./components/teacher/Feedback.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
+Vue.component('teacher-lessons', require('./components/teacher/Lessons.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
 
 // Register components for student pages
