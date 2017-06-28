@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\User;
 use App\Policies\CoursePolicy;
 use App\Policies\LessonPolicy;
 use App\Policies\RegistrationPolicy;
@@ -44,6 +45,16 @@ class AuthServiceProvider extends ServiceProvider {
 
     Gate::define('student', function($user) {
       return ($user instanceof Student);
+    });
+
+    Gate::define('showFeedback', function(User $user, Student $student = null) {
+      if (!$user->isTeacher()) {
+        return false;
+      }
+      if ($user->admin) {
+        return true;
+      }
+      return $user->form && (!$student || $student->groups()->wherePivot('group_id', $user->form->group_id)->exists());
     });
 
     Auth::provider('multiple', function() {

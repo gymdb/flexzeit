@@ -9,6 +9,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>{{ config('app.name', 'Flexzeit') }}</title>
+  <link rel="icon" href="data:,">
 
   <!-- Styles -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -69,6 +70,11 @@
                   <li>
                     <a href="{{route('teacher.documentation')}}">@lang('messages.documentation.link')</a>
                   </li>
+                  @can('showFeedback')
+                    <li>
+                      <a href="{{route('teacher.feedback')}}">@lang('messages.feedback.link')</a>
+                    </li>
+                  @endcan
                 </ul>
               </li>
             </ul>

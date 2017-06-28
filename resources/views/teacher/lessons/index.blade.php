@@ -13,6 +13,8 @@
                   :teachers='@json($teachers)'
                   teacher-label="@lang('messages.teacher')"
                   @endif
+                  default-start-date='{{$defaultStartDate}}'
+                  default-end-date='{{$defaultEndDate}}'
                   min-date='{{$minDate->toDateString()}}'
                   max-date='{{$maxDate->toDateString()}}'
                   :disabled-days-of-week='@json($disabledDaysOfWeek)'

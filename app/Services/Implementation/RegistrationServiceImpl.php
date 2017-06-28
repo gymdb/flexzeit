@@ -10,14 +10,10 @@ use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Registration;
 use App\Models\Student;
-use App\Models\Subject;
-use App\Models\Teacher;
-use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
-use App\Services\LessonService;
 use App\Services\RegistrationService;
 use App\Validators\DateValidator;
 use Illuminate\Support\Facades\DB;
@@ -29,12 +25,6 @@ class RegistrationServiceImpl implements RegistrationService {
 
   /** @var ConfigService */
   private $configService;
-
-  /** @var LessonService */
-  private $lessonService;
-
-  /** @var GroupRepository */
-  private $groupRepository;
 
   /** @var LessonRepository */
   private $lessonRepository;
@@ -48,19 +38,16 @@ class RegistrationServiceImpl implements RegistrationService {
   /**
    * LessonService constructor for injecting dependencies.
    *
-   * @param RegistrationRepository $registrationRepository
    * @param ConfigService $configService
-   * @param LessonService $lessonService
-   * @param GroupRepository $groupRepository
+   * @param RegistrationRepository $registrationRepository
+   * @param LessonRepository $lessonRepository
    * @param OffdayRepository $offdayRepository
    * @param DateValidator $dateValidator
    */
-  public function __construct(RegistrationRepository $registrationRepository, ConfigService $configService, LessonService $lessonService,
-      GroupRepository $groupRepository, LessonRepository $lessonRepository, OffdayRepository $offdayRepository, DateValidator $dateValidator) {
-    $this->registrationRepository = $registrationRepository;
+  public function __construct(ConfigService $configService,RegistrationRepository $registrationRepository,
+      LessonRepository $lessonRepository, OffdayRepository $offdayRepository, DateValidator $dateValidator) {
     $this->configService = $configService;
-    $this->lessonService = $lessonService;
-    $this->groupRepository = $groupRepository;
+    $this->registrationRepository = $registrationRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
     $this->dateValidator = $dateValidator;
@@ -134,7 +121,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$ignoreDate && !$this->dateValidator->validateRegisterAllowed('date', $lesson->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
-      if ($lesson->students()->count() >= $this->configService->getAsInt("lesson.maxstudents")) {
+      if ($lesson->students()->count() >= $this->configService->getMaxStudents()) {
         return RegistrationException::MAXSTUDENTS;
       }
       if ($this->offdayRepository->inRange($lesson->date, null, null, $student->offdays())->exists()) {
@@ -193,18 +180,6 @@ class RegistrationServiceImpl implements RegistrationService {
     // TODO
   }
 
-  public function setFeedback(Registration $registration, $feedback) {
-    if (!is_null($feedback) && !is_string($feedback)) {
-      throw new RegistrationException(RegistrationException::INVALID_FEEDBACK);
-    }
-    if ($registration->lesson->date->isFuture()) {
-      throw new RegistrationException(RegistrationException::FEEDBACK_PERIOD);
-    }
-
-    $registration->feedback = $feedback;
-    $registration->save();
-  }
-
   public function setAttendance(Registration $registration, $attendance) {
     if (!is_bool($attendance)) {
       throw new RegistrationException(RegistrationException::INVALID_ATTENDANCE);
@@ -233,10 +208,6 @@ class RegistrationServiceImpl implements RegistrationService {
         ->update(['attendance' => DB::raw('not exists(' . $sub . ')')]);
   }
 
-  public function documentLesson(Registration $registration, $documentation) {
-    // TODO
-  }
-
   public function getForLesson(Lesson $lesson) {
     $registrations = $lesson->registrations()
         ->join('students', 'students.id', 'registrations.student_id')
@@ -262,21 +233,6 @@ class RegistrationServiceImpl implements RegistrationService {
         ->get(['registrations.id', 'registrations.lesson_id', 'registrations.student_id']);
 
     return $registrations;
-  }
-
-  public function getDocumentation(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
-    return $this->registrationRepository
-        ->forStudent($student, $start ?: $this->configService->getAsDate('year.start'), $end ?: Date::today(), null, $teacher, $subject)
-        ->with('lesson', 'lesson.teacher')
-        ->get(['documentation', 'lesson_id'])
-        ->map(function(Registration $reg) {
-          $this->lessonService->setTimes($reg->lesson);
-          return [
-              'documentation' => $reg->documentation,
-              'lesson'        => ['date' => (string)$reg->lesson->date],
-              'teacher'       => $reg->lesson->teacher->name()
-          ];
-        });
   }
 
 }

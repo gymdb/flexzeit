@@ -15,8 +15,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   // Course related pages
   Route::resource('/courses', 'CourseController', ['as' => 'teacher']);
 
-  // Registration related pages
-  Route::get('/documentation', 'RegistrationController@showDocumentation')->name('teacher.documentation');
+  // Documentation/feedback related pages
+  Route::get('/documentation', 'DocumentationController@showDocumentation')->name('teacher.documentation');
+  Route::get('/feedback', 'DocumentationController@showFeedback')->name('teacher.feedback');
 
   // API methods
   Route::group(['prefix' => 'api'], function() {
@@ -26,16 +27,17 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     // Lesson related API methods
     Route::get('/lessons', 'LessonController@getLessons')->middleware('params:teacher?;i|start?;d|end?;d');
 
-    // Registration related API methods
-    Route::get('/feedback/{registration}', 'RegistrationController@getFeedback');
-    Route::post('/feedback/{registration}', 'RegistrationController@setFeedback')->middleware('params:feedback?');
+    // Documentation/Feedback related API methods
+    Route::get('documentation', 'DocumentationController@getDocumentation')->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+    Route::get('feedback', 'DocumentationController@getFeedbackForStudent')->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+    Route::get('/feedback/{registration}', 'DocumentationController@getFeedbackForRegistration');
+    Route::post('/feedback/{registration}', 'DocumentationController@setFeedback')->middleware('params:feedback?');
 
+    // Registration related API methods
     Route::post('/attendance/{registration}', 'RegistrationController@setAttendance')->middleware('params:attendance;b');
     Route::post('/attendanceChecked/{lesson}', 'RegistrationController@setAttendanceChecked');
 
     Route::post('/unregister/lesson/{registration}', 'RegistrationController@unregisterLesson');
-
-    Route::get('documentation', 'RegistrationController@getDocumentation')->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
 
     // Students for filter
     Route::get('students', 'FilterController@getStudents')->middleware('params:group;i');

@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 
 class RegistrationRepository implements \App\Repositories\RegistrationRepository {
 
@@ -28,8 +29,20 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
       $query->where('lessons.teacher_id', $teacher->id);
     }
     if ($subject) {
-      $query->join('courses', 'courses.id', 'lessons.course_id')
-          ->where('courses.subject_id', $subject->id);
+      $query->where(function($q1) use ($subject) {
+        $q1->whereExists(function($q2) use ($subject) {
+          $q2->select(DB::raw(1))
+              ->from('courses')
+              ->whereColumn('courses.id', 'lessons.course_id')
+              ->where('courses.subject_id', $subject->id);
+        });
+        $q1->orWhereExists(function($q2) use ($subject) {
+          $q2->select(DB::raw(1))
+              ->from('subject_teacher')
+              ->whereColumn('subject_teacher.teacher_id', 'lessons.teacher_id')
+              ->where('subject_teacher.subject_id', $subject->id);
+        });
+      });
     }
     return $query;
   }

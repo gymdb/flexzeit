@@ -19,7 +19,8 @@ Vue.component('unregister', require('./components/Unregister.vue'));
 // Register components for teacher pages
 Vue.component('attendance', require('./components/teacher/Attendance.vue'));
 Vue.component('documentation', require('./components/teacher/Documentation.vue'));
-Vue.component('feedback-edit', require('./components/teacher/Feedback.vue'));
+Vue.component('feedback-edit', require('./components/teacher/FeedbackEdit.vue'));
+Vue.component('feedback-show', require('./components/teacher/FeedbackShow.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
 Vue.component('teacher-lessons', require('./components/teacher/Lessons.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));

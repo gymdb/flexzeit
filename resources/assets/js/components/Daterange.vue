@@ -3,7 +3,7 @@
     <div class="date-range clearfix">
       <div class="form-group" :class="{required: type === 0}">
         <label for="firstDate" :class="{'sr-only': hideLabels}">{{labelFirst}}</label>
-        <datepicker v-model="firstDate" name="firstDate" :placeholder="labelFirst"
+        <datepicker v-model="firstDate" name="firstDate" :placeholder="defaultStartDate || labelFirst"
                     :required="type === 0"
                     :show-today="type === 1"
                     :disabled-days-of-week="disabledDaysOfWeek"
@@ -19,7 +19,7 @@
 
       <div class="form-group">
         <label for="lastDate" :class="{'sr-only': hideLabels}">{{labelLast}}</label>
-        <datepicker v-model="lastDate" name="lastDate" :placeholder="labelLast"
+        <datepicker v-model="lastDate" name="lastDate" :placeholder="defaultEndDate || labelLast"
                     :show-today="type === 1"
                     :disabled="lastDateDisabled"
                     :disabled-days-of-week="lastDateDisabledDaysOfWeek"
@@ -52,6 +52,14 @@
       type: {
         'type': Number,
         'default': 0
+      },
+      defaultStartDate: {
+        'type': String,
+        'default': null
+      },
+      defaultEndDate: {
+        'type': String,
+        'default': null
       },
       minDate: {
         'type': String,

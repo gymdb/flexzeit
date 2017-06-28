@@ -38,12 +38,14 @@
 
     <daterange v-if="minDate"
                :type="1"
+               :default-start-date="defaultStartDate"
+               :default-end-date="defaultEndDate"
                :min-date="minDate"
                :max-date="maxDate"
                :disabled-days-of-week="disabledDaysOfWeek"
                :disabled-dates="disabledDates"
-               :old-first-date="null"
-               :old-last-date="null"
+               :old-first-date="initialStart"
+               :old-last-date="initialEnd"
                :label-first="startLabel"
                :label-last="endLabel"
                :hide-labels="true"
@@ -54,19 +56,39 @@
 </template>
 
 <script>
+  import moment from 'moment';
+
   export default {
     data() {
+      let params = {};
+      if (location.search) {
+        location.search.substr(1).split("&")
+            .forEach(item => {
+              let [k, v] = item.split("=", 2);
+              if (k && v) {
+                params[k] = decodeURIComponent(v);
+              }
+            });
+      }
+
+      let group = this.groups && this.groups.length === 1 ? this.groups[0].id : (params.group || null);
+      if (group) {
+        this.loadStudents(group);
+      }
+
       return {
         // Workaround for some weird behaviour: Property fires change event on parent re-rendering
         groupsList: this.groups,
         subjectsList: this.subjects,
         teachersList: this.teachers,
-        teacher: null,
-        group: this.groups && this.groups.length === 1 ? this.groups[0].id : null,
-        student: null,
-        subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : null,
-        start: null,
-        end: null,
+        teacher: params.teacher || null,
+        group: group,
+        student: params.student || null,
+        subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : (params.subject || null),
+        initialStart: params.start || null,
+        initialEnd: params.end || null,
+        start: params.start ? moment(params.start) : null,
+        end: params.end ? moment(params.end) : null,
         students: [],
         error: null
       }
@@ -82,6 +104,14 @@
       },
       subjects: {
         'type': Array,
+        'default': null
+      },
+      defaultStartDate: {
+        'type': String,
+        'default': null
+      },
+      defaultEndDate: {
+        'type': String,
         'default': null
       },
       minDate: {
@@ -135,25 +165,14 @@
     },
     watch: {
       group(newGroup) {
-        this.student = null;
-        this.students = [];
-        if (newGroup && this.groups) {
-          let self = this;
-          this.$http.get('/teacher/api/students', {
-            params: {
-              group: newGroup
-            }
-          }).then(function (response) {
-            self.error = null;
-            self.students = response.data;
-          }).catch(function (error) {
-            self.error = error.response ? error.response.status : 100;
-          });
-        }
+        this.loadStudents(newGroup);
       },
-      filter: _.debounce(function(filter) {
+      filter: _.debounce(function (filter) {
         this.$emit('filter', filter);
-      }, 50)
+      }, 50),
+      query(query) {
+        window.history.replaceState(null, null, '?' + query);
+      }
     },
     created() {
       this.$emit('filter', this.filter);
@@ -184,9 +203,54 @@
           filter.end = this.end ? this.end.format('YYYY-MM-DD') : null;
         }
         return filter;
+      },
+      query() {
+        let params = {};
+
+        if (this.groupsList) {
+          if (this.group) {
+            params.group = this.group;
+          }
+          if (this.student) {
+            params.student = this.student;
+          }
+        }
+        if (this.teachersList && this.teacher) {
+          params.teacher = this.teacher;
+        }
+        if (this.subjectsList && this.subject) {
+          params.subject = this.subject;
+        }
+        if (this.minDate) {
+          if (this.start) {
+            params.start = this.start.format('YYYY-MM-DD');
+          }
+          if (this.end) {
+            params.end = this.end.format('YYYY-MM-DD');
+          }
+        }
+
+        return $.param(params, true);
       }
     },
     methods: {
+      loadStudents(group) {
+        this.student = null;
+        this.students = [];
+        if (group && this.groups) {
+          let self = this;
+          this.$http.get('/teacher/api/students', {
+            params: {
+              group: group
+            }
+          }).then(function (response) {
+            self.error = null;
+            self.students = response.data;
+          }).catch(function (error) {
+            self.error = error.response ? error.response.status : 100;
+          });
+        }
+      },
       setStart(date) {
         this.start = date;
       },
