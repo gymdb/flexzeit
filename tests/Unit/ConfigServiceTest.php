@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Helpers\Date;
 use App\Models\ConfigOption;
 use App\Repositories\ConfigRepository;
-use App\Services\ConfigService;
+use App\Services\ConfigStorageService;
 use Mockery;
 use Tests\TestCase;
 use Tests\Traits\MockDbTrait;
@@ -20,14 +20,14 @@ class ConfigTest extends TestCase {
   use MockDbTrait;
 
   /**
-   * @var ConfigService configService
+   * @var ConfigStorageService configService
    */
   protected $configService;
 
   protected function setUp() {
     parent::setUp();
     $this->mock(['repo' => ConfigRepository::class]);
-    $this->configService = $this->app->make(ConfigService::class);
+    $this->configService = $this->app->make(ConfigStorageService::class);
   }
 
   protected function tearDown() {

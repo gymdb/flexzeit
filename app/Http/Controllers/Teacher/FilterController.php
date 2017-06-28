@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Services\MiscService;
-use App\Services\TeacherService;
 
 /**
  * Controller for miscellaneous pages for teachers
@@ -22,7 +21,7 @@ class FilterController extends Controller {
    *
    * @param MiscService $miscService
    */
-  public function __construct(TeacherService $miscService) {
+  public function __construct(MiscService $miscService) {
     $this->miscService = $miscService;
   }
 

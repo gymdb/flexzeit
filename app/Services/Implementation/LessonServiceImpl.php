@@ -71,56 +71,13 @@ class LessonServiceImpl implements LessonService {
     return $lessons;
   }
 
-  public function getLessonCount(Date $date) {
-    return $this->configService->getAsInt('lesson.count.' . $date->dayOfWeek, 0);
-  }
-
-  public function getAllLessonTimes() {
-    $lessons = [];
-    for ($d = 0; $d < 7; $d++) {
-      $n = $this->configService->getAsInt('lesson.count.' . $d);
-      if ($n > 0) {
-        $lessons[$d] = [];
-        for ($l = 1; $l <= $n; $l++) {
-          $lessons[$d][$l] = [
-              'start' => $this->configService->getAsString('lesson.start.' . $d . '.' . $l),
-              'end'   => $this->configService->getAsString('lesson.end.' . $d . '.' . $l)
-          ];
-        }
-      }
-    }
-    return $lessons;
-  }
-
-  public function getDaysWithoutLessons($lessons = null) {
-    $daysWithoutLessons = [];
-    for ($d = 0; $d < 7; $d++) {
-      if ($lessons) {
-        if (empty($lessons[$d])) {
-          $daysWithoutLessons[] = $d;
-        }
-      } else if (!$this->configService->getAsInt('lesson.count.' . $d)) {
-        $daysWithoutLessons[] = $d;
-      }
-    }
-    return $daysWithoutLessons;
-  }
-
-  public function getStart(Date $date, $number) {
-    return $this->configService->getAsString('lesson.start.' . $date->dayOfWeek . '.' . $number);
-  }
-
-  public function getEnd(Date $date, $number) {
-    return $this->configService->getAsString('lesson.end.' . $date->dayOfWeek . '.' . $number);
-  }
-
   public function isAttendanceChecked(Lesson $lesson) {
     return !$lesson->registrations()->whereNull('attendance')->exists();
   }
 
   public function setTimes(Lesson $lesson) {
-    $lesson->start = $this->getStart($lesson->date, $lesson->number);
-    $lesson->end = $this->getEnd($lesson->date, $lesson->number);
+    $lesson->start = $this->configService->getLessonStart($lesson->date, $lesson->number);
+    $lesson->end = $this->configService->getLessonEnd($lesson->date, $lesson->number);
   }
 
 }

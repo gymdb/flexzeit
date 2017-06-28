@@ -12,61 +12,96 @@ use App\Helpers\Date;
 interface ConfigService {
 
   /**
-   * Invalidate the cache, forcing a reload on the next access
+   * Return the start of the school year
    *
-   * @param string|null $key Only invalidate this key
+   * @param Date|null $min Earliest possible date
+   * @return Date
    */
-  public function invalidateCache($key = null);
+  public function getYearStart(Date $min = null);
 
   /**
-   * Load the config option associated with the given key
+   * Return the end of the school year
    *
-   * @param string $key
-   * @param mixed $default
-   * @return mixed
+   * @param Date|null $max Latest possible date
+   * @return Date
    */
-  public function get($key, $default = null);
+  public function getYearEnd(Date $max = null);
 
   /**
-   * Load the config option associated with the given key as a string
+   * @return Date
+   */
+  public function getFirstCourseCreateDate();
+
+  /**
+   * @return Date
+   */
+  public function getLastCourseCreateDate();
+
+  /**
+   * Return the minimum number for a grade
    *
-   * @param string $key
-   * @param string|null $default
+   * @return int
+   */
+  public function getMinYear();
+
+  /**
+   * Return the maximum number for a grade
+   *
+   * @return int
+   */
+  public function getMaxYear();
+
+  /**
+   * Return the default maximum number of students for a course
+   *
+   * @return int
+   */
+  public function getMaxStudents();
+
+  /**
+   * Get the number of lessons on a given date
+   *
+   * @param Date $date
+   * @return int
+   */
+  public function getLessonCount(Date $date);
+
+  /**
+   * @return array
+   */
+  public function getLessonTimes();
+
+  /**
+   * Get an array containing all days of week with no lessons
+   *
+   * @return array
+   */
+  public function getDaysWithoutLessons();
+
+  /**
+   * Get the start time of a lesson on a given date
+   *
+   * @param Date $date
+   * @param int $number
    * @return string|null
    */
-  public function getAsString($key, $default = null);
+  public function getLessonStart(Date $date, $number);
 
   /**
-   * Load the config option associated with the given key as an integer
+   * Get the end time of a lesson on a given date
    *
-   * @param string $key
-   * @param int|null $default
-   * @return int|null
+   * @param Date $date
+   * @param int $number
+   * @return string|null
    */
-  public function getAsInt($key, $default = null);
+  public function getLessonEnd(Date $date, $number);
 
-  /**
-   * Load the config option associated with the given key as a datetime object
-   *
-   * @param string $key
-   * @param Date|null $default
-   * @return Date|null
-   */
-  public function getAsDate($key, Date $default = null);
+  public function getFirstRegisterDate();
 
-  /**
-   * Write the new config value to database
-   *
-   * @param string $key
-   * @param mixed $value
-   */
-  public function set($key, $value);
+  public function getLastRegisterDate();
 
-  /**
-   * Remove a config option
-   *
-   * @param string $key
-   */
-  public function destroy($key);
+  public function getFirstDocumentationDate();
+
+  public function getLastDocumentationDate();
 
 }

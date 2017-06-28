@@ -40,45 +40,6 @@ interface LessonService {
   public function getForCourse(Course $course);
 
   /**
-   * Get the number of lessons on a given date
-   *
-   * @param Date $date
-   * @return int
-   */
-  public function getLessonCount(Date $date);
-
-  /**
-   * @return mixed
-   */
-  public function getAllLessonTimes();
-
-  /**
-   * Get an array containing all days
-   *
-   * @param array|null $lessons Previously loaded number of lessons for each day of week
-   * @return mixed
-   */
-  public function getDaysWithoutLessons($lessons = null);
-
-  /**
-   * Get the start time of a lesson on a given date
-   *
-   * @param Date $date
-   * @param int $number
-   * @return string|null
-   */
-  public function getStart(Date $date, $number);
-
-  /**
-   * Get the end time of a lesson on a given date
-   *
-   * @param Date $date
-   * @param int $number
-   * @return string|null
-   */
-  public function getEnd(Date $date, $number);
-
-  /**
    * Checks if attendance has been checked for the given lesson
    *
    * @param Lesson $lesson

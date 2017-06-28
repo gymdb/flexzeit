@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Group;
 use Illuminate\Database\Eloquent\Collection;
 
 interface MiscService {
@@ -19,6 +20,14 @@ interface MiscService {
    * @return Collection
    */
   public function getGroups();
+
+  /**
+   * Get a list of all students in the given group, sorted by name
+   *
+   * @param Group $group
+   * @return Collection
+   */
+  public function getStudents(Group $group);
 
   /**
    * Get a list of all subjects, sorted by name

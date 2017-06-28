@@ -3,19 +3,19 @@
 namespace App\Http\Requests\Course;
 
 use App\Models\Course;
-use App\Services\CourseService;
+use App\Services\ConfigService;
 use Illuminate\Support\Facades\App;
 
 trait NormalCourseTrait {
 
   protected function typeSpecificRules() {
-    /** @var CourseService $courseService */
-    $courseService = App::make(CourseService::class);
+    /** @var ConfigService $configService */
+    $configService = App::make(ConfigService::class);
 
     $yearFrom = (int)$this->input('yearFrom');
     $yearTo = (int)$this->input('yearTo');
-    $minYear = $courseService->getMinYear();
-    $maxYear = $courseService->getMaxYear();
+    $minYear = $configService->getMinYear();
+    $maxYear = $configService->getMaxYear();
     $maxYearFrom = $yearTo ? min($yearTo, $maxYear) : $maxYear;
     $minYearTo = $yearFrom ? max($yearFrom, $minYear) : $minYear;
 

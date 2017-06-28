@@ -10,13 +10,13 @@ use App\Http\Requests\Course\CreateObligatoryCourseRequest;
 use App\Http\Requests\Course\EditNormalCourseRequest;
 use App\Http\Requests\Course\EditObligatoryCourseRequest;
 use App\Models\Course;
+use App\Services\ConfigService;
 use App\Services\CourseService;
 use App\Services\LessonService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Controller for course related pages for teachers
@@ -24,6 +24,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @package App\Http\Controllers\Teacher
  */
 class CourseController extends Controller {
+
+  /** @var ConfigService */
+  private $configService;
 
   /** @var CourseService */
   private $courseService;
@@ -40,13 +43,15 @@ class CourseController extends Controller {
   /**
    * CourseController constructor.
    *
+   * @param ConfigService $configService
    * @param CourseService $courseService
    * @param LessonService $lessonService
    * @param OffdayService $offdayService
    * @param RegistrationService $registrationService
    */
-  public function __construct(CourseService $courseService, LessonService $lessonService, OffdayService $offdayService,
-      RegistrationService $registrationService) {
+  public function __construct(ConfigService $configService, CourseService $courseService, LessonService $lessonService,
+      OffdayService $offdayService, RegistrationService $registrationService) {
+    $this->configService = $configService;
     $this->courseService = $courseService;
     $this->lessonService = $lessonService;
     $this->offdayService = $offdayService;
@@ -71,18 +76,18 @@ class CourseController extends Controller {
   public function create() {
     $this->authorize('create', Course::class);
 
-    $minDate = $this->courseService->getFirstCreateDate();
-    $maxDate = $this->courseService->getLastCreateDate();
-    $lessons = $this->lessonService->getAllLessonTimes();
+    $minDate = $this->configService->getFirstCourseCreateDate();
+    $maxDate = $this->configService->getLastCourseCreateDate();
+    $lessons = $this->configService->getLessonTimes();
 
     if ($minDate === null || $maxDate === null || empty($lessons) || $minDate > $maxDate) {
       return view('teacher.courses.impossible');
     }
 
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
-    $disabledDaysOfWeek = $this->lessonService->getDaysWithoutLessons($lessons);
-    $minYear = $this->courseService->getMinYear();
-    $maxYear = $this->courseService->getMaxYear();
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+    $minYear = $this->configService->getMinYear();
+    $maxYear = $this->configService->getMaxYear();
 
     return view('teacher.courses.create', compact('minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek', 'offdays', 'minYear', 'maxYear'));
   }
@@ -97,18 +102,18 @@ class CourseController extends Controller {
     // TODO
     $this->authorize('create', Course::class);
 
-    $minDate = $this->courseService->getFirstCreateDate();
-    $maxDate = $this->courseService->getLastCreateDate();
-    $lessons = $this->lessonService->getAllLessonTimes();
+    $minDate = $this->configService->getFirstCourseCreateDate();
+    $maxDate = $this->configService->getLastCourseCreateDate();
+    $lessons = $this->configService->getLessonTimes();
 
     if ($minDate === null || $maxDate === null || empty($lessons) || $minDate > $maxDate) {
-      throw new CourseException(0);
+      return view('teacher.courses.impossible');
     }
 
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
-    $disabledDaysOfWeek = $this->lessonService->getDaysWithoutLessons($lessons);
-    $minYear = $this->courseService->getMinYear();
-    $maxYear = $this->courseService->getMaxYear();
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+    $minYear = $this->configService->getMinYear();
+    $maxYear = $this->configService->getMaxYear();
 
     return view('teacher.courses.createObligatory', compact('minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek', 'offdays', 'minYear', 'maxYear'));
   }

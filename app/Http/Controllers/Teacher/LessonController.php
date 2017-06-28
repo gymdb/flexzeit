@@ -45,7 +45,7 @@ class LessonController extends Controller {
    * @param OffdayService $offdayService
    * @param RegistrationService $registrationService
    */
-  public function __construct(ConfigService $configService, LessonService $lessonService,  MiscService $miscService,
+  public function __construct(ConfigService $configService, LessonService $lessonService, MiscService $miscService,
       OffdayService $offdayService, RegistrationService $registrationService) {
     $this->configService = $configService;
     $this->lessonService = $lessonService;
@@ -73,12 +73,14 @@ class LessonController extends Controller {
     $isAdmin = $this->getTeacher()->admin;
     $teachers = $isAdmin ? $this->miscService->getTeachers() : null;
 
-    $minDate = $this->configService->getAsDate('year.start');
-    $maxDate = $this->configService->getAsDate('year.end');
+    $minDate = $this->configService->getYearStart();
+    $maxDate = $this->configService->getYearEnd();
+    $defaultStartDate = max($minDate, $this->getDefaultStartDate());
+    $defaultEndDate = min($maxDate, $this->getDefaultEndDate());
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
-    $disabledDaysOfWeek = $this->lessonService->getDaysWithoutLessons();
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.lessons.index', compact('isAdmin', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.lessons.index', compact('isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -118,8 +120,16 @@ class LessonController extends Controller {
     }
     $this->authorize('viewLessons', $teacher);
 
-    $lessons = $this->lessonService->getForTeacher($teacher, $start ?: Date::today()->addWeek(-1), $end ?: Date::today()->addWeek());
+    $lessons = $this->lessonService->getForTeacher($teacher, $start ?: $this->getDefaultStartDate(), $end ?: $this->getDefaultEndDate());
     return response()->json($lessons);
+  }
+
+  private function getDefaultStartDate() {
+    return Date::today()->addWeek(-1);
+  }
+
+  private function getDefaultEndDate() {
+    return Date::today()->addWeek(1);
   }
 
 }

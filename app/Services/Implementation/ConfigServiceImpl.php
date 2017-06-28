@@ -3,10 +3,8 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
-use App\Repositories\ConfigRepository;
 use App\Services\ConfigService;
-use DateTime;
-use Illuminate\Support\Facades\Cache;
+use App\Services\ConfigStorageService;
 
 /**
  * Service for accessing config option values from database while using caches
@@ -15,79 +13,110 @@ use Illuminate\Support\Facades\Cache;
  */
 class ConfigServiceImpl implements ConfigService {
 
-  private $configRepository;
+  /** @var ConfigStorageService */
+  private $configService;
 
-  private $prefix = 'config';
-
-  function __construct(ConfigRepository $configRepository) {
-    $this->configRepository = $configRepository;
+  function __construct(ConfigStorageService $configService) {
+    $this->configService = $configService;
   }
 
-  public function invalidateCache($key = null) {
-    if (is_null($key)) {
-      $this->getCache()->flush();
-    } else {
-      $this->getCache()->forget($this->prefix . '.' . $key);
-    }
+  public function getYearStart(Date $min = null) {
+    $date = $this->configService->getAsDate('year.start');
+    return $min ? max($date, $min) : $date;
   }
 
-  public function get($key, $default = null) {
-    $value = $this->getCache()->rememberForever($this->prefix . '.' . $key, function() use ($key) {
-      $configOption = $this->configRepository->find($key);
-      return $configOption ? $configOption->value : null;
-    });
-    return is_null($value) ? $default : $value;
+  public function getYearEnd(Date $max = null) {
+    $date = $this->configService->getAsDate('year.end');
+    return $max ? min($date, $max) : $date;
   }
 
-  public function getAsString($key, $default = null) {
-    $value = $this->get($key);
-    return is_null($value) ? $default : (string)$value;
+  public function getFirstCourseCreateDate() {
+    return $this->getYearStart($this->dateValidator->getDateBound('course.create'));
   }
 
-  public function getAsInt($key, $default = null) {
-    $value = $this->get($key);
-    return is_null($value) ? $default : (int)$value;
+  public function getLastCourseCreateDate() {
+    return $this->getYearEnd();
   }
 
-  public function getAsDate($key, Date $default = null) {
-    $value = $this->get($key);
-    if (is_null($value)) {
-      return $default;
-    }
-    if ($value instanceof DateTime) {
-      return Date::instance($value);
-    }
-    if (is_int($value)) {
-      return Date::createFromTimestampUTC($value);
-    }
-    $tz = null;
-    if (is_array($value) && isset($value['date'])) {
-      if (isset($value['timezone'])) {
-        $tz = $value['timezone'];
+  public function getMinYear() {
+    return $this->configService->getAsInt('year.min', 1);
+  }
+
+  public function getMaxYear() {
+    return $this->configService->getAsInt('year.max', 1);
+  }
+
+  public function getMaxStudents() {
+    return $this->configService->getAsInt("maxstudents", 0);
+  }
+
+  public function getLessonCount(Date $date) {
+    return count($this->getLessonTimes()[$date->dayOfWeek]);
+  }
+
+  public function getLessonTimes() {
+    return $this->configService->get('lessons', []);
+  }
+
+  public function getDaysWithoutLessons($lessons = null) {
+    $lessons = $this->getLessonTimes();
+    $daysWithoutLessons = [];
+    for ($d = 0; $d < 7; $d++) {
+      if (empty($lessons[$d])) {
+        $daysWithoutLessons[] = $d;
       }
-      $value = $value['date'];
     }
-    if (is_string($value)) {
-      return Date::parse($value, $tz);
+    return $daysWithoutLessons;
+  }
+
+  public function getLessonStart(Date $date, $number) {
+    $lessons = $this->getLessonTimes();
+    return isset($lessons[$date->dayOfWeek], $lessons[$date->dayOfWeek][$number]) ? $lessons[$date->dayOfWeek][$number]['start'] : null;
+  }
+
+  public function getLessonEnd(Date $date, $number) {
+    $lessons = $this->getLessonTimes();
+    return isset($lessons[$date->dayOfWeek], $lessons[$date->dayOfWeek][$number]) ? $lessons[$date->dayOfWeek][$number]['end'] : null;
+  }
+
+  public function getFirstRegisterDate() {
+    return $this->getDateBound('registration.end');
+  }
+
+  public function getLastRegisterDate() {
+    return $this->getDateBound('registration.begin')->addDay(-1);
+  }
+
+  public function getFirstDocumentationDate() {
+    return Date::today();
+  }
+
+  public function getLastDocumentationDate() {
+    return $this->getDateBound('documentation', -1)->addDay(-1);
+  }
+
+  /**
+   * Return the date boundary (earliest or last possible date for some action) specified by a day/week config pair
+   *
+   * @param string $key
+   * @param int $future 1 for bound in future, -1 for bound in past
+   * @return Date
+   */
+  private function getDateBound($key, $future = 1) {
+    $day = $this->configService->getAsInt($key . '.day');
+    if (is_null($day)) {
+      $day = 1;
+      $week = 0;
+    } else {
+      $week = $this->configService->getAsInt($key . '.week', 0);
     }
 
-    return null;
-  }
-
-  public function set($key, $value) {
-    $configOption = $this->configRepository->findOrNew($key);
-    $configOption->value = $value instanceof DateTime ? $value->format('c') : $value;
-    $configOption->save();
-    $this->invalidateCache($key);
-  }
-
-  public function destroy($key) {
-    $this->configRepository->destroy($key);
-    $this->invalidateCache($key);
-  }
-
-  protected function getCache() {
-    return Cache::tags($this->prefix);
+    $today = Date::today();
+    return $week <= 0
+      // Allow creation up to given days before the date
+        ? $today->addDays($future * $day)
+      // Allow creation up to given weeks before the date, in relation to the start of the week for the given day of week
+        : $today->setToDayOfWeek($day)->startOfWeek()->addWeeks($future * $week);
   }
 
 }

@@ -37,11 +37,6 @@ interface StudentService {
   public function getAvailableLessons(Student $student, Date $date);
 
   /**
-   * @return Date
-   */
-  public function getFirstRegisterDate();
-
-  /**
    * @param Date $date
    * @return bool
    */

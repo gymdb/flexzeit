@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Student;
 
 use App\Helpers\Date;
 use App\Http\Controllers\Controller;
-use App\Models\Student;
+use App\Services\ConfigService;
 use App\Services\StudentService;
-use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller {
+
+  /** @var ConfigService */
+  private $configService;
 
   /** @var StudentService */
   private $studentService;
@@ -16,9 +18,11 @@ class StudentController extends Controller {
   /**
    * Create a new controller instance.
    *
+   * @param ConfigService $configService
    * @param StudentService $studentService
    */
-  public function __construct(StudentService $studentService) {
+  public function __construct(ConfigService $configService, StudentService $studentService) {
+    $this->configService = $configService;
     $this->studentService = $studentService;
   }
 
@@ -33,7 +37,7 @@ class StudentController extends Controller {
     $today = $this->studentService->getRegistrationsForDay($student);
     $upcoming = $this->studentService->getUpcomingRegistrations($student);
     $documentation = $this->studentService->getDocumentationRegistrations($student);
-    $firstRegisterDate = $this->studentService->getFirstRegisterDate();
+    $firstRegisterDate = $this->configService->getFirstRegisterDate();
 
     return view('student.dashboard', compact('today', 'upcoming', 'documentation', 'firstRegisterDate'));
   }

@@ -12,12 +12,28 @@ class ConfigSeeder extends Seeder {
    * @return void
    */
   public function run() {
+    $times = [
+        1 => ['start' => '09:00', 'end' => '09:30'],
+        2 => ['start' => '10:00', 'end' => '10:30']
+    ];
+    $lessons = [];
+
+    for ($d = 1; $d <= 5; $d++) {
+      $lessons[$d] = [];
+      foreach ($times as $n => $time) {
+        $lessons[$d][$n] = $time;
+      }
+    }
+
     $config = [
+      // Lesson count and times
+        'lessons'                 => $lessons,
+
       // Course creation possible until sunday one week earlier
         'course.create.day'       => 0,
         'course.create.week'      => 2,
       // Default maximum students for a lesson
-        'lesson.maxstudents'      => 20,
+        'maxstudents'      => 20,
 
       // Registration is possible on each day the week before
         'registration.begin.day'  => 1,
@@ -33,19 +49,6 @@ class ConfigSeeder extends Seeder {
         'year.start'              => Date::today()->addMonth(-1)->setToDayOfWeek(Date::MONDAY)->toDateString(),
         'year.end'                => Date::today()->addMonths(3)->setToDayOfWeek(Date::FRIDAY)->toDateString()
     ];
-
-    $lessons = [
-        1 => ['09:00', '09:30'],
-        2 => ['10:00', '10:30']
-    ];
-
-    for ($d = 1; $d <= 5; $d++) {
-      $config['lesson.count.' . $d] = 2;
-      foreach ($lessons as $n => $times) {
-        $config['lesson.start.' . $d . '.' . $n] = $times[0];
-        $config['lesson.end.' . $d . '.' . $n] = $times[1];
-      }
-    }
 
     foreach ($config as $key => $value) {
       ConfigOption::create(compact('key', 'value'));

@@ -11,7 +11,6 @@ use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
-use App\Services\LessonService;
 use App\Services\RegistrationService;
 use App\Services\StudentService;
 use App\Validators\DateValidator;
@@ -23,9 +22,6 @@ class StudentServiceImpl implements StudentService {
 
   /** @var ConfigService */
   private $configService;
-
-  /** @var LessonService */
-  private $lessonService;
 
   /** @var RegistrationService */
   private $registrationService;
@@ -42,10 +38,9 @@ class StudentServiceImpl implements StudentService {
   /** @var  DateValidator */
   private $dateValidator;
 
-  function __construct(ConfigService $configService, LessonService $lessonService, RegistrationService $registrationService,
-      LessonRepository $lessonRepository, OffdayRepository $offdayRepository, RegistrationRepository $registrationRepository, DateValidator $dateValidator) {
+  function __construct(ConfigService $configService, RegistrationService $registrationService, LessonRepository $lessonRepository,
+      OffdayRepository $offdayRepository, RegistrationRepository $registrationRepository, DateValidator $dateValidator) {
     $this->configService = $configService;
-    $this->lessonService = $lessonService;
     $this->registrationService = $registrationService;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
@@ -65,7 +60,7 @@ class StudentServiceImpl implements StudentService {
 
   public function getUpcomingRegistrations(Student $student) {
     $start = Date::today()->addDay();
-    $end = $this->dateValidator->getDateBound('registration.begin')->addDay(-1);
+    $end = $this->configService->getLastRegisterDate();
     $registrations = $this->registrationRepository
         ->forStudent($student, $start, $end)
         ->orderBy('lessons.number')
@@ -75,8 +70,8 @@ class StudentServiceImpl implements StudentService {
   }
 
   public function getDocumentationRegistrations(Student $student) {
-    $end = Date::today()->addDay(-1);
-    $start = $this->dateValidator->getDateBound('documentation')->addDay(-1);
+    $start = $this->configService->getFirstDocumentationDate();
+    $end = $this->configService->getLastDocumentationDate();
     $registrations = $this->registrationRepository
         ->forStudent($student, $start, $end)
         ->orderBy('lessons.number')
@@ -86,7 +81,7 @@ class StudentServiceImpl implements StudentService {
   }
 
   public function getAvailableLessons(Student $student, Date $date) {
-    $numbers = range(1, $this->lessonService->getLessonCount($date));
+    $numbers = range(1, $this->configService->getLessonCount($date));
     $this->lessonRepository
         ->forStudent($student, $date)
         ->get(['number'])
@@ -120,17 +115,13 @@ class StudentServiceImpl implements StudentService {
     return $this->dateValidator->validateRegisterAllowed('date', $date);
   }
 
-  public function getFirstRegisterDate() {
-    return $this->dateValidator->getDateBound('registration.end');
-  }
-
   private function combineRegistrations(ArrayIterator $items, array $dates, $addMissing = true) {
     $slots = [];
     $lesson = null;
     $registration = null;
 
     foreach ($dates as $date) {
-      $lessonCount = $this->lessonService->getLessonCount($date);
+      $lessonCount = $this->configService->getLessonCount($date);
       $first = null;
 
       for ($n = 1; $n <= $lessonCount; $n++) {
@@ -163,12 +154,12 @@ class StudentServiceImpl implements StudentService {
 
         if ($slot) {
           if ($first) {
-            $first['end'] = $this->lessonService->getEnd($date, $n - 1);
+            $first['end'] = $this->configService->getLessonEnd($date, $n - 1);
           }
           unset($first);
 
           $slot['date'] = $date;
-          $slot['start'] = $this->lessonService->getStart($date, $n);
+          $slot['start'] = $this->configService->getLessonStart($date, $n);
           $first =& $slot;
           $slots[] =& $slot;
         }
@@ -177,7 +168,7 @@ class StudentServiceImpl implements StudentService {
       }
 
       if ($first) {
-        $first['end'] = $this->lessonService->getEnd($date, $lessonCount);
+        $first['end'] = $this->configService->getLessonEnd($date, $lessonCount);
       }
       unset($first);
     }
@@ -190,8 +181,8 @@ class StudentServiceImpl implements StudentService {
     $first = null;
 
     foreach ($lessons as $lesson) {
-      $start = $this->lessonService->getStart($lesson->date, $lesson->number);
-      $end = $this->lessonService->getEnd($lesson->date, $lesson->number);
+      $start = $this->configService->getLessonStart($lesson->date, $lesson->number);
+      $end = $this->configService->getLessonEnd($lesson->date, $lesson->number);
 
       $firstLesson = $first ? $first['lesson'] : null;
       if (!$firstLesson

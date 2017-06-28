@@ -67,12 +67,4 @@ interface CourseService {
 
   public function removeCourse(Course $course);
 
-  public function getFirstCreateDate();
-
-  public function getLastCreateDate();
-
-  public function getMinYear();
-
-  public function getMaxYear();
-
 }

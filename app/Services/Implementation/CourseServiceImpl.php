@@ -11,19 +11,14 @@ use App\Models\Teacher;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
-use App\Services\ConfigService;
 use App\Services\CourseService;
 use App\Services\RegistrationService;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
 use App\Specifications\ObligatorySpecification;
-use App\Validators\DateValidator;
 use Illuminate\Database\Eloquent\Builder;
 
 class CourseServiceImpl implements CourseService {
-
-  /** @var ConfigService */
-  private $configService;
 
   /** @var RegistrationService */
   private $registrationService;
@@ -37,17 +32,12 @@ class CourseServiceImpl implements CourseService {
   /** @var  OffdayRepository */
   private $offdayRepository;
 
-  /** @var  DateValidator */
-  private $dateValidator;
-
-  function __construct(ConfigService $configService, RegistrationService $registrationService, GroupRepository $groupRepository,
-      LessonRepository $lessonRepository, OffdayRepository $offdayRepository, DateValidator $dateValidator) {
-    $this->configService = $configService;
+  function __construct(RegistrationService $registrationService, GroupRepository $groupRepository,
+      LessonRepository $lessonRepository, OffdayRepository $offdayRepository) {
     $this->registrationService = $registrationService;
     $this->groupRepository = $groupRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
-    $this->dateValidator = $dateValidator;
   }
 
   public function coursePossible(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
@@ -135,22 +125,6 @@ class CourseServiceImpl implements CourseService {
 
   public function removeCourse(Course $course) {
     // TODO Implement
-  }
-
-  public function getFirstCreateDate() {
-    return max($this->configService->getAsDate('year.start'), $this->dateValidator->getDateBound('course.create'));
-  }
-
-  public function getLastCreateDate() {
-    return $this->configService->getAsDate('year.end');
-  }
-
-  public function getMinYear() {
-    return $this->configService->getAsInt('year.min', 1);
-  }
-
-  public function getMaxYear() {
-    return $this->configService->getAsInt('year.max', 1);
   }
 
   private function buildLessonsWithCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {

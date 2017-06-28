@@ -5,11 +5,8 @@ namespace App\Http\Requests\Course;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Services\ConfigService;
-use App\Services\LessonService;
 use App\Specifications\CreateCourseSpecification;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 abstract class CreateCourseRequest extends CourseRequest implements CreateCourseSpecification {
@@ -62,7 +59,7 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
     parent::parse($source);
 
     $this->lessonCount = ($firstDate = $this->getFirstDate())
-        ? App::make(LessonService::class)->getLessonCount($firstDate) : 0;
+        ? App::make(ConfigService::class)->getLessonCount($firstDate) : 0;
   }
 
 }
