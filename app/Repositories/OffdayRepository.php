@@ -18,10 +18,16 @@ interface OffdayRepository {
    *
    * @param Date $start Start date
    * @param Date|null $end Optional end date (start day only if empty)
-   * @param null $dayOfWeek Only show dates on the given day of week
+   * @param int|null $dayOfWeek Only show dates on the given day of week
+   * @param int|int[]|null $number
    * @param Relation|null $relation Relation to run the query on
    * @return Builder
    */
-  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, Relation $relation = null);
+  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null);
+
+  /**
+   * Remove all days without lessons
+   */
+  public function removeAll();
 
 }

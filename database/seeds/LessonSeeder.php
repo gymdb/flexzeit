@@ -1,16 +1,13 @@
 <?php
 
 use App\Helpers\Date;
-use App\Models\Form;
 use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Offday;
 use App\Models\Registration;
 use App\Models\Student;
-use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class LessonSeeder extends Seeder {
 
@@ -39,37 +36,38 @@ class LessonSeeder extends Seeder {
         continue;
       }
 
-      $groups->each(function($group) use ($date) {
-        if (mt_rand(1, 100) <= 2) {
-          Offday::create(['date' => $date, 'group_id' => $group]);
-        }
-      });
-
-      $lessons = [];
-      foreach ($teachers as $teacher) {
-        if ($teacher->admin || $date->dayOfWeek - 1 === $teacher->id % 5) {
-          continue;
-        }
-        $lessons[] = factory(Lesson::class)->create(['date' => $date, 'number' => 1, 'teacher_id' => $teacher->id]);
-        $lessons[] = factory(Lesson::class)->create(['date' => $date, 'number' => 2, 'teacher_id' => $teacher->id]);
-      }
-
-      if ($date <= Date::today()->addWeek()) {
-        $factory = $date->isPast() ? factory(Registration::class)->states('past') : factory(Registration::class);
-        $students->each(function(Student $student) use ($date, $factory, $lessons) {
-          if ($student->offdays()->where('date', $date)->exists()) {
-            return;
-          }
-
-          foreach ($lessons as $lesson) {
-            if (mt_rand(1, 100) <= 5) {
-              $factory->create(['lesson_id' => $lesson->id, 'student_id' => $student->id]);
-              if (!$lesson->cancelled) {
-                return;
-              }
-            }
+      for ($i = 1; $i <= 2; $i++) {
+        $groups->each(function($group) use ($date, $i) {
+          if (mt_rand(1, 100) <= 2) {
+            Offday::create(['date' => $date, 'number' => $i, 'group_id' => $group]);
           }
         });
+
+        $lessons = [];
+        foreach ($teachers as $teacher) {
+          if ($teacher->admin || $date->dayOfWeek - 1 === $teacher->id % 5) {
+            continue;
+          }
+          $lessons[] = factory(Lesson::class)->create(['date' => $date, 'number' => $i, 'teacher_id' => $teacher->id]);
+        }
+
+        if ($date <= Date::today()->addWeek()) {
+          $factory = $date->isPast() ? factory(Registration::class)->states('past') : factory(Registration::class);
+          $students->each(function(Student $student) use ($date, $i, $factory, $lessons) {
+            if ($student->offdays()->where('date', $date)->where('number', $i)->exists()) {
+              return;
+            }
+
+            foreach ($lessons as $lesson) {
+              if (mt_rand(1, 100) <= 20) {
+                $factory->create(['lesson_id' => $lesson->id, 'student_id' => $student->id]);
+                if (!$lesson->cancelled) {
+                  return;
+                }
+              }
+            }
+          });
+        }
       }
     }
   }

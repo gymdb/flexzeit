@@ -10,13 +10,17 @@ use App\Http\Requests\Course\CreateObligatoryCourseRequest;
 use App\Http\Requests\Course\EditNormalCourseRequest;
 use App\Http\Requests\Course\EditObligatoryCourseRequest;
 use App\Models\Course;
+use App\Models\Teacher;
 use App\Services\ConfigService;
 use App\Services\CourseService;
 use App\Services\LessonService;
+use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 /**
  * Controller for course related pages for teachers
@@ -34,6 +38,9 @@ class CourseController extends Controller {
   /** @var LessonService */
   private $lessonService;
 
+  /** @var MiscService */
+  private $miscService;
+
   /** @var OffdayService */
   private $offdayService;
 
@@ -46,14 +53,16 @@ class CourseController extends Controller {
    * @param ConfigService $configService
    * @param CourseService $courseService
    * @param LessonService $lessonService
+   * @param MiscService $miscService
    * @param OffdayService $offdayService
    * @param RegistrationService $registrationService
    */
   public function __construct(ConfigService $configService, CourseService $courseService, LessonService $lessonService,
-      OffdayService $offdayService, RegistrationService $registrationService) {
+      MiscService $miscService, OffdayService $offdayService, RegistrationService $registrationService) {
     $this->configService = $configService;
     $this->courseService = $courseService;
     $this->lessonService = $lessonService;
+    $this->miscService = $miscService;
     $this->offdayService = $offdayService;
     $this->registrationService = $registrationService;
   }
@@ -64,13 +73,23 @@ class CourseController extends Controller {
    * @return Response
    */
   public function index() {
-    // TODO
+    $isAdmin = $this->getTeacher()->admin;
+    $teachers = $isAdmin ? $this->miscService->getTeachers() : null;
+
+    $minDate = $this->configService->getYearStart();
+    $maxDate = $this->configService->getYearEnd();
+    $defaultStartDate = $this->configService->getDefaultListStartDate();
+    $defaultEndDate = $this->configService->getDefaultListEndDate();
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate);
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+
+    return view('teacher.courses.index', compact('isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
    * Show the form for creating a new course
    *
-   * @return Response
+   * @return View
    * @throws CourseException
    */
   public function create() {
@@ -95,7 +114,7 @@ class CourseController extends Controller {
   /**
    * Show the form for creating a new obligatory course
    *
-   * @return Response
+   * @return View
    * @throws CourseException
    */
   public function createObligatory() {
@@ -122,33 +141,33 @@ class CourseController extends Controller {
    * Store a newly created course
    *
    * @param  CreateNormalCourseRequest $request
-   * @return Response
+   * @return RedirectResponse
    */
   public function store(CreateNormalCourseRequest $request) {
     $this->authorize('create', Course::class);
 
     $course = $this->courseService->createCourse($request, $this->getTeacher());
-    return redirect(route('teacher.courses.show', $course->id));
+    return redirect(route('teacher.courses.show', [$course->id]));
   }
 
   /**
    * Store a newly created obligatory course
    *
    * @param  CreateObligatoryCourseRequest $request
-   * @return Response
+   * @return RedirectResponse
    */
   public function storeObligatory(CreateObligatoryCourseRequest $request) {
     $this->authorize('create', Course::class);
 
     $course = $this->courseService->createCourse($request, $this->getTeacher());
-    return redirect(route('teacher.courses.show', $course->id));
+    return redirect(route('teacher.courses.show', [$course->id]));
   }
 
   /**
    * Display a specific course
    *
    * @param  Course $course
-   * @return Response
+   * @return View
    */
   public function show(Course $course) {
     $this->authorize('view', $course);
@@ -163,7 +182,7 @@ class CourseController extends Controller {
    * Show the form for editing the specified course
    *
    * @param  Course $course
-   * @return Response
+   * @return View
    */
   public function edit(Course $course) {
     // TODO
@@ -175,7 +194,7 @@ class CourseController extends Controller {
    *
    * @param  EditNormalCourseRequest $request
    * @param  Course $course
-   * @return Response
+   * @return RedirectResponse
    */
   public function update(EditNormalCourseRequest $request, Course $course) {
     // TODO
@@ -187,7 +206,7 @@ class CourseController extends Controller {
    *
    * @param  EditObligatoryCourseRequest $request
    * @param  Course $course
-   * @return Response
+   * @return RedirectResponse
    */
   public function updateObligatory(EditObligatoryCourseRequest $request, Course $course) {
     // TODO
@@ -198,7 +217,7 @@ class CourseController extends Controller {
    * Remove the specified course
    *
    * @param  Course $course
-   * @return Response
+   * @return RedirectResponse
    */
   public function destroy(Course $course) {
     // TODO
@@ -210,7 +229,7 @@ class CourseController extends Controller {
    *
    * @param Date $firstDate
    * @param Date|null $lastDate
-   * @param string|int $number
+   * @param int $number
    * @return JsonResponse
    */
   public function getLessonsForCreate(Date $firstDate, Date $lastDate = null, $number) {
@@ -222,6 +241,28 @@ class CourseController extends Controller {
         'withCourse'   => $lessonsWithCourse,
         'forNewCourse' => $lessonsForNewCourse
     ]);
+  }
+
+
+  /**
+   * Get lessons for a teacher in JSON format
+   *
+   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to currently logged in user
+   * @param Date|null $start
+   * @param Date|null $end
+   * @return JsonResponse
+   */
+  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
+    if (!$teacher) {
+      $teacher = $this->getTeacher();
+    }
+    $this->authorize('viewCourses', $teacher);
+
+    $start = $start ?: $this->configService->getDefaultListStartDate();
+    $end = $end ?: $this->configService->getDefaultListEndDate();
+
+    $lessons = $this->courseService->getMappedForTeacher($teacher, $start, $end);
+    return response()->json($lessons);
   }
 
 }

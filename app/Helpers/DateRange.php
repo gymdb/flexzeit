@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use DatePeriod;
 use Carbon\CarbonInterval;
+use Illuminate\Support\Collection;
 
 /**
  * Helper class for making usage of PHPs DatePeriod
@@ -43,12 +44,33 @@ class DateRange extends DatePeriod {
   }
 
   /**
+   * Return a collection containing all the days on a given day of week within the range
+   *
+   * @param Date $start
+   * @param Date $end
+   * @param int|null $dayOfWeek Day of week, as defined by the constants in Carbon. Null if every day should be included
+   * @return Collection
+   */
+  public static function getCollection(Date $start, Date $end, $dayOfWeek = null) {
+    return (new DateRange($start, $end, $dayOfWeek))->toCollection();
+  }
+
+  /**
    * Return an array containing all dates in this range
    *
    * @return Date[]
    */
   public function toArray() {
     return iterator_to_array($this);
+  }
+
+  /**
+   * Return a collection containing all days in range
+   *
+   * @return Collection
+   */
+  public function toCollection() {
+    return collect($this);
   }
 
 }

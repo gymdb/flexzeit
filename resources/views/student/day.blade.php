@@ -1,145 +1,123 @@
 @extends('layouts.app')
 
 @section('content')
-  <student-register inline-template>
-    <main class="container">
-      <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          @component('errors', ['errorMin' => 20, 'errorMax' => 25])
-            @slot('successMsg')
-              <p><strong>@lang('registrations.success')</strong></p>
-            @endslot
-            @slot('partialMsg')
-              <p><strong>@lang('registrations.partial')</strong></p>
-            @endslot
-            @slot('failureMsg')
-              <p><strong>@lang('registrations.failure')</strong></p>
-            @endslot
-          @endcomponent
-
-          <section class="panel panel-default">
-            <h2 class="panel-heading">@lang('registrations.on', ['date' => $date])</h2>
-            <div class="panel-body">
-              @if(empty($registrations))
-                @lang('registrations.today.none')
-              @else
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                    <tr>
-                      <th>@lang('messages.time')</th>
-                      <th>@lang('messages.teacher')</th>
-                      <th>@lang('messages.course')</th>
-                      <th>@lang('messages.room')</th>
-                    </tr>
-                    </thead>
-                    @foreach($registrations as $slot)
-                      <tr>
-                        <td>{{$slot['start']}} &ndash; {{$slot['end']}}</td>
-                        @if(!$slot['lesson'])
-                          <td colspan="3" class="text-danger">@lang('registrations.missing')</td>
-                        @elseif($slot['lesson']->course)
-                          <td>{{$slot['lesson']->teacher->name()}}</td>
-                          <td>{{$slot['lesson']->course->name}}</td>
-                          <td>{{$slot['lesson']->course->room}}</td>
-                        @else
-                          <td>{{$slot['lesson']->teacher->name()}}</td>
-                          <td></td>
-                          <td>{{$slot['lesson']->room}}</td>
+  @php $hasMissing = false; @endphp
+  <student-registrations inline-template>
+    <section class="panel panel-default">
+      <h2 class="panel-heading">@lang('student.day.heading', ['date' => $date])</h2>
+      <div class="panel-body">
+        @if($lessons->isEmpty())
+          @lang('student.day.none')
+        @else
+          <div class="table-responsive">
+            <table class="table table-squeezed">
+              <thead>
+              <tr>
+                <th>@lang('messages.time')</th>
+                <th>@lang('messages.teacher')</th>
+                <th>@lang('messages.course')</th>
+                <th>@lang('messages.room')</th>
+                @if($allowRegistration)
+                  <th></th>
+                @endif
+              </tr>
+              </thead>
+              @foreach($lessons as $lesson)
+                <tr>
+                  <td>@lang('messages.format.range', $lesson->time)</td>
+                  @if(!$lesson->id)
+                    @php $hasMissing = true; @endphp
+                    <td colspan="3" class="text-danger">@lang('student.missing')</td>
+                    @if($allowRegistration)
+                      <td></td>
+                    @endif
+                  @elseif($lesson->course)
+                    <td>{{$lesson->teacher->name()}}</td>
+                    <td>{{$lesson->course->name}}</td>
+                    <td>{{$lesson->course->room}}</td>
+                    @if($allowRegistration)
+                      <td>
+                        @if($lesson->course->firstLesson()->date >= $firstRegisterDate && !$lesson->obligatory)
+                          <unregister :id="{{$lesson->course->id}}" :course="true" base-url="student" :button="false"
+                                      confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
+                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                            <span class="sr-only"> @lang('student.unregister.label')</span>
+                          </unregister>
                         @endif
-                      </tr>
-                    @endforeach
-                  </table>
-                </div>
-              @endif
-            </div>
-          </section>
-
-          @if(!empty($lessons))
-            <section class="panel panel-default">
-              <h2 class="panel-heading">@lang('registrations.available')</h2>
-              <div class="panel-body">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                    <tr>
-                      <th>@lang('messages.time')</th>
-                      <th>@lang('messages.teacher')</th>
-                      <th>@lang('messages.course')</th>
-                      <th>@lang('messages.room')</th>
-                      @if($allowRegistration)
-                        <th></th>
-                      @endif
-                    </tr>
-                    </thead>
-                    @foreach($lessons as $slot)
-                      <tr>
-                        <td>{{$slot['start']}} &ndash; {{$slot['end']}}</td>
-                        <td>{{$slot['lesson']->teacher->name()}}</td>
-                        @if($slot['lesson']->course)
-                          <td>{{$slot['lesson']->course->name}}</td>
-                          <td>
-                            @if(empty($slot['lesson']->course->room))
-                              {{$slot['lesson']->room}}
-                            @else
-                              {{$slot['lesson']->course->room}}
-                            @endif
-                          </td>
-                          @if($allowRegistration)
-                            <td>
-                              <a href="#" title="@lang('registrations.register')"
-                                 @click.prevent="registerCourse({{$slot['lesson']->course->id}}, '{{$slot['lesson']->course->name}}'
-                              , '{{$slot['lesson']->teacher->name()}}', {{json_encode($slot['lessons'])}})">
-                                <span class="sr-only">@lang('registrations.register')</span>
-                                <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
-                              </a>
-                            </td>
-                          @endif
-                        @else
-                          <td></td>
-                          <td>{{$slot['lesson']->room}}</td>
-                          @if($allowRegistration)
-                            <td>
-                              <a href="#" title="@lang('registrations.register')"
-                                 @click.prevent="registerLesson('{{$slot['lesson']->teacher->name()}}', {{json_encode($slot['lessons'])}})">
-                                <span class="sr-only">@lang('registrations.register')</span>
-                                <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
-                              </a>
-                            </td>
-                          @endif
+                      </td>
+                    @endif
+                  @else
+                    <td>{{$lesson->teacher->name()}}</td>
+                    <td></td>
+                    <td>{{$lesson->room}}</td>
+                    @if($allowRegistration)
+                      <td>
+                        @if($lesson->date >= $firstRegisterDate)
+                          <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
+                                      confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
+                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                            <span class="sr-only"> @lang('student.unregister.label')</span>
+                          </unregister>
                         @endif
-                      </tr>
-                    @endforeach
-                  </table>
-                </div>
-              </div>
-            </section>
-          @endif
-        </div>
+                      </td>
+                    @endif
+                  @endif
+                </tr>
+              @endforeach
+            </table>
+          </div>
+        @endif
       </div>
+    </section>
+  </student-registrations>
 
-      <modal :value="modal" effect="fade" ok-text="@lang('registrations.register')" cancel-text="@lang('messages.cancel')" @cancel="cancel" :callback=
-      "save">
-      <template v-if="isCourse">
-        <template slot="title">@lang('registrations.modal.title')</template>
-        <p>@lang('registrations.course.info')</p>
-        <ul>
-          <li v-for="date in dates">@{{date}}</li>
-        </ul>
-      </template>
-      <template v-else>
-        <template slot="title">@lang('registrations.lesson.title')</template>
-        <p>@lang('registrations.lesson.info', ['date' => $date])</p>
-        <ul>
-          <li v-for="lesson in lessons" class="list-unstyled">
-            <label>
-              <input type="checkbox" :value="lesson.id" v-model="chosen" ref="checked"/>
-              @{{lesson.start}} &ndash; @{{lesson.end}}
-            </label>
-          </li>
-        </ul>
-      </template>
-      </modal>
-    </main>
-  </student-register>
+  @if($hasMissing)
+    <section class="panel panel-default">
+      <h2 class="panel-heading">@lang('student.available.heading')</h2>
+      <div class="panel-body">
+        <filtered-list
+            url="/student/api/lessons/{{$date->toDateString()}}"
+            :teachers='@json($teachers)'
+            :subjects='@json($subjects)'
+            error-text="@lang('student.available.error')">
+          <div slot="empty" class="alert alert-warning">@lang('student.available.none')</div>
+          <template scope="props">
+            <div class="table-responsive">
+              <table class="table table-squeezed">
+                <thead>
+                <tr>
+                  <th>@lang('messages.time')</th>
+                  <th>@lang('messages.teacher')</th>
+                  <th>@lang('messages.course')</th>
+                  @if($allowRegistration)
+                    <th></th>
+                  @endif
+                </tr>
+                </thead>
+                <tr v-for="lesson in props.data">
+                  <td>@{{$t('messages.range', lesson.time)}}</td>
+                  <td>@{{lesson.teacher}}</td>
+                  <td><span v-if="lesson.course">@{{lesson.course.name}}</span></td>
+                  @if ($allowRegistration)
+                    <td>
+                      <a href="#" @click.prevent="$refs.registerModal.open(lesson)" title="@lang('student.register.button')">
+                        <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
+                        <span class="sr-only">@lang('student.register.button')</span>
+                      </a>
+                    </td>
+                  @endif
+                </tr>
+              </table>
+            </div>
+          </template>
+        </filtered-list>
+      </div>
+    </section>
+
+    @if($allowRegistration)
+      <student-register ref="registerModal"></student-register>
+    @endif
+  @endif
 @endsection

@@ -31,7 +31,7 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   public function getFirstCourseCreateDate() {
-    return $this->getYearStart($this->dateValidator->getDateBound('course.create'));
+    return $this->getYearStart($this->getDateBound('course.create'));
   }
 
   public function getLastCourseCreateDate() {
@@ -88,11 +88,19 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   public function getFirstDocumentationDate() {
-    return Date::today();
+    return $this->getDateBound('documentation', -1)->addDay(-1);
   }
 
   public function getLastDocumentationDate() {
-    return $this->getDateBound('documentation', -1)->addDay(-1);
+    return Date::today();
+  }
+
+  public function getDefaultListStartDate() {
+    return max(Date::today()->addWeek(-1), $this->getYearStart());
+  }
+
+  public function getDefaultListEndDate() {
+    return min(Date::today()->addWeek(1), $this->getYearEnd());
   }
 
   /**

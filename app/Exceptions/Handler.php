@@ -7,6 +7,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,7 +34,7 @@ class Handler extends ExceptionHandler {
    *
    * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
    *
-   * @param  \Exception $exception
+   * @param  Exception $exception
    * @return void
    */
   public function report(Exception $exception) {
@@ -43,8 +44,8 @@ class Handler extends ExceptionHandler {
   /**
    * Render an exception into an HTTP response.
    *
-   * @param  \Illuminate\Http\Request $request
-   * @param  \Exception $exception
+   * @param  Request $request
+   * @param  Exception $exception
    * @return Response
    */
   public function render($request, Exception $exception) {
@@ -59,16 +60,31 @@ class Handler extends ExceptionHandler {
     return parent::render($request, $exception);
   }
 
+  protected function prepareException(Exception $e) {
+    if ($e instanceof TokenMismatchException) {
+      $e = new HttpException(403, 'Security token mismatch', $e);
+    }
+
+    return parent::prepareException($e);
+  }
+
+  protected function prepareResponse($request, Exception $e) {
+    if ($request->expectsJson()) {
+      return response()->json(['message' => $e->getMessage()], ($e instanceof HttpException) ? $e->getStatusCode() : 500);
+    }
+    return parent::prepareResponse($request, $e);
+  }
+
   /**
    * Convert an authentication exception into an unauthenticated response.
    *
-   * @param  \Illuminate\Http\Request $request
+   * @param  Request $request
    * @param  AuthenticationException $exception
    * @return \Illuminate\Http\Response
    */
   protected function unauthenticated($request, AuthenticationException $exception) {
     if ($request->expectsJson()) {
-      return response()->json(['error' => 'Unauthenticated.'], 401);
+      return response()->json(['message' => $exception->getMessage()], 401);
     }
 
     return redirect()->guest('login');

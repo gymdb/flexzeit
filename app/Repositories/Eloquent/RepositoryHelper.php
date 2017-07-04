@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repositories\Eloquent;
 
 use App\Helpers\Date;
@@ -14,22 +15,35 @@ class RepositoryHelper {
    * @param Date $from
    * @param Date|null $to
    * @param int|null $dayOfWeek
+   * @param int|int[]|null $number
+   * @param string $table
    * @return Builder
    */
-  public static function inRange(Builder $query, Date $from, Date $to = null, $dayOfWeek = null) {
+  public static function inRange($query, Date $from, Date $to = null, $dayOfWeek = null, $number = null, $table = '') {
+    if (!is_null($number)) {
+      $query->where(function($query) use ($number, $table) {
+        $query->whereIn($table . 'number', is_scalar($number) ? [$number] : $number)
+            ->orWhereNull($table . 'number');
+      });
+    }
+
     if (is_null($to)) {
-      return $query->where('date', $from);
+      return $query->orderBy($table . 'number')->where($table . 'date', $from);
     }
 
-    if (is_null($dayOfWeek)) {
-      return $query
-          ->whereBetween('date', [$from, $to])
-          ->orderBy('date', 'asc');
-    }
+    $query->orderBy($table . 'date');
+    $query->orderBy($table . 'number');
+    return is_null($dayOfWeek)
+        ? $query->whereBetween($table . 'date', [$from, $to])
+        : $query->whereIn($table . 'date', DateRange::getDates($from, $to, $dayOfWeek));
+  }
 
-    return $query
-        ->whereIn('date', DateRange::getDates($from, $to, $dayOfWeek))
-        ->orderBy('date', 'asc');
+  public static function matcher(Date $date, $number = null, $cancelled = null) {
+    return function($item) use ($date, $number, $cancelled) {
+      return $item->date == $date
+          && (is_null($number) || $item->number === $number)
+          && (is_null($cancelled) || $item->cancelled === $cancelled);
+    };
   }
 
 }

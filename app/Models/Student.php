@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @package App\Models
  * @property string $image
+ * @property int $untis_id
  * @property Collection $absences
  * @property Collection $groups
+ * @property Collection $forms
  * @property Collection $registrations
  * @property Collection $lessons
  */

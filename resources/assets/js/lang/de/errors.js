@@ -1,0 +1,27 @@
+/* global module */
+module.exports = {
+  '1': 'Für eine der gewählten Einheiten existiert bereits ein Kurs.',
+  '2': 'Der Kurs konnte nicht in der Datenbank gespeichert werden.',
+  '3': 'Eine der Klassen/Gruppen hat bereits einen verpflichtenden Kurs in einer der gewählten Einheiten.',
+  '10': 'Zur gewählten Zeit gibt es keine Einheiten.',
+  '11': 'Die maximale Teilnehmerzahl ist bereits erreicht.',
+  '12': 'In dieser Einheit findet ein Kurs statt, die Anmeldung kann nur für den gesamten Kurs erfolgen.',
+  '13': 'Zu dieser Zeit gibt es bereits eine Registrierung zu einer anderen Einheit.',
+  '14': 'Der Anmeldezeitraum für diese Einheit ist bereits abgelaufen.',
+  '15': 'Das ist ein verpflichtender Kurs, eine manuelle Anmeldung ist nicht möglich.',
+  '16': 'Dieser Kurs ist nur für andere Jahrgänge verfügbar.',
+  '20': 'Ungültiger Wert für die Anwesenheit.',
+  '21': 'Die Anwesenheit kann nur am selben Tag eingetragen werden.',
+  '22': 'Ungültiger Wert für die Rückmeldung.',
+  '23': 'Zu dieser Einheit können noch keine Rückmeldungen erstellt werden.',
+  '24': 'Ungültiger Wert für die Dokumentation.',
+  '25': 'Zu dieser Einheit kann derzeit keine Dokumentation verfasst werden.',
+  '99': 'Ein unbekannter Fehler ist aufgetreten. Bitte den Systemadministrator kontaktieren.',
+  '401': 'Nicht angemeldet. Möglicherweise ist die Sitzung abgelaufen.',
+  '403': 'Keine Berechtigung für die angeforderten Daten. Möglicherweise ist die Sitzung abgelaufen.',
+  '404': 'Die angeforderten Daten konnten nicht am Server gefunden werden.',
+  '5xx': 'Ein Serverfehler ist aufgetreten ({code}). Bitte später erneut versuchen oder den Systemadministrator kontaktieren.',
+  'http': 'Ein Verbindungsfehler ist aufgetreten ({code}).  Bitte später erneut versuchen oder den Systemadministrator kontaktieren.',
+  'unknown': 'Ein unbekannter Fehler ist aufgetreten ({code}). Bitte den Systemadministrator kontaktieren.',
+  'message': 'Fehlermeldung vom System'
+};

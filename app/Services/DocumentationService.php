@@ -3,20 +3,14 @@
 namespace App\Services;
 
 use App\Helpers\Date;
+use App\Models\Group;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
+use Illuminate\Support\Collection;
 
 interface DocumentationService {
-
-  /**
-   * Give feedback for a particular registration
-   *
-   * @param Registration $registration
-   * @param string $feedback
-   */
-  public function setFeedback(Registration $registration, $feedback);
 
   /**
    * Add documentation for a lesson
@@ -27,27 +21,47 @@ interface DocumentationService {
   public function setDocumentation(Registration $registration, $documentation);
 
   /**
-   * Get documentation for a student
+   * Give feedback for a particular registration
    *
-   * @param Student $student
-   * @param Teacher|null $teacher
-   * @param Subject|null $subject
-   * @param Date|null $start
-   * @param Date|null $end
-   * @return mixed
+   * @param Registration $registration
+   * @param string $feedback
    */
-  public function getDocumentation(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null);
+  public function setFeedback(Registration $registration, $feedback);
 
   /**
-   * Get feedback for a student
+   * Get documentation for a student for returning as JSON
    *
    * @param Student $student
-   * @param Teacher|null $teacher
-   * @param Subject|null $subject
    * @param Date|null $start
    * @param Date|null $end
-   * @return mixed
+   * @param Teacher|null $teacher
+   * @param Subject|null $subject
+   * @return Collection<array>
    */
-  public function getFeedback(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null);
+  public function getMappedDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+
+  /**
+   * Get missing documentation for returning as JSON
+   *
+   * @param Group $group
+   * @param Student|null $student
+   * @param Date|null $start
+   * @param Date|null $end
+   * @param Teacher|null $teacher
+   * @return Collection <array>
+   */
+  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null);
+
+  /**
+   * Get feedback for a student for returning as JSON
+   *
+   * @param Student $student
+   * @param Date|null $start
+   * @param Date|null $end
+   * @param Teacher|null $teacher
+   * @param Subject|null $subject
+   * @return Collection<array>
+   */
+  public function getMappedFeedback(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
 
 }

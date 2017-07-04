@@ -105,8 +105,7 @@
             }
             self.roomOriginal = room;
           }).catch(function (error) {
-            console.log(error);
-            self.error = error.response ? error.response.status : 100;
+            self.error = error;
           });
         }
       }, 50)

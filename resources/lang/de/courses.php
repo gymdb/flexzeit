@@ -25,5 +25,11 @@ return [
     ],
     'maxStudents'         => 'Max. Teilnehmer',
     'lessonsWithCourse'   => 'Für Einheiten innerhalb des gewählten Zeitraums existieren bereits Kurse:',
-    'lessonsForNewCourse' => 'Der neue Kurs wird in folgenden Einheiten abgehalten werden:'
+    'lessonsForNewCourse' => 'Der neue Kurs wird in folgenden Einheiten abgehalten werden:',
+    'index'               => [
+        'heading' => 'Alle Kurse',
+        'error'   => 'Fehler beim Laden der Kurse.',
+        'none'    => 'Im ausgewählten Zeitraum gibt es keine Kurse.',
+        'details' => 'Details zum Kurs'
+    ]
 ];

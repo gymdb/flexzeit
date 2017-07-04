@@ -3,7 +3,8 @@
     data() {
       return {
         attendanceError: null,
-        unregisterError: null
+        unregisterError: null,
+        modifiedAttendanceChecked: this.attendanceChecked
       }
     },
     props: {
@@ -22,7 +23,6 @@
         this.unregisterError = null;
       },
       setAttendanceError(error) {
-        console.log(error);
         this.attendanceError = error;
         this.unregisterError = null;
       },
@@ -30,7 +30,6 @@
         location.reload();
       },
       setUnregisterError(error) {
-        console.log(error);
         this.unregisterError = error;
         this.attendanceError = null;
       },
@@ -38,17 +37,20 @@
         let self = this;
         this.$http.post('/teacher/api/attendanceChecked/' + this.id).then(function (response) {
           if (response.data.success) {
-            self.attendanceChecked = true;
+            self.modifiedAttendanceChecked = true;
             self.setAttendanceSuccess();
           } else {
             self.setAttendanceError(response.data.error);
           }
         }).catch(function (error) {
-          self.setAttendanceError(error.response ? error.response.status : 100);
+          self.setAttendanceError(error);
         });
       },
       openFeedback(id) {
         this.$refs.feedbackModal.open(id);
+      },
+      openRegister() {
+        this.$refs.registerModal.open();
       }
     }
   }

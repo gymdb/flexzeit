@@ -32,6 +32,7 @@ class Initial extends Migration {
       $table->string('username', 32)->unique();
       $table->string('password');
       $table->string('image')->nullable();
+      $table->unsignedBigInteger('untis_id')->unique();
     });
 
     Schema::create('subjects', function(Blueprint $table) {
@@ -53,9 +54,12 @@ class Initial extends Migration {
     Schema::create('absences', function(Blueprint $table) {
       $table->unsignedInteger('student_id');
       $table->date('date');
+      $table->unsignedTinyInteger('number');
 
-      $table->primary(['student_id', 'date']);
+      $table->primary(['student_id', 'date', 'number']);
       $table->foreign('student_id')->references('id')->on('students');
+      $table->index(['date', 'number']);
+      $table->index(['number']);
     });
 
     Schema::create('courses', function(Blueprint $table) {
@@ -79,6 +83,7 @@ class Initial extends Migration {
       $table->primary('group_id');
       $table->foreign('group_id')->references('id')->on('groups');
       $table->foreign('kv_id')->references('id')->on('teachers');
+      $table->index('kv_id');
     });
 
     Schema::create('lessons', function(Blueprint $table) {
@@ -93,16 +98,22 @@ class Initial extends Migration {
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('course_id')->references('id')->on('courses');
       $table->unique(['teacher_id', 'date', 'number']);
+      $table->index(['teacher_id', 'date', 'number', 'cancelled']);
       $table->index(['date', 'number', 'cancelled']);
+      $table->index(['number', 'cancelled']);
+      $table->index(['cancelled']);
     });
 
     Schema::create('offdays', function(Blueprint $table) {
       $table->increments('id');
       $table->date('date');
+      $table->unsignedTinyInteger('number')->nullable();
       $table->unsignedInteger('group_id')->nullable();
 
       $table->foreign('group_id')->references('id')->on('groups');
-      $table->unique(['date', 'group_id']);
+      $table->unique(['group_id', 'date', 'number']);
+      $table->index(['date', 'number']);
+      $table->index(['number']);
     });
 
     Schema::create('registrations', function(Blueprint $table) {
@@ -117,6 +128,7 @@ class Initial extends Migration {
       $table->foreign('lesson_id')->references('id')->on('lessons');
       $table->foreign('student_id')->references('id')->on('students');
       $table->unique(['lesson_id', 'student_id']);
+      $table->index('student_id');
     });
 
     // Last create association tables

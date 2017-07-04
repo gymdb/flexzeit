@@ -8,8 +8,16 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class OffdayRepository implements \App\Repositories\OffdayRepository {
 
-  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, Relation $relation = null) {
-    return RepositoryHelper::inRange($relation ? $relation->getQuery() : Offday::doesntHave('group'), $start, $end, $dayOfWeek);
+  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null) {
+    $query = RepositoryHelper::inRange($relation ? $relation->getQuery() : Offday::doesntHave('group'), $start, $end, $dayOfWeek, $number);
+    if (is_null($number)) {
+      $query->whereNull('number');
+    }
+    return $query;
+  }
+
+  public function removeAll() {
+    Offday::whereNull('group_id')->delete();
   }
 
 }

@@ -67,4 +67,14 @@ interface CourseService {
 
   public function removeCourse(Course $course);
 
+  /**
+   * Get a list of a teacher's courses
+   *
+   * @param Teacher $teacher
+   * @param Date $start
+   * @param Date|null $end
+   * @return mixed
+   */
+  public function getMappedForTeacher(Teacher $teacher, Date $start, Date $end = null);
+
 }

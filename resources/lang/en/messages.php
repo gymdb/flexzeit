@@ -1,23 +1,17 @@
 <?php
 
 return [
-    'navToggle'     => 'Toggle Navigation',
-    'today'         => 'Today: :date',
+    'format'        => [
+        'date'  => 'Y-m-d',
+        'range' => ':start &ndash; :end'
+    ],
     'date'          => 'Date',
     'time'          => 'Time',
+    'group'         => 'Form/Group',
+    'student'       => 'Student',
     'teacher'       => 'Teacher',
     'course'        => 'Course',
     'room'          => 'Room',
-    'cancel'        => 'Cancel',
-    'student'       => 'Student',
-    'group'         => 'Form/Group',
-    'subject'       => 'Subject',
-    'from'          => 'From date',
-    'to'            => 'To date',
-    'reports'       => 'Reports',
-    'chooseStudent' => 'Choose a student first.',
-    'documentation' => [
-        'link'   => 'Show documentation',
-        'header' => 'Documentation'
-    ]
+    'documentation' => 'Documentation',
+    'feedback'      => 'Feedback'
 ];

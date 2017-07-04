@@ -1,6 +1,6 @@
 <template>
-  <a href="#" @click.prevent="unregister()" class="btn btn-xs btn-default">
-    <slot>{{buttonText}}</slot>
+  <a href="#" @click.prevent="unregister()" :class="button ? 'btn btn-xs btn-default' : ''" :title="$t('registrations.unregister.submit')">
+    <slot>{{$t('registrations.unregister.submit')}}</slot>
   </a>
 </template>
 
@@ -23,9 +23,9 @@
         'type': Boolean,
         'default': false
       },
-      buttonText: {
-        'type': String,
-        'required': true
+      button: {
+        'type': Boolean,
+        'default': true
       }
     },
     methods: {
@@ -44,11 +44,7 @@
             self.$emit('error', response.data.error);
           }
         }).catch(function (error) {
-          if (error.response) {
-            self.$emit('error', error.response.status);
-          } else {
-            self.$emit('error', 100);
-          }
+          self.$emit('error', error);
         });
       },
     }

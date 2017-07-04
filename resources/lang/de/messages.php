@@ -1,23 +1,17 @@
 <?php
 
 return [
-    'navToggle'     => 'Navigation ein-/ausblenden',
-    'today'         => 'Heute: :date',
+    'format'        => [
+        'date'  => 'd.m.Y',
+        'range' => ':start &ndash; :end'
+    ],
     'date'          => 'Datum',
     'time'          => 'Zeit',
+    'group'         => 'Klasse/Gruppe',
+    'student'       => 'SchülerIn',
     'teacher'       => 'Lehrkraft',
     'course'        => 'Kurs',
     'room'          => 'Raum',
-    'cancel'        => 'Abbrechen',
-    'student'       => 'SchülerIn',
-    'group'         => 'Klasse/Gruppe',
-    'subject'       => 'Fach',
-    'from'          => 'Von (Datum)',
-    'to'            => 'Bis (Datum)',
-    'reports'       => 'Berichte',
-    'chooseStudent' => 'SchülerIn auswählen, um Daten anzuzeigen.',
-    'documentation' => [
-        'link'   => 'Dokumentation anzeigen',
-        'header' => 'Dokumentation'
-    ]
+    'documentation' => 'Dokumentation',
+    'feedback'      => 'Rückmeldung'
 ];

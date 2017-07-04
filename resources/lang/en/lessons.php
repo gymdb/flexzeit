@@ -1,45 +1,41 @@
 <?php
 
 return [
-    'lessons'       => 'Lessons',
-    'my'            => 'My lessons',
-    'none'          => 'There are no lessons today.',
-    'cancelled'     => [
-        'short' => 'Cancelled',
-        'long'  => 'This lesson has been cancelled.'
+    'dashboard'     => [
+        'heading'    => 'Today: :date',
+        'none'       => 'You don\'t have any lessons today.',
+        'cancelled'  => 'Cancelled',
+        'attendance' => 'Check attendance'
+    ],
+    'index'         => [
+        'heading' => 'All lessons',
+        'error'   => 'Error loading the lessons.',
+        'none'    => 'There are no lessons to show.',
+        'details' => 'Details for lesson'
+    ],
+    'show'          => [
+        'heading'   => 'Lesson on <em>:date</em> at <em>:start &ndash; :end</em>',
+        'cancelled' => 'This lesson has been cancelled.'
+    ],
+    'registrations' => [
+        'heading' => 'Registered students',
+        'none'    => 'No students are registered for this lesson.'
     ],
     'attendance'    => [
-        'check'      => 'Check attendance',
-        'header'     => 'Attendance',
-        'error'      => 'Error saving attendance.',
-        'present'    => 'Present',
-        'excused'    => 'Excused',
-        'absent'     => 'Absent',
-        'checked'    => 'Attendance has already been checked',
-        'setChecked' => 'Attendance checked'
+        'heading' => 'Attendance',
+        'error'   => 'Error saving attendance.',
+        'checked' => 'Attendance has already been checked',
+        'button'  => 'Attendance checked'
     ],
-    'lesson'        => 'Lesson on <em>:date</em> at <em>:start &ndash; :end</em>',
-    'registrations' => [
-        'header' => 'Registered students',
-        'none'   => 'No students are registered for this lesson.'
+    'register'      => [
+        'button' => 'Register student'
     ],
     'unregister'    => [
-        'header'  => 'Unregister student',
-        'button'  => 'Unregister',
+        'heading' => 'Unregister student',
         'error'   => 'Error unregistering student.',
         'confirm' => 'Really unregister :student?'
     ],
     'feedback'      => [
-        'button'    => 'Feedback',
-        'header'    => 'Add feedback for',
-        'label'     => 'Feedback',
-        'save'      => 'Save feedback',
-        'loadError' => 'Error loading feedback.',
-        'saveError' => 'Error saving feedback.'
-    ],
-    'list'          => [
-        'header'     => 'Lessons',
-        'noMatching' => 'There are no lessons to show.'
-    ],
-    'details'       => 'Details for lesson'
+        'button' => 'Feedback'
+    ]
 ];

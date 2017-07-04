@@ -43,4 +43,12 @@ class Teacher extends User {
     return $this->belongsToMany(Subject::class);
   }
 
+  public function registrations() {
+    return $this->hasManyThrough(Registration::class, Lesson::class);
+  }
+
+  public function courses() {
+    return $this->belongsToMany(Course::class, 'lessons');
+  }
+
 }

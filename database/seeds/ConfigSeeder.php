@@ -33,13 +33,17 @@ class ConfigSeeder extends Seeder {
         'course.create.day'       => 0,
         'course.create.week'      => 2,
       // Default maximum students for a lesson
-        'maxstudents'      => 20,
+        'maxstudents'             => 20,
 
       // Registration is possible on each day the week before
         'registration.begin.day'  => 1,
         'registration.begin.week' => 1,
         'registration.end.day'    => 0,
         'registration.end.week'   => 1,
+
+      // Documentation is possible for a week
+        'documentation.day'       => 7,
+        'documentation.week'      => 0,
 
       // School years are within 1-8
         'year.min'                => 1,

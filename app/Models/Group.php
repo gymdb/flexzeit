@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\BelongsToManyKey;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -42,6 +43,12 @@ class Group extends Model {
 
   public function lessons() {
     return $this->hasManyThrough(Lesson::class, Course::class);
+  }
+
+  public function registrations() {
+    return new BelongsToManyKey(
+        (new Registration())->newQuery(), $this, 'group_student', 'group_id', 'student_id', $this->guessBelongsToManyRelation()
+    );
   }
 
 }

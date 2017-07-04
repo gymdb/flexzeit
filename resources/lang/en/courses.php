@@ -5,7 +5,7 @@ return [
     'my'                  => 'My courses',
     'show'                => 'Course: :name',
     'create'              => 'Create course',
-    'createImpossible' => 'Creating courses is currently not possible.',
+    'createImpossible'    => 'Creating courses is currently not possible.',
     'firstDate'           => 'First date',
     'lastDate'            => 'Last date',
     'lesson'              => 'Lesson',
@@ -25,5 +25,11 @@ return [
     ],
     'maxStudents'         => 'Max. participants',
     'lessonsWithCourse'   => 'Courses already exist for some lessons within the chosen timeframe:',
-    'lessonsForNewCourse' => 'The new course will be held at the following lessons:'
+    'lessonsForNewCourse' => 'The new course will be held at the following lessons:',
+    'index'               => [
+        'heading' => 'All courses',
+        'error'   => 'Error loading the courses.',
+        'none'    => 'There are no courses to show.',
+        'details' => 'Details for course'
+    ]
 ];

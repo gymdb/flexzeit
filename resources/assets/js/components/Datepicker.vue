@@ -109,7 +109,7 @@
           'locale': 'de',
           'useCurrent': false,
           'showClear': !this.required,
-          'showTodayButton': this.showToday,
+          'showTodayButton': this.showToday && !this.minDate.isAfter() && !this.maxDate.isBefore(),
           'daysOfWeekDisabled': this.disabledDaysOfWeek,
           'disabledDates': this.disabledDates,
           'viewDate': this.showToday ? false : this.minDate.clone(),

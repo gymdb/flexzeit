@@ -1,0 +1,329 @@
+<template>
+  <div>
+    <div class="row clearfix hidden-print">
+      <div v-if="showGroup" class="form-group col-sm-3 col-xs-6">
+        <label for="group" class="sr-only">{{$t('messages.group')}}</label>
+        <select class="form-control" id="group" v-model="group">
+          <option :value="null">{{$t('messages.group')}}</option>
+          <option v-for="g in groupsList" :value="g.id">{{g.name}}</option>
+        </select>
+      </div>
+
+      <div v-if="groups" class="form-group col-sm-3 col-xs-6">
+        <label for="student" class="sr-only">{{$t('messages.student')}}</label>
+        <select class="form-control" id="student" :disabled="!group" v-model="student">
+          <option :value="null">{{$t('messages.student')}}</option>
+          <option v-for="s in studentsList" :value="s.id">{{s.name}}</option>
+        </select>
+      </div>
+
+      <div v-if="teachers" class="form-group col-sm-3 col-xs-6">
+        <label for="teacher" class="sr-only">{{$t('messages.teacher')}}</label>
+        <select class="form-control" id="teacher" v-model="teacher">
+          <option :value="null">{{$t('messages.teacher')}}</option>
+          <option v-for="t in teachersList" :value="t.id">{{t.name}}</option>
+        </select>
+      </div>
+
+      <div v-if="subjects" class="form-group col-sm-3 col-xs-6">
+        <label for="subject" class="sr-only">{{$t('messages.subject')}}</label>
+        <select class="form-control" id="subject" v-model="subject">
+          <option :value="null">{{$t('messages.subject')}}</option>
+          <option v-for="s in subjectsList" :value="s.id">{{s.name}}</option>
+        </select>
+      </div>
+
+      <daterange v-if="minDate"
+                 :type="1"
+                 :default-start-date="defaultStartDate"
+                 :default-end-date="defaultEndDate"
+                 :min-date="minDate"
+                 :max-date="maxDate"
+                 :disabled-days-of-week="disabledDaysOfWeek"
+                 :disabled-dates="disabledDates"
+                 :old-first-date="initialStart"
+                 :old-last-date="initialEnd"
+                 :label-first="$t('messages.from')"
+                 :label-last="$t('messages.to')"
+                 :hide-labels="true"
+                 v-on:first="setStart"
+                 v-on:last="setEnd">
+      </daterange>
+
+
+      <div class="col-xs-12">
+        <error :error="studentsError">{{$t('messages.studentsError')}}</error>
+      </div>
+
+      <div class="col-xs-12">
+        <error :error="dataError">{{errorText}}</error>
+      </div>
+    </div>
+
+    <dl class="dl-horizontal dl-narrow visible-print">
+      <dt v-if="groupName">{{$t('messages.group')}}</dt>
+      <dd v-if="groupName">{{groupName}}</dd>
+
+      <dt v-if="studentName">{{$t('messages.student')}}</dt>
+      <dd v-if="studentName">{{studentName}}</dd>
+
+      <dt v-if="teacherName">{{$t('messages.teacher')}}</dt>
+      <dd v-if="teacherName">{{teacherName}}</dd>
+
+      <dt v-if="subjectName">{{$t('messages.subject')}}</dt>
+      <dd v-if="subjectName">{{subjectName}}</dd>
+
+      <dt v-if="start">{{$t('messages.from')}}</dt>
+      <dd v-if="start">{{start.format('L')}}</dd>
+
+      <dt v-if="end">{{$t('messages.to')}}</dt>
+      <dd v-if="end">{{end.format('L')}}</dd>
+    </dl>
+
+    <slot v-if="!filter" name="chooseStudent">
+      <div class="alert alert-info">{{$t(requireStudent ? 'messages.chooseStudent' : 'messages.chooseGroup')}}</div>
+    </slot>
+    <slot v-else-if="!data || !data.length" name="empty">
+      <div class="alert alert-warning">{{$t('messages.emptyResult')}}</div>
+    </slot>
+    <slot v-else :data="data" :filter="filter"></slot>
+  </div>
+</template>
+
+<script>
+  import moment from 'moment';
+  import _ from 'lodash';
+
+  export default {
+    data() {
+      let params = {};
+      if (location.search) {
+        location.search.substr(1).split("&")
+            .forEach(item => {
+              let [k, v] = item.split("=", 2);
+              if (k && v) {
+                params[k] = decodeURIComponent(v);
+              }
+            });
+      }
+
+      let group = this.groups && this.groups.length === 1 ? this.groups[0].id : (params.group || null);
+      if (group) {
+        this.loadStudents(group);
+      }
+
+      return {
+        // Workaround for some weird behaviour: Property fires change event on parent re-rendering
+        groupsList: this.groups,
+        studentsList: [],
+        teachersList: this.teachers,
+        subjectsList: this.subjects,
+        group: group,
+        student: params.student || null,
+        teacher: params.teacher || null,
+        subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : (params.subject || null),
+        initialStart: params.start || null,
+        initialEnd: params.end || null,
+        start: params.start ? moment(params.start) : null,
+        end: params.end ? moment(params.end) : null,
+        data: null,
+        studentsError: null,
+        dataError: null
+      }
+    },
+    props: {
+      url: {
+        'type': String,
+        'required': true
+      },
+      groups: {
+        'type': Array,
+        'default': null
+      },
+      teachers: {
+        'type': Array,
+        'default': null
+      },
+      subjects: {
+        'type': Array,
+        'default': null
+      },
+      defaultStartDate: {
+        'type': String,
+        'default': null
+      },
+      defaultEndDate: {
+        'type': String,
+        'default': null
+      },
+      minDate: {
+        'type': String,
+        'default': null
+      },
+      maxDate: {
+        'type': String,
+        'default': null
+      },
+      disabledDaysOfWeek: {
+        'type': Array,
+        'default': function () {
+          return [];
+        }
+      },
+      disabledDates: {
+        'type': Array,
+        'default': function () {
+          return [];
+        }
+      },
+      keepFilter: {
+        'type': Boolean,
+        'default': true
+      },
+      requireStudent: {
+        'type': Boolean,
+        'default': true
+      },
+      errorText: {
+        'type': String,
+        'required': true
+      }
+    },
+    watch: {
+      group(newGroup) {
+        this.loadStudents(newGroup);
+      },
+      filter: _.debounce(function (filter) {
+        this.loadData(filter);
+        this.$emit('filter', filter);
+      }, 50),
+      data(data) {
+        this.$emit('data', data);
+      },
+      query(query) {
+        if (this.keepFilter) {
+          window.history.replaceState(null, null, '?' + query);
+        }
+      }
+    },
+    created() {
+      this.loadData(this.filter);
+    },
+    computed: {
+      showGroup() {
+        return this.groupsList && this.groupsList.length > 1;
+      },
+      filter() {
+        if (this.groupsList && (!this.group || (this.requireStudent && !this.student))) {
+          return null;
+        }
+
+        let filter = {};
+
+        if (this.groupsList) {
+          filter.group = this.group;
+          filter.student = this.student;
+        }
+        if (this.teachersList) {
+          filter.teacher = this.teacher;
+        }
+        if (this.subjectsList) {
+          filter.subject = this.subject;
+        }
+        if (this.minDate) {
+          filter.start = this.start ? this.start.format('YYYY-MM-DD') : null;
+          filter.end = this.end ? this.end.format('YYYY-MM-DD') : null;
+        }
+        return filter;
+      },
+      query() {
+        let params = {};
+
+        if (this.groupsList) {
+          if (this.group) {
+            params.group = this.group;
+          }
+          if (this.student) {
+            params.student = this.student;
+          }
+        }
+        if (this.teachersList && this.teacher) {
+          params.teacher = this.teacher;
+        }
+        if (this.subjectsList && this.subject) {
+          params.subject = this.subject;
+        }
+        if (this.minDate) {
+          if (this.start) {
+            params.start = this.start.format('YYYY-MM-DD');
+          }
+          if (this.end) {
+            params.end = this.end.format('YYYY-MM-DD');
+          }
+        }
+
+        return $.param(params, true);
+      },
+      groupName() {
+        return this.showGroup ? this.findName(this.groupsList, +this.group) : null;
+      },
+      studentName() {
+        return this.findName(this.studentsList, +this.student);
+      },
+      teacherName() {
+        return this.findName(this.teachersList, +this.teacher);
+      },
+      subjectName() {
+        return this.findName(this.subjectsList, +this.subject);
+      }
+    },
+    methods: {
+      loadStudents(group) {
+        this.student = null;
+        this.studentsList = [];
+        if (group && this.groups) {
+          let self = this;
+          this.$http.get('/teacher/api/students', {
+            params: {
+              group: group
+            }
+          }).then(function (response) {
+            self.studentsError = null;
+            self.studentsList = response.data;
+          }).catch(function (error) {
+            self.studentsError = error;
+          });
+        }
+      },
+      loadData(filter) {
+        if (!filter) {
+          this.dataError = null;
+          this.data = null;
+        } else {
+          let self = this;
+          this.$http.get(this.url, {params: filter}).then(function (response) {
+            self.dataError = null;
+            self.data = response.data;
+          }).catch(function (error) {
+            self.dataError = error;
+            self.data = null;
+          });
+        }
+      },
+      setStart(date) {
+        this.start = date;
+      },
+      setEnd(date) {
+        this.end = date;
+      },
+      findName(list, id) {
+        if (!list || !id) {
+          return null;
+        }
+
+        const item = list.find(item => item.id === id);
+        return item ? item.name : null;
+      }
+    }
+  }
+</script>

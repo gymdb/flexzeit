@@ -44,4 +44,8 @@ class Course extends Model {
     return $this->hasManyThrough(Registration::class, Lesson::class);
   }
 
+  public function teacher() {
+    return $this->belongsToMany(Teacher::class, 'lessons');
+  }
+
 }

@@ -1,29 +1,38 @@
 <?php
 
 return [
-    'missing'         => 'Missing registration!',
-    'upcoming'        => [
-        'title' => 'Upcoming days',
-        'none'  => 'No upcoming registrations.'
+    'list'          => [
+        'heading' => 'Registrations',
+        'error'   => 'Error loading the registrations.',
+        'none'    => 'No registrations matching the criteria.'
     ],
-    'today'           => [
-        'none' => 'No lessons today.'
+    'missing'       => [
+        'heading' => 'Missing registrations',
+        'error'   => 'Error loading the missing registrations.',
+        'none'    => 'No missing registrations for the given criteria.'
     ],
-    'on'              => 'Registrations on :date',
-    'available'       => 'Available lessons',
-    'register'        => 'Register',
-    'unregister'      => 'Unregister',
-    'course'          => [
-        'title' => 'Register for course <em>{{course}}</em> by <em>{{teacher}}</em>',
-        'info'  => 'The course will be held on the following dates:'
+    'absent'        => [
+        'heading'    => 'Absent students',
+        'error'      => 'Error loading the list of absent students.',
+        'none'       => 'No absent students for the given criteria.',
+        'attendance' => 'Attendance',
+        'untis'      => 'Untis status',
+        'untisError' => 'Error reloading data from Untis'
     ],
-    'lesson'          => [
-        'title' => 'Register for lessons by <em>{{teacher}}</em>',
-        'info'  => 'The following lessons will be held on :date:'
+    'documentation' => [
+        'heading' => 'Documentation',
+        'error'   => 'Error loading the documentation.',
+        'none'    => 'No documentation for the given criteria.',
+        'empty'   => 'No documentation available.',
+        'missing' => [
+            'heading' => 'Missing documentation',
+            'error'   => 'Error loading the list of missing documentation.',
+            'none'    => 'No documentation missing for the given criteria.'
+        ],
     ],
-    'success'         => 'You were successfully registered.',
-    'partial'         => 'You were only registered to some of the selected lessons, check again below.',
-    'failure'         => 'Registration failed, try again.',
-    'noMatching'      => 'No registrations matching the criteria.',
-    'noDocumentation' => 'No documentation available.'
+    'feedback'      => [
+        'heading' => 'Feedback',
+        'error'   => 'Error loading the feedback.',
+        'none'    => 'No feedback for the given criteria.'
+    ]
 ];

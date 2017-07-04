@@ -28,4 +28,15 @@ class TeacherPolicy {
     return $user->isTeacher() && $teacher->id === $user->id;
   }
 
+  /**
+   * Determine whether the user can view the list of courses of this teacher.
+   *
+   * @param  User $user
+   * @param  Teacher $teacher
+   * @return bool
+   */
+  public function viewCourses(User $user, Teacher $teacher) {
+    return $user->isTeacher() && $teacher->id === $user->id;
+  }
+
 }

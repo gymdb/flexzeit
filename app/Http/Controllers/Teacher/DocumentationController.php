@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Helpers\Date;
 use App\Http\Controllers\Controller;
+use App\Models\Group;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Subject;
@@ -14,6 +15,7 @@ use App\Services\MiscService;
 use App\Services\LessonService;
 use App\Services\OffdayService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class DocumentationController extends Controller {
 
@@ -53,7 +55,7 @@ class DocumentationController extends Controller {
   /**
    * Show the overview page for student documentation
    *
-   * @return \Illuminate\Http\Response
+   * @return View
    */
   public function showDocumentation() {
     $groups = $this->miscService->getGroups();
@@ -65,7 +67,7 @@ class DocumentationController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.documentation', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.documentation.documentation', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -79,17 +81,56 @@ class DocumentationController extends Controller {
    * @return JsonResponse
    */
   public function getDocumentation(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
-    $documentation = $this->documentationService->getDocumentation($student, $teacher, $subject, $start, $end);
+    $documentation = $this->documentationService->getMappedDocumentation($student, $start, $end, $teacher, $subject);
     return response()->json($documentation);
+  }
+
+  /**
+   * Show the overview page for student documentation
+   *
+   * @return View
+   */
+  public function showMissing() {
+    $teacher = $this->getTeacher();
+    $groups = $this->miscService->getGroups($teacher->admin ? null : $teacher);
+    $teachers = $this->miscService->getTeachers();
+
+    $minDate = $this->configService->getYearStart();
+    $maxDate = $this->configService->getFirstDocumentationDate()->addDay(-1);
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate);
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+
+    return view('teacher.documentation.missing', compact('groups', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+  }
+
+  /**
+   * Get registrations with missing documentation
+   *
+   * @param Group $group
+   * @param Student|null $student
+   * @param Teacher|null $teacher
+   * @param Date|null $start
+   * @param Date|null $end
+   * @return JsonResponse
+   */
+  public function getMissing(Group $group, Student $student = null, Teacher $teacher = null, Date $start = null, Date $end = null) {
+    if ($student) {
+      $this->authorize('showMissingDocumentation', $student);
+    } else {
+      $this->authorize('showMissingDocumentation', $group);
+    }
+
+    $missing = $this->documentationService->getMissing($group, $student, $start, $end, $teacher);
+    return response()->json($missing);
   }
 
   /**
    * Show the overview page for feedback for a student
    *
-   * @return \Illuminate\Http\Response
+   * @return View
    */
   public function showFeedback() {
-    $this->authorize('showFeedback');
+    $this->authorize('showFeedback', Student::class);
 
     $user = $this->getTeacher();
     $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
@@ -101,7 +142,7 @@ class DocumentationController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.feedback', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.documentation.feedback', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -117,7 +158,7 @@ class DocumentationController extends Controller {
   public function getFeedbackForStudent(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
     $this->authorize('showFeedback', $student);
 
-    $feedback = $this->documentationService->getFeedback($student, $teacher, $subject, $start, $end);
+    $feedback = $this->documentationService->getMappedFeedback($student, $start, $end, $teacher, $subject);
     return response()->json($feedback);
   }
 

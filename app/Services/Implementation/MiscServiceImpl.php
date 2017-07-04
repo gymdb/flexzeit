@@ -27,8 +27,8 @@ class MiscServiceImpl implements MiscService {
     $this->teacherRepository = $teacherRepository;
   }
 
-  public function getGroups() {
-    return $this->groupRepository->query()
+  public function getGroups(Teacher $teacher = null) {
+    return ($teacher ? $teacher->groups() : $this->groupRepository->query())
         ->orderBy('name')
         ->get(['id', 'name']);
   }

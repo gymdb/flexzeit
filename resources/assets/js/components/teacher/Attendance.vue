@@ -4,8 +4,9 @@
       <span class="glyphicon" :class="iconClass"></span> {{text}}
     </template>
     <ul slot="dropdown-menu" class="dropdown-menu">
-      <li :class="{active: computedAttendance}"><a href="#" @click.prevent="setPresent()">{{presentText}}</a></li>
-      <li :class="{active: !computedAttendance}"><a href="#" @click.prevent="setAbsent()">{{excused ? excusedText : absentText}}</a></li>
+      <li :class="{active: computedAttendance}"><a href="#" @click.prevent="setPresent()">{{label('present')}}</a></li>
+      <li :class="{active: !computedAttendance}"><a href="#" @click.prevent="setAbsent()">{{label(excused ? 'excused' : 'absent')}}</a>
+      </li>
     </ul>
   </dropdown>
   <span v-else>
@@ -36,18 +37,11 @@
       changeable: {
         'type': Boolean,
         'default': false
-      },
-      presentText: {
-        'type': String,
-        'required': true
-      },
-      absentText: {
-        'type': String,
-        'required': true
-      },
-      excusedText: {
-        'type': String,
-        'required': true
+      }
+    },
+    watch: {
+      attendance(attendance) {
+        this.currAttendance = attendance;
       }
     },
     computed: {
@@ -67,13 +61,13 @@
       },
       text() {
         if (this.computedAttendance) {
-          return this.presentText;
+          return this.label('present');
         }
         if (this.excused) {
-          return this.excusedText;
+          return this.label('excused');
         }
         if (this.currAttendance === false) {
-          return this.absentText;
+          return this.label('absent');
         }
       }
     },
@@ -95,13 +89,12 @@
               self.$emit('error', response.data.error);
             }
           }).catch(function (error) {
-            if (error.response) {
-              self.$emit('error', error.response.status);
-            } else {
-              self.$emit('error', 100);
-            }
+            self.$emit('error', error);
           });
         }
+      },
+      label(key) {
+        return this.$t('registrations.attendance.' + key);
       }
     }
   }

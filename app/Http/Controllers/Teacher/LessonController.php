@@ -12,7 +12,7 @@ use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 /**
  * Controller for all lesson related pages for teachers
@@ -57,7 +57,7 @@ class LessonController extends Controller {
   /**
    * Show the teacher dashboard
    *
-   * @return \Illuminate\Http\Response
+   * @return View
    */
   public function dashboard() {
     $lessons = $this->lessonService->getForDay($this->getTeacher());
@@ -67,7 +67,7 @@ class LessonController extends Controller {
   /**
    * Display a listing of all lessons
    *
-   * @return Response
+   * @return View
    */
   public function index() {
     $isAdmin = $this->getTeacher()->admin;
@@ -75,8 +75,8 @@ class LessonController extends Controller {
 
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
-    $defaultStartDate = max($minDate, $this->getDefaultStartDate());
-    $defaultEndDate = min($maxDate, $this->getDefaultEndDate());
+    $defaultStartDate = $this->configService->getDefaultListStartDate();
+    $defaultEndDate = $this->configService->getDefaultListEndDate();
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
@@ -87,49 +87,49 @@ class LessonController extends Controller {
    * Display a specific lesson
    *
    * @param Lesson $lesson
-   * @return Response
+   * @return View
    */
   public function show(Lesson $lesson) {
     $this->authorize('view', $lesson);
 
     $registrations = $this->registrationService->getForLesson($lesson);
-    $this->lessonService->setTimes($lesson);
+    $this->lessonService->setTime($lesson);
 
     $attendanceChecked = $this->lessonService->isAttendanceChecked($lesson);
 
-    $attendanceChangeable = $lesson->date->isToday() && !$lesson->cancelled;
+    $isOwnLesson = ($lesson->teacher->id == $this->getTeacher()->id);
+
+    $attendanceChangeable = $isOwnLesson && $lesson->date->isToday() && !$lesson->cancelled;
     $showAttendance = !$lesson->date->isFuture() && !$lesson->cancelled;
-    $showFeedback = !$lesson->date->isFuture() && !$lesson->cancelled;
-    $showUnregister = !$lesson->date->isPast() && !$lesson->cancelled;
+    $showFeedback = $isOwnLesson && !$lesson->date->isFuture() && !$lesson->cancelled;
+    $showRegister = !$lesson->date->isPast() && !$lesson->cancelled;
+    $isAdmin = $this->getTeacher()->admin;
+
+    $groups = $showRegister ? $this->miscService->getGroups() : null;
 
     return view('teacher.lessons.show', compact(
-        'lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance', 'showFeedback', 'showUnregister'));
+        'lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance', 'showFeedback', 'showRegister', 'groups', 'isAdmin'));
   }
 
   /**
-   * Get lessons in JSON format
+   * Get lessons for a teacher in JSON format
    *
    * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to currently logged in user
-   * @param Date $start
-   * @param Date $end
+   * @param Date|null $start
+   * @param Date|null $end
    * @return JsonResponse
    */
-  public function getLessons(Teacher $teacher = null, Date $start = null, Date $end = null) {
+  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
     if (!$teacher) {
       $teacher = $this->getTeacher();
     }
     $this->authorize('viewLessons', $teacher);
 
-    $lessons = $this->lessonService->getForTeacher($teacher, $start ?: $this->getDefaultStartDate(), $end ?: $this->getDefaultEndDate());
+    $start = $start ?: $this->configService->getDefaultListStartDate();
+    $end = $end ?: $this->configService->getDefaultListEndDate();
+
+    $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end);
     return response()->json($lessons);
-  }
-
-  private function getDefaultStartDate() {
-    return Date::today()->addWeek(-1);
-  }
-
-  private function getDefaultEndDate() {
-    return Date::today()->addWeek(1);
   }
 
 }

@@ -28,11 +28,15 @@ interface ConfigService {
   public function getYearEnd(Date $max = null);
 
   /**
+   * Get the first date for which courses can currently be created (included)
+   *
    * @return Date
    */
   public function getFirstCourseCreateDate();
 
   /**
+   * Get the first date for which courses can currently be created (included)
+   *
    * @return Date
    */
   public function getLastCourseCreateDate();
@@ -96,12 +100,46 @@ interface ConfigService {
    */
   public function getLessonEnd(Date $date, $number);
 
+  /**
+   * Get the first date for which registrations are currently possible (included)
+   *
+   * @return Date
+   */
   public function getFirstRegisterDate();
 
+  /**
+   * Get the last date for which registrations are currently possible (included)
+   *
+   * @return Date
+   */
   public function getLastRegisterDate();
 
+  /**
+   * Get the first date for which documentations can currently be created (included)
+   *
+   * @return Date
+   */
   public function getFirstDocumentationDate();
 
+  /**
+   * Get the last date for which documentations can currently be created (included)
+   *
+   * @return Date
+   */
   public function getLastDocumentationDate();
+
+  /**
+   * Get the default start date in report lists
+   *
+   * @return Date
+   */
+  public function getDefaultListStartDate();
+
+  /**
+   * Get the default end date in report lists
+   *
+   * @return Date
+   */
+  public function getDefaultListEndDate();
 
 }

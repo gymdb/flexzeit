@@ -1,11 +1,15 @@
 // Fonts
-@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);
+@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
 // Variables
 @import "variables";
 // Bootstrap
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 // Datepicker
 @import "~eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker";
+
+body {
+  min-width: 300px;
+}
 
 h2.panel-heading {
   margin: 0;
@@ -22,7 +26,38 @@ h2.panel-heading {
   font-size: 120%;
 }
 
-@media (max-width: 767px) {
+.spin {
+  transform-origin: 50% calc(50% - .5px);
+  -webkit-transform-origin: 50% calc(50% - .5px);
+  animation: spin 2s infinite linear;
+  -webkit-animation: spin 2s infinite linear;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg)
+  }
+
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg)
+  }
+}
+
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg)
+  }
+
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg)
+  }
+}
+
+@media (max-width: $screen-xs-max) {
   .table-responsive {
     .dropdown-menu, .popover {
       position: static !important;
@@ -30,11 +65,20 @@ h2.panel-heading {
   }
 }
 
-@media (min-width: 768px) {
+@media (max-width: $screen-sm-max) {
+  .container {
+    width: auto;
+    max-width: 808px;
+  }
+}
+
+@media (min-width: $screen-md-min), print {
   .table-responsive {
     overflow: visible;
   }
+}
 
+@media (min-width: $screen-sm-min), print {
   .dl-horizontal {
     dt {
       text-align: left;
@@ -42,11 +86,11 @@ h2.panel-heading {
 
     &.dl-narrow {
       dt {
-        width: 80px;
+        width: 110px;
       }
 
       dd {
-        margin-left: 100px;
+        margin-left: 120px;
       }
     }
   }
@@ -172,5 +216,19 @@ table .popover-container {
 @media print {
   .panel {
     border: 0;
+  }
+
+  .dl-horizontal {
+    dt {
+      float: left;
+      width: ($dl-horizontal-offset - 20);
+      clear: left;
+      @include text-overflow;
+    }
+
+    dd {
+      @include clearfix; // Clear the floated `dt` if an empty `dd` is present
+      margin-left: $dl-horizontal-offset;
+    }
   }
 }

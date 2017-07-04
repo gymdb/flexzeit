@@ -32,4 +32,8 @@ class LessonPolicy {
     return $user->isTeacher() && $lesson->teacher->id === $user->id;
   }
 
+  public function register(User $user, Lesson $lesson) {
+    return $user->isTeacher() && ($user->admin || $lesson->teacher->id === $user->id);
+  }
+
 }

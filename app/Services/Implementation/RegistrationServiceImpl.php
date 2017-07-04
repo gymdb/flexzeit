@@ -10,12 +10,16 @@ use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Registration;
 use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
+use App\Services\LessonService;
 use App\Services\RegistrationService;
 use App\Validators\DateValidator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationServiceImpl implements RegistrationService {
@@ -25,6 +29,9 @@ class RegistrationServiceImpl implements RegistrationService {
 
   /** @var ConfigService */
   private $configService;
+
+  /** @var LessonService */
+  private $lessonService;
 
   /** @var LessonRepository */
   private $lessonRepository;
@@ -39,14 +46,16 @@ class RegistrationServiceImpl implements RegistrationService {
    * LessonService constructor for injecting dependencies.
    *
    * @param ConfigService $configService
+   * @param LessonService $lessonService
    * @param RegistrationRepository $registrationRepository
    * @param LessonRepository $lessonRepository
    * @param OffdayRepository $offdayRepository
    * @param DateValidator $dateValidator
    */
-  public function __construct(ConfigService $configService,RegistrationRepository $registrationRepository,
+  public function __construct(ConfigService $configService, LessonService $lessonService, RegistrationRepository $registrationRepository,
       LessonRepository $lessonRepository, OffdayRepository $offdayRepository, DateValidator $dateValidator) {
     $this->configService = $configService;
+    $this->lessonService = $lessonService;
     $this->registrationRepository = $registrationRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
@@ -62,8 +71,8 @@ class RegistrationServiceImpl implements RegistrationService {
       throw new RegistrationException($code);
     }
 
-    $course->lessons->map(function($lesson) use ($student, $force) {
-      $this->doRegister($lesson, $student, $force);
+    $course->lessons->map(function($lesson) use ($student, $force, $admin) {
+      $this->doRegister($lesson, $student, $force, $admin);
     });
   }
 
@@ -110,7 +119,7 @@ class RegistrationServiceImpl implements RegistrationService {
     if (!$admin && ($code = $this->validateStudentForLesson($lesson, $student, false, $force)) !== 0) {
       throw new RegistrationException($code);
     }
-    $this->doRegister($lesson, $student, $force);
+    $this->doRegister($lesson, $student, $force, $admin);
   }
 
   public function validateStudentForLesson(Lesson $lesson, Student $student, $ignoreDate = false, $force = false) {
@@ -124,7 +133,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($lesson->students()->count() >= $this->configService->getMaxStudents()) {
         return RegistrationException::MAXSTUDENTS;
       }
-      if ($this->offdayRepository->inRange($lesson->date, null, null, $student->offdays())->exists()) {
+      if ($this->offdayRepository->inRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
         return RegistrationException::OFFDAY;
       }
     }
@@ -139,7 +148,20 @@ class RegistrationServiceImpl implements RegistrationService {
     return 0;
   }
 
-  private function doRegister(Lesson $lesson, Student $student, $force) {
+  private function doRegister(Lesson $lesson, Student $student, $force, $admin) {
+    if ($admin) {
+      $student->registrations()
+          ->whereExists(function($query) use ($lesson) {
+            $query->select(DB::raw(1))
+                ->from('lessons')
+                ->whereColumn('lessons.id', 'registrations.lesson_id')
+                ->where('date', $lesson->date)
+                ->where('number', $lesson->number)
+                ->where('cancelled', false);
+          })
+          ->delete();
+    }
+
     $registration = new Registration(['obligatory' => $force]);
     $registration->lesson()->associate($lesson);
     $registration->student()->associate($student);
@@ -151,7 +173,29 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function unregisterStudentFromCourse(Course $course, Student $student, $force = false) {
-    // TODO
+    $registrations = $course->registrations()->where('student_id', $student->id)->get(['registrations.id', 'obligatory']);
+    $lesson = $course->firstLesson();
+
+    if (!$force) {
+      $obligatory = $registrations->contains(function(Registration $reg) {
+        return $reg->obligatory;
+      });
+      if ($obligatory) {
+        throw new RegistrationException(RegistrationException::OBLIGATORY);
+      }
+
+      if (!$this->dateValidator->validateRegisterAllowed('date', $lesson->date)) {
+        throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
+      }
+    }
+
+    if ($lesson->date < Date::today()) {
+      throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
+    }
+
+    $registrations->each(function(Registration $reg) {
+      $reg->delete();
+    });
   }
 
   public function unregisterStudentFromLesson(Registration $registration, $force = false) {
@@ -180,11 +224,11 @@ class RegistrationServiceImpl implements RegistrationService {
     // TODO
   }
 
-  public function setAttendance(Registration $registration, $attendance) {
+  public function setAttendance(Registration $registration, $attendance, $force = false) {
     if (!is_bool($attendance)) {
       throw new RegistrationException(RegistrationException::INVALID_ATTENDANCE);
     }
-    if (!$registration->lesson->date->isToday()) {
+    if ((!$force && !$registration->lesson->date->isToday()) || ($force && $registration->lesson->date->isFuture())) {
       throw new RegistrationException(RegistrationException::ATTENDANCE_PERIOD);
     }
 
@@ -233,6 +277,140 @@ class RegistrationServiceImpl implements RegistrationService {
         ->get(['registrations.id', 'registrations.lesson_id', 'registrations.student_id']);
 
     return $registrations;
+  }
+
+  private function buildForStudent(Student $student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+    return $this->registrationRepository
+        ->forStudent($student, $start, $end, $number, $showCancelled, $teacher, $subject)
+        ->with('lesson', 'lesson.teacher', 'lesson.course');
+  }
+
+  public function getForStudent(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+    $registrations = $this
+        ->buildforStudent($student, $start ?: $this->configService->getYearStart(), $end ?: Date::today(), null, false, $teacher, $subject)
+        ->where(function($q1) {
+          $q1->where('attendance', true)
+              ->orWhereNull('attendance');
+        })
+        ->get(['registrations.id', 'registrations.lesson_id', 'documentation']);
+    $registrations->each(function(Registration $registration) {
+      $this->lessonService->setTime($registration->lesson);
+    });
+    return $registrations;
+  }
+
+  public function getSlots(Student $student, Date $date = null, Date $end = null) {
+    $lessons = $this->registrationRepository
+        ->getSlots($student, $date ?: Date::today(), $end)
+        ->with('teacher', 'course')
+        ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
+    $lessons->each(function($lesson) {
+      $this->lessonService->setTime($lesson);
+    });
+
+    return $lessons;
+  }
+
+  public function getMappedForList(Student $student, Date $start = null, Date $end = null, $number = null, Teacher $teacher = null, Subject $subject = null) {
+    $query = $this->buildForStudent($student, $start, $end, $number, true, $teacher, $subject)
+        ->select(['registrations.id', 'lesson_id', 'attendance']);
+    return $this->getExcused($query)
+        ->get()
+        ->map(function(Registration $registration) {
+          $lesson = $registration->lesson;
+          $this->lessonService->setTime($lesson);
+          $data = [
+              'attendance' => $registration->attendance,
+              'excused'    => boolval($registration->excused),
+              'id'         => $registration->id,
+              'date'       => $lesson->date->toDateString(),
+              'time'       => $lesson->time,
+              'room'       => $lesson->room,
+              'teacher'    => $lesson->teacher->name(),
+              'cancelled'  => $lesson->cancelled
+          ];
+          if ($lesson->course) {
+            $data['course'] = [
+                'id'   => $lesson->course->id,
+                'name' => $lesson->course->name,
+                'room' => $lesson->course->room
+            ];
+          }
+          return $data;
+        });
+  }
+
+  public function getMappedForSlot(Student $student, Date $date, $number) {
+    return $this->buildForStudent($student, $date, null, $number)
+        ->get(['lesson_id'])
+        ->map(function(Registration $registration) {
+          $lesson = $registration->lesson;
+          return [
+              'lesson_id' => $lesson->id,
+              'teacher'   => $lesson->teacher->name(),
+              'course'    => $lesson->course ? $lesson->course->name : null
+          ];
+        });
+  }
+
+  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+    return $this->registrationRepository->getMissing($group, $student,
+        $start ?: $this->configService->getYearStart(), $end ?: $this->configService->getFirstRegisterDate()->addDay(-1))
+        ->orderBy('date')
+        ->orderBy('lastname')
+        ->orderBy('firstname')
+        ->orderBy('number')
+        ->get(['id', 'firstname', 'lastname', 'date', 'number'])
+        ->map(function(Student $student) {
+          $lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
+          $this->lessonService->setTime($lesson);
+          return [
+              'date'   => $lesson->date->toDateString(),
+              'number' => $lesson->number,
+              'time'   => $lesson->time,
+              'id'     => $student->id,
+              'name'   => $student->name()
+          ];
+        });
+  }
+
+  public function getAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+    $query = $this->registrationRepository
+        ->forStudent($student ?: $group, $start ?: $this->configService->getYearStart(), $end ?: Date::today())
+        ->select(['registrations.id', 'lesson_id', 'attendance', 'registrations.student_id']);
+    return $this->getExcused($query)
+        ->where(function($q2) {
+          $q2->where(function($q3) {
+            $q3->where('attendance', false)->whereNull('a.student_id');
+          })->orWhere(function($q3) {
+            $q3->where('attendance', true)->whereNotNull('a.student_id');
+          });
+        })
+        ->with('lesson', 'lesson.teacher', 'student')
+        ->get()
+        ->map(function(Registration $registration) {
+          $lesson = $registration->lesson;
+          $this->lessonService->setTime($lesson);
+          return [
+              'id'         => $registration->id,
+              'date'       => $lesson->date->toDateString(),
+              'time'       => $lesson->time,
+              'teacher'    => $lesson->teacher->name(),
+              'name'       => $registration->student->name(),
+              'attendance' => $registration->attendance,
+              'excused'    => boolval($registration->excused)
+          ];
+        });
+  }
+
+  private function getExcused(Builder $query) {
+    return $query
+        ->addSelect('a.student_id as excused')
+        ->leftJoin('absences as a', function($join) {
+          $join->on('a.date', 'l.date')
+              ->on('a.number', 'l.number')
+              ->on('a.student_id', 'registrations.student_id');
+        });
   }
 
 }

@@ -13,6 +13,7 @@ class ParametersMiddleware {
    *
    * @param  Request $request
    * @param  Closure $next
+   * @param string $keys
    * @return mixed
    */
   public function handle(Request $request, Closure $next, $keys) {

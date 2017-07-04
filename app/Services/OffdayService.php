@@ -14,4 +14,9 @@ interface OffdayService {
    */
   public function getInRange(Date $start, Date $end = null, $dayOfWeek = null);
 
+  /**
+   * Replace school-wide days without lessons with the ones loaded from Untis
+   */
+  public function loadOffdays();
+
 }

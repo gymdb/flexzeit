@@ -12,6 +12,7 @@ namespace App\Models;
  * @property bool $obligatory
  * @property bool $attendance
  * @property string $documentation
+ * @property string $feedback
  */
 class Registration extends Model {
 

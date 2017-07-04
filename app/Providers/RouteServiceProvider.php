@@ -28,6 +28,7 @@ class RouteServiceProvider extends ServiceProvider {
     Route::pattern('course', $idPattern);
     Route::pattern('lesson', $idPattern);
     Route::pattern('registration', $idPattern);
+    Route::pattern('number', $idPattern);
     parent::boot();
   }
 
@@ -37,7 +38,6 @@ class RouteServiceProvider extends ServiceProvider {
    * @return void
    */
   public function map() {
-    $this->mapApiRoutes();
     $this->mapWebRoutes();
   }
 
@@ -54,17 +54,4 @@ class RouteServiceProvider extends ServiceProvider {
         ->group(base_path('routes/web.php'));
   }
 
-  /**
-   * Define the "api" routes for the application.
-   *
-   * These routes are typically stateless.
-   *
-   * @return void
-   */
-  protected function mapApiRoutes() {
-    Route::prefix('api')
-        ->middleware('api')
-        ->namespace($this->namespace)
-        ->group(base_path('routes/api.php'));
-  }
 }
