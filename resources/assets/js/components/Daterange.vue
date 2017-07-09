@@ -1,15 +1,17 @@
+<!--suppress XmlInvalidId, JSUnresolvedVariable -->
 <template>
   <div class="col-sm-6 col-xs-12">
     <div class="date-range clearfix">
-      <div class="form-group" :class="{required: type === 0}">
+      <div class="form-group" :class="{required: required}">
         <label for="firstDate" :class="{'sr-only': hideLabels}">{{labelFirst}}</label>
         <datepicker v-model="firstDate" name="firstDate" :placeholder="defaultStartDate || labelFirst"
-                    :required="type === 0"
-                    :show-today="type === 1"
-                    :disabled-days-of-week="disabledDaysOfWeek"
+                    :required="required"
+                    :show-today="showToday"
+                    :disabled="firstDateDisabled"
+                    :disabled-days-of-week="firstDateDisabled ? null : disabledDaysOfWeek"
                     :disabled-dates="disabledDatesMoment"
-                    :min-date="minDateMoment"
-                    :max-date="maxFirstDate">
+                    :min-date="firstDateDisabled ? null : minDateMoment"
+                    :max-date="firstDateDisabled ? null : maxFirstDate">
         </datepicker>
       </div>
 
@@ -20,21 +22,34 @@
       <div class="form-group">
         <label for="lastDate" :class="{'sr-only': hideLabels}">{{labelLast}}</label>
         <datepicker v-model="lastDate" name="lastDate" :placeholder="defaultEndDate || labelLast"
-                    :show-today="type === 1"
+                    :show-today="showToday"
                     :disabled="lastDateDisabled"
-                    :disabled-days-of-week="lastDateDisabledDaysOfWeek"
-                    :disabled-dates="disabledDatesMoment"
-                    :min-date="minLastDate"
-                    :max-date="maxDateMoment">
+                    :disabled-days-of-week="lastDateDisabled ? null: lastDateDisabledDaysOfWeek"
+                    :disabled-dates="lastDateDisabled ? null: disabledDatesMoment"
+                    :min-date="lastDateDisabled ? null: minLastDate"
+                    :max-date="lastDateDisabled ? null: maxDateMoment">
         </datepicker>
       </div>
     </div>
   </div>
 </template>
 
-
 <script>
   import moment from 'moment';
+
+  const types = [{
+    'required': true,
+    'course': true
+  }, {
+    'today': true
+  }, {
+    'firstDisabled': true,
+    'course': true,
+    'edit': true
+  }, {
+    'firstDisabled': true,
+    'lastDisabled': true
+  }];
 
   export default {
     data() {
@@ -45,7 +60,10 @@
         maxDateMoment: this.maxDate ? moment(this.maxDate, 'YYYY-MM-DD', true).endOf('day') : null,
         disabledDatesMoment: this.disabledDates.map(function (date) {
           return moment(date, 'YYYY-MM-DD', true);
-        })
+        }),
+        required: types[this.type].required,
+        showToday: types[this.type].showToday,
+        firstDateDisabled: types[this.type].firstDisabled
       }
     },
     props: {
@@ -112,16 +130,20 @@
     },
     computed: {
       maxFirstDate() {
-        return this.type === 0 || !this.lastDate ? this.maxDateMoment : this.lastDate.clone().endOf('day');
+        return (types[this.type].course || !this.lastDate) ? this.maxDateMoment : this.lastDate.clone().endOf('day');
       },
       minLastDate() {
         if (this.firstDate) {
-          return this.type === 0 ? this.firstDate.clone().add(1, 'w') : this.firstDate;
+          if (types[this.type].edit) {
+            //noinspection JSCheckFunctionSignatures
+            return moment.max(this.firstDate, this.minDateMoment.clone().subtract(1, 'w'));
+          }
+          return types[this.type].course ? this.firstDate.clone().add(1, 'w') : this.firstDate;
         }
         return this.minDateMoment;
       },
       lastDateDisabledDaysOfWeek() {
-        if (this.type === 0 && this.firstDate) {
+        if (types[this.type].course && this.firstDate) {
           let disabled = [];
           for (let i = 0; i < 7; i++) {
             if (i !== this.firstDate.day()) {
@@ -134,9 +156,15 @@
         return this.disabledDaysOfWeek;
       },
       lastDateDisabled() {
-        return this.type === 0 ? !this.firstDate : false;
+        if (types[this.type].lastDisabled) {
+          return true;
+        }
+        return types[this.type].course ? !this.firstDate : false;
       }
     },
-    methods: {}
+    created() {
+      this.$emit('first', this.firstDate);
+      this.$emit('last', this.lastDate);
+    }
   }
 </script>

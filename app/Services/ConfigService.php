@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\Date;
+use App\Models\Lesson;
 
 /**
  * Service for accessing config option values from database while using caches
@@ -141,5 +142,12 @@ interface ConfigService {
    * @return Date
    */
   public function getDefaultListEndDate();
+
+  /**
+   * Store the start and end time of a lesson in the lesson object
+   *
+   * @param Lesson $lesson
+   */
+  public function setTime(Lesson $lesson);
 
 }

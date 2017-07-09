@@ -18,14 +18,13 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $yearto
  * @property Collection $groups
  * @property Collection $lessons
- * @property Lesson $firstLesson
  */
 class Course extends Model {
 
   public $timestamps = false;
 
   public function groups() {
-    return $this->belongsToMany(Group::class);
+    return $this->belongsToMany(Group::class)->orderBy('name');
   }
 
   public function lessons() {
@@ -33,7 +32,11 @@ class Course extends Model {
   }
 
   public function firstLesson() {
-    return $this->lessons()->orderBy("date")->orderBy("number")->first();
+    return $this->lessons()->orderBy('date')->orderBy('number')->first();
+  }
+
+  public function lastLesson() {
+    return $this->lessons()->orderBy('date', 'desc')->orderBy('number', 'desc')->first();
   }
 
   public function subject() {

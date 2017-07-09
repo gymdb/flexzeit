@@ -12,15 +12,11 @@ use App\Models\Teacher;
 use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\DocumentationService;
-use App\Services\LessonService;
 
 class DocumentationServiceImpl implements DocumentationService {
 
   /** @var ConfigService */
   private $configService;
-
-  /** @var LessonService */
-  private $lessonService;
 
   /** @var RegistrationRepository */
   private $registrationRepository;
@@ -29,12 +25,10 @@ class DocumentationServiceImpl implements DocumentationService {
    * LessonService constructor for injecting dependencies.
    *
    * @param ConfigService $configService
-   * @param LessonService $lessonService
    * @param RegistrationRepository $registrationRepository
    */
-  public function __construct(ConfigService $configService, LessonService $lessonService, RegistrationRepository $registrationRepository) {
+  public function __construct(ConfigService $configService, RegistrationRepository $registrationRepository) {
     $this->configService = $configService;
-    $this->lessonService = $lessonService;
     $this->registrationRepository = $registrationRepository;
   }
 
@@ -62,11 +56,28 @@ class DocumentationServiceImpl implements DocumentationService {
     $registration->save();
   }
 
+  public function getDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+
+    $registrations = $this->registrationRepository
+        ->queryDocumentation($student, $start, $end, $teacher, $subject)
+        ->with('lesson.course')
+        ->get(['registrations.id', 'registrations.lesson_id', 'documentation']);
+    $registrations->each(function(Registration $registration) {
+      $this->configService->setTime($registration->lesson);
+    });
+
+    return $registrations;
+  }
+
   public function getMappedDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+
     return $this->registrationRepository
-        ->forStudent($student, $start ?: $this->configService->getYearStart(), $end ?: Date::today(), null, false, $teacher, $subject)
-        ->with('lesson', 'lesson.teacher')
-        ->get(['documentation', 'lesson_id'])
+        ->queryDocumentation($student, $start, $end, $teacher, $subject)
+        ->get(['registrations.documentation', 'registrations.lesson_id'])
         ->map(function(Registration $reg) {
           return [
               'documentation' => $reg->documentation,
@@ -76,24 +87,17 @@ class DocumentationServiceImpl implements DocumentationService {
         });
   }
 
-  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null) {
-    $query = $this->registrationRepository
-        ->forStudent($student ?: $group, $start ?: $this->configService->getYearStart(),
-            $end ?: $this->configService->getFirstDocumentationDate()->addDay(-1), null, false, $teacher)
-        ->where(function($q1) {
-          $q1->where('attendance', true)->orWhereNull('attendance');
-        })
-        ->whereNull('documentation');
-    if ($student) {
-      $query->join('students', 'students.id', 'registrations.student_id')
-          ->orderBy('students.lastname')
-          ->orderBy('students.firstname');
-    }
-    return $query->with('lesson', 'lesson.teacher', 'student')
+  public function getMappedMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null) {
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: $this->configService->getFirstDocumentationDate()->addDay(-1);
+
+    return $this->registrationRepository
+        ->queryDocumentation($student ?: $group, $start, $end, $teacher)
+        ->whereNull('documentation')
         ->get(['registrations.lesson_id', 'registrations.student_id'])
         ->map(function(Registration $reg) {
           $lesson = $reg->lesson;
-          $this->lessonService->setTime($lesson);
+          $this->configService->setTime($lesson);
 
           return [
               'date'    => $lesson->date->toDateString(),
@@ -105,10 +109,12 @@ class DocumentationServiceImpl implements DocumentationService {
   }
 
   public function getMappedFeedback(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+
     return $this->registrationRepository
-        ->forStudent($student, $start ?: $this->configService->getYearStart(), $end ?: Date::today(), null, false, $teacher, $subject)
+        ->queryForStudent($student, $start, $end, null, false, $teacher, $subject)
         ->whereNotNull('feedback')
-        ->with('lesson', 'lesson.teacher')
         ->get(['feedback', 'lesson_id'])
         ->map(function(Registration $reg) {
           return [

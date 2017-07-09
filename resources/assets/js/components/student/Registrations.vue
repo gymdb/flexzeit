@@ -1,4 +1,5 @@
 <script>
+  //noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
@@ -13,6 +14,7 @@
         this.error = error;
       },
       openDocumentation(id) {
+        //noinspection JSUnresolvedVariable
         this.$refs.documentationModal.open(id);
       }
     }

@@ -17,7 +17,7 @@ use App\Services\RegistrationService;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
 use App\Specifications\ObligatorySpecification;
-use App\Validators\DateValidator;
+use App\Validators\CourseValidator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Mockery;
@@ -62,7 +62,7 @@ class CourseServiceTest extends TestCase {
     $this->courseService = $partialMock
         ? Mockery::mock(CourseServiceImpl::class . '[coursePossible,obligatoryPossible]',
             [$this->getMocked('configService'), $this->getMocked('registrations'), $this->getMocked('groups'),
-                $this->getMocked('lessons'), $this->getMocked('offdays'), $this->app->make(DateValidator::class)])
+                $this->getMocked('lessons'), $this->getMocked('offdays'), $this->app->make(CourseValidator::class)])
         : $this->app->make(CourseService::class);
   }
 

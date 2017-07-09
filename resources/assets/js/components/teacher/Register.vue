@@ -1,5 +1,6 @@
+<!--suppress JSUnresolvedVariable -->
 <template>
-  <modal :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" :large="true">
+  <modal :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" large>
     <div class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
@@ -26,6 +27,7 @@
 </template>
 
 <script>
+  //noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {

@@ -36,6 +36,8 @@ class ApiController extends Controller {
     $this->documentationService = $documentationService;
     $this->lessonService = $lessonService;
     $this->registrationService = $registrationService;
+
+    $this->middleware('transaction', ['only' => ['registerCourse', 'registerLesson', 'unregisterCourse', 'unregisterLesson', 'setDocumentation']]);
   }
 
   /**

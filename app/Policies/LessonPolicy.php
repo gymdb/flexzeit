@@ -36,4 +36,8 @@ class LessonPolicy {
     return $user->isTeacher() && ($user->admin || $lesson->teacher->id === $user->id);
   }
 
+  public function cancel(User $user) {
+    return $user->isTeacher() && $user->admin;
+  }
+
 }

@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Student;
 use App\Helpers\Date;
 use App\Http\Controllers\Controller;
 use App\Services\ConfigService;
+use App\Services\DocumentationService;
 use App\Services\MiscService;
 use App\Services\RegistrationService;
-use App\Validators\DateValidator;
 use Illuminate\View\View;
 
 class StudentController extends Controller {
@@ -15,28 +15,28 @@ class StudentController extends Controller {
   /** @var ConfigService */
   private $configService;
 
+  /** @var DocumentationService */
+  private $documentationService;
+
   /** @var MiscService */
   private $miscService;
 
   /** @var RegistrationService */
   private $registrationService;
 
-  /** @var DateValidator */
-  private $dateValidator;
-
   /**
    * Create a new controller instance.
    *
    * @param ConfigService $configService
+   * @param DocumentationService $documentationService
    * @param MiscService $miscService
    * @param RegistrationService $registrationService
-   * @param DateValidator $dateValidator
    */
-  public function __construct(ConfigService $configService, MiscService $miscService, RegistrationService $registrationService, DateValidator $dateValidator) {
+  public function __construct(ConfigService $configService, DocumentationService $documentationService, MiscService $miscService, RegistrationService $registrationService) {
     $this->configService = $configService;
+    $this->documentationService = $documentationService;
     $this->miscService = $miscService;
     $this->registrationService = $registrationService;
-    $this->dateValidator = $dateValidator;
   }
 
   /**
@@ -49,10 +49,9 @@ class StudentController extends Controller {
 
     $today = $this->registrationService->getSlots($student);
     $upcoming = $this->registrationService->getSlots($student, Date::today()->addDay(), $this->configService->getLastRegisterDate());
-    $documentation = $this->registrationService->getForStudent($student, $this->configService->getFirstDocumentationDate(), $this->configService->getLastDocumentationDate());
-    $firstRegisterDate = $this->configService->getFirstRegisterDate();
+    $documentation = $this->documentationService->getDocumentation($student, $this->configService->getFirstDocumentationDate(), $this->configService->getLastDocumentationDate());
 
-    return view('student.dashboard', compact('today', 'upcoming', 'documentation', 'firstRegisterDate'));
+    return view('student.dashboard', compact('today', 'upcoming', 'documentation'));
   }
 
   /**
@@ -65,10 +64,9 @@ class StudentController extends Controller {
     $lessons = $this->registrationService->getSlots($student, $date);
     $subjects = $this->miscService->getSubjects();
     $teachers = $this->miscService->getTeachers();
-    $firstRegisterDate = $this->configService->getFirstRegisterDate();
-    $allowRegistration = $this->dateValidator->validateRegisterAllowed('date', $date);
+    $allowRegistration = $this->registrationService->isRegistrationPossible($date);
 
-    return view('student.day', compact('date', 'lessons', 'subjects', 'teachers', 'firstRegisterDate', 'allowRegistration'));
+    return view('student.day', compact('date', 'lessons', 'subjects', 'teachers', 'allowRegistration'));
   }
 
 }

@@ -21,6 +21,17 @@
           @endif
         </dl>
 
+        @if($allowCancel)
+          <confirm confirm-text="@lang('lessons.cancel.confirm')" inline-template>
+            <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)">
+              {{csrf_field()}}
+              <p>
+                <button type="submit" class="btn btn-default">@lang('lessons.cancel.submit')</button>
+              </p>
+            </form>
+          </confirm>
+        @endif
+
         <h3>@lang('lessons.registrations.heading')</h3>
         @if($registrations->isEmpty())
           <p>@lang('lessons.registrations.none')</p>
@@ -77,9 +88,9 @@
                   @if($showAttendance)
                     <td>
                       <teacher-attendance :id="{{$reg->id}}" :attendance="{{json_encode($reg->attendance)}}"
-                                  :excused="{{json_encode($reg->student->absences->isNotEmpty())}}"
-                                  :changeable="{{json_encode($attendanceChangeable)}}"
-                                  v-on:success="setAttendanceSuccess" v-on:error="setAttendanceError">
+                                          :excused="{{json_encode($reg->student->absences->isNotEmpty())}}"
+                                          :changeable="{{json_encode($attendanceChangeable)}}"
+                                          v-on:success="setAttendanceSuccess" v-on:error="setAttendanceError">
                       </teacher-attendance>
                     </td>
                   @endif

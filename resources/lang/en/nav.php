@@ -8,8 +8,12 @@ return [
         'list'    => 'All lessons'
     ],
     'courses'       => [
-        'list'   => 'All courses',
-        'create' => 'Create course'
+        'list'       => 'All courses',
+        'create'     => 'Create course',
+        'obligatory' => [
+            'list'   => 'Show obligatory courses',
+            'create' => 'Create obligatory course'
+        ]
     ],
     'documentation' => [
         'list'    => 'Show documentation',

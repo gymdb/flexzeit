@@ -1,3 +1,4 @@
+<!--suppress JSValidateTypes, JSUnresolvedVariable -->
 <template>
   <dropdown v-if="changeable" size="xs">
     <template slot="button">

@@ -60,6 +60,17 @@ class CoursePolicy {
     return $this->checkUser($user, $course);
   }
 
+  /**
+   * Determine whether the user can list obligatory courses
+   *
+   * @param User $user
+   * @return bool
+   */
+  public function listObligatory(/** @noinspection PhpUnusedParameterInspection */
+      User $user) {
+    return false;
+  }
+
   private function checkUser(User $user, Course $course) {
     if (!$user->isTeacher()) {
       return false;

@@ -11,6 +11,7 @@ class SubjectSeeder extends Seeder {
    * @return void
    */
   public function run() {
+    /** @noinspection SpellCheckingInspection */
     $subjects = [
         'Bildn. Erziehung',
         'Biologie',

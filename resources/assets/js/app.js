@@ -33,6 +33,7 @@ const dateTimeFormats = {
   }
 };
 
+//noinspection JSUnresolvedVariable
 const i18n = new VueI18n({
   locale: window.Laravel.lang,
   fallbackLocale: 'en',
@@ -41,6 +42,7 @@ const i18n = new VueI18n({
 });
 
 // Register general components
+Vue.component('confirm', require('./components/Confirm.vue'));
 Vue.component('datepicker', require('./components/Datepicker.vue'));
 Vue.component('daterange', require('./components/Daterange.vue'));
 Vue.component('error', require('./components/Error.vue'));
@@ -55,6 +57,7 @@ Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
 Vue.component('teacher-register', require('./components/teacher/Register.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
+Vue.component('course-edit', require('./components/course/Edit.vue'));
 
 // Register components for student pages
 Vue.component('student-documentation',require('./components/student/Documentation.vue'));
@@ -62,9 +65,11 @@ Vue.component('student-register', require('./components/student/Register.vue'));
 Vue.component('student-registrations',require('./components/student/Registrations.vue'));
 
 // Register vue-strap components
+require('vue-strap/dist/vue-strap-lang');
 Vue.component('dropdown', require('vue-strap/src/Dropdown.vue'));
 Vue.component('modal', require('vue-strap/src/Modal.vue'));
 Vue.component('popover', require('vue-strap/src/Popover.vue'));
+Vue.component('v-select', require('vue-strap/src/Select.vue'));
 
 Vue.prototype.moment = require('moment');
 

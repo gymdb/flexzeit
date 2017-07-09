@@ -3,11 +3,11 @@
 namespace App\Repositories;
 
 use App\Helpers\Date;
+use App\Models\Course;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * Repository for accessing the lessons table
@@ -17,42 +17,28 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 interface LessonRepository {
 
   /**
-   * Build a query for all lessons within a given range
-   *
+   * @param Teacher $teacher
    * @param Date $start Start date
    * @param Date|null $end Optional end date (start day only if empty)
    * @param int|null $dayOfWeek Only show dates on the given day of week
    * @param int[]|int|null $number Only show lessons with these numbers
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
-   * @param Relation|null $relation Relation to run the query on
    * @return Builder
    */
-  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false, Relation $relation = null);
-
-  /**
-   * @param Teacher $teacher
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $numbers Only show lessons with these numbers
-   * @param bool $showCancelled Also include cancelled lessons in the result
-   * @param bool $withCourse Only show lessons with an assigned course
-   * @return Builder
-   */
-  public function forTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $numbers = null, $showCancelled = false, $withCourse = false);
+  public function queryForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
 
   /**
    * @param Student $student
    * @param Date $start Start date
    * @param Date|null $end Optional end date (start day only if empty)
    * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $numbers Only show lessons with these numbers
+   * @param int[]|int|null $number Only show lessons with these numbers
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
    * @return Builder
    */
-  public function forStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $numbers = null, $showCancelled = false, $withCourse = false);
+  public function queryForStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
 
   /**
    * @param Student $student
@@ -62,17 +48,17 @@ interface LessonRepository {
    * @param Subject|null $subject
    * @return Builder
    */
-  public function buildAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null);
+  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null);
 
   /**
-   * @param Builder $groups
+   * @param array $groups
    * @param Date $start Start date
    * @param Date|null $end Optional end date (start day only if empty)
    * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $numbers Only show lessons with these numbers
-   * @param bool $showCancelled Also include cancelled lessons in the result
+   * @param int[]|int|null $number Only show lessons with these numbers
+   * @param Course|null $exclude Exclude lessons from this course
    * @return Builder
    */
-  public function forGroups(Builder $groups, Date $start, Date $end = null, $dayOfWeek = null, $numbers = null, $showCancelled = false);
+  public function queryForGroups(array $groups, Date $start, Date $end = null, $dayOfWeek = null, $number = null, Course $exclude = null);
 
 }

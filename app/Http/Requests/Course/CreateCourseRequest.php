@@ -4,15 +4,9 @@ namespace App\Http\Requests\Course;
 
 use App\Helpers\Date;
 use App\Models\Course;
-use App\Services\ConfigService;
 use App\Specifications\CreateCourseSpecification;
-use Illuminate\Support\Facades\App;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 abstract class CreateCourseRequest extends CourseRequest implements CreateCourseSpecification {
-
-  /** @var int */
-  private $lessonCount;
 
   protected $dateFields = ['firstDate', 'lastDate'];
 
@@ -22,11 +16,10 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
    * @return array
    */
   public function rules() {
-    $this->parseParameters();
     return array_merge(parent::rules(), [
-        'firstDate'    => 'required|bail|date|after:today|in_year|create_allowed|school_day',
-        'lastDate'     => 'nullable|bail|date|after_or_equal:firstDate|in_year',
-        'lessonNumber' => 'required|integer|' . ($this->lessonCount ? 'between:1,' . $this->lessonCount : 'min:1')
+        'firstDate'    => 'required|bail|date|create_allowed|school_day',
+        'lastDate'     => 'nullable|bail|date|after_or_equal:firstDate|create_allowed',
+        'lessonNumber' => 'required|bail|integer|min:1|lesson_number:firstDate'
     ]);
   }
 
@@ -53,13 +46,6 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
    */
   public final function populateCourse(Course $course = null) {
     return parent::populateCourse($course ?: new Course());
-  }
-
-  protected function parse(ParameterBag $source) {
-    parent::parse($source);
-
-    $this->lessonCount = ($firstDate = $this->getFirstDate())
-        ? App::make(ConfigService::class)->getLessonCount($firstDate) : 0;
   }
 
 }

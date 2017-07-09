@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'dashboard'     => [
         'heading'    => 'Heute: :date',
@@ -37,5 +38,9 @@ return [
     ],
     'feedback'      => [
         'button' => 'Rückmeldung schreiben'
+    ],
+    'cancel'       => [
+        'submit'  => 'Einheit absagen',
+        'confirm' => 'Soll diese Einheit wirklich abgesagt werden?'
     ]
 ];

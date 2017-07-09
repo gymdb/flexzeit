@@ -12,9 +12,14 @@ Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => ['auth', 'can:teacher']], function() {
   // Lesson related pages
   Route::get('/', 'LessonController@dashboard')->name('teacher.dashboard');
+  Route::post('/lessons/cancel/{lesson}', 'LessonController@cancel')->name('teacher.lessons.cancel');
   Route::resource('/lessons', 'LessonController', ['as' => 'teacher', 'only' => ['index', 'show']]);
 
   // Course related pages
+  Route::get('/courses/obligatory', 'CourseController@listObligatory')->name('teacher.courses.obligatory.list');
+  Route::get('/courses/obligatory/create', 'CourseController@createObligatory')->name('teacher.courses.obligatory.create');
+  Route::post('/courses/obligatory', 'CourseController@storeObligatory')->name('teacher.courses.obligatory.store');
+  Route::put('/courses/obligatory/{course}', 'CourseController@updateObligatory')->name('teacher.courses.obligatory.update');
   Route::resource('/courses', 'CourseController', ['as' => 'teacher']);
 
   // Documentation/feedback related pages
@@ -31,7 +36,13 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   Route::group(['prefix' => 'api'], function() {
     // Course related API methods
     Route::get('/courses', 'CourseController@getForTeacher')->middleware('params:teacher?;i|start?;d|end?;d');
-    Route::get('/course/lessonsForCreate', 'CourseController@getLessonsForCreate')->middleware('params:firstDate;d|lastDate?;d|number;i');
+    Route::get('/courses/obligatory', 'CourseController@getObligatory')
+        ->middleware('params:group?;i|teacher?;i|subject?;i|start?;d|end?;d')
+        ->name('teacher.api.courses.obligatory');
+    Route::get('/course/lessonsForCreate', 'CourseController@getLessonsForCreate')
+        ->middleware('params:firstDate;d|lastDate?;d|number;i|groups*;i');
+    Route::get('/course/lessonsForEdit', 'CourseController@getLessonsForEdit')
+        ->middleware('params:course;i|lastDate?;d|groups*;i');
 
     // Lesson related API methods
     Route::get('/lessons', 'LessonController@getForTeacher')->middleware('params:teacher?;i|start?;d|end?;d');

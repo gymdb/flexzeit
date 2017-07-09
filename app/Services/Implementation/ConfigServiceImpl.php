@@ -3,6 +3,7 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
+use App\Models\Lesson;
 use App\Services\ConfigService;
 use App\Services\ConfigStorageService;
 
@@ -101,6 +102,13 @@ class ConfigServiceImpl implements ConfigService {
 
   public function getDefaultListEndDate() {
     return min(Date::today()->addWeek(1), $this->getYearEnd());
+  }
+
+  public function setTime(Lesson $lesson) {
+    $lesson->time = [
+        'start' => $this->getLessonStart($lesson->date, $lesson->number),
+        'end'   => $this->getLessonEnd($lesson->date, $lesson->number)
+    ];
   }
 
   /**

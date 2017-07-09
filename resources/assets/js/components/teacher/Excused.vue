@@ -1,3 +1,4 @@
+<!--suppress JSValidateTypes, JSUnresolvedVariable -->
 <template>
   <a href="#" @click.prevent="refresh()" class="btn btn-default btn-xs" :title="$t('registrations.untis.reload')">
     <span class="glyphicon glyphicon-refresh" :class="{spin: loading}"></span> {{label(excused ? 'excused' : 'present')}}

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -54,7 +55,7 @@ class Handler extends ExceptionHandler {
         return response()->json(['success' => false, 'error' => $exception->getCode()]);
       }
 
-      return redirect()->back()->withInput($request->input())->withErrors(['api' => [$exception->getCode()]]);
+      return redirect()->back()->withInput($request->input())->withErrors(['api' => [Lang::get('errors.' . $exception->getCode())]]);
     }
 
     return parent::render($request, $exception);

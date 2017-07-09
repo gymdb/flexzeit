@@ -6,7 +6,7 @@
       <section class="panel panel-default">
         <h2 class="panel-heading">@lang('student.today.heading', ['date' => \App\Helpers\Date::today()])</h2>
         <div class="panel-body">
-          @if(empty($today))
+          @if($today->isEmpty())
             @lang('student.today.none')
           @else
             <div class="table-responsive">
@@ -46,7 +46,7 @@
         <div class="panel-body">
           <error :error="error">@lang('student.unregister.error')</error>
 
-          @if(empty($upcoming))
+          @if($upcoming->isEmpty())
             @lang('student.upcoming.none')
           @else
             <div class="table-responsive">
@@ -79,8 +79,8 @@
                       <td>{{$lesson->course->name}}</td>
                       <td>{{$lesson->course->room}}</td>
                       <td>
-                        @if($lesson->course->firstLesson()->date >= $firstRegisterDate && !$lesson->obligatory)
-                          <unregister :id="{{$lesson->course->id}}" :course="true" base-url="student" :button="false"
+                        @if($lesson->unregisterPossible)
+                          <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
                             <span class="glyphicon glyphicon-remove-sign register-link"></span>
@@ -93,7 +93,7 @@
                       <td></td>
                       <td>{{$lesson->room}}</td>
                       <td>
-                        @if($lesson->date >= $firstRegisterDate)
+                        @if($lesson->unregisterPossible)
                           <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
@@ -115,7 +115,7 @@
       <section class="panel panel-default">
         <h2 class="panel-heading">@lang('student.documentation.heading')</h2>
         <div class="panel-body">
-          @if(empty($documentation))
+          @if($documentation->isEmpty())
             @lang('student.documentation.none')
           @else
             <div class="table-responsive">

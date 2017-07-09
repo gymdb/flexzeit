@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'list'          => [
         'heading' => 'Anmeldungen',

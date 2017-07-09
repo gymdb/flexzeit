@@ -2,23 +2,31 @@
   import moment from 'moment';
   import _ from 'lodash';
 
+  //noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
         firstDate: null,
         lastDate: null,
-        number: null,
+        number: this.oldNumber,
         name: this.oldName,
         room: this.oldRoom,
-        roomOriginal: this.oldRoom,
+        roomOriginal: null,
         yearFrom: this.oldYearFrom,
         yearTo: this.oldYearFrom,
-        lessonsWithCourse: [],
-        lessonsForNewCourse: [],
+        subject: this.oldSubject,
+        groups: this.oldGroups,
+        withCourse: [],
+        forNewCourse: [],
+        withObligatory: [],
         error: null
       }
     },
     props: {
+      obligatory: {
+        'type': Boolean,
+        'default': false
+      },
       lessons: {
         'type': Object
       },
@@ -29,6 +37,10 @@
       maxYear: {
         'type': Number,
         'default': Number.MAX_VALUE
+      },
+      oldNumber: {
+        'type': Number,
+        'default': null
       },
       oldName: {
         'type': String,
@@ -45,6 +57,16 @@
       oldYearTo: {
         'type': Number,
         'default': null
+      },
+      oldSubject: {
+        'type': Number,
+        'default': null
+      },
+      oldGroups: {
+        'type': Array,
+        'default': function () {
+          return [];
+        }
       }
     },
     watch: {
@@ -57,9 +79,11 @@
         return (this.firstDate && this.lessons[this.firstDate.day()]) ? this.lessons[this.firstDate.day()] : null;
       },
       maxYearFrom() {
+        //noinspection JSCheckFunctionSignatures
         return this.yearTo ? Math.min(this.maxYear, this.yearTo) : this.maxYear;
       },
       minYearTo() {
+        //noinspection JSCheckFunctionSignatures
         return this.yearFrom ? Math.max(this.minYear, this.yearFrom) : this.minYear;
       },
       loadLessonsOptions() {
@@ -69,13 +93,19 @@
           return {
             firstDate: this.firstDate.format('YYYY-MM-DD'),
             lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
-            number: this.number
+            number: this.number,
+            groups: this.groups.length ? this.groups : null
           };
         }
       },
       buttonDisabled() {
+        if (this.obligatory) {
+          return !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
+              || this.withCourse.length || this.withObligatory.length || !this.forNewCourse.length;
+        }
+
         return !this.firstDate || !this.number || !this.name || !this.room
-            || this.lessonsWithCourse.length !== 0 || this.lessonsForNewCourse.length === 0;
+            || this.withCourse.length || !this.forNewCourse.length;
       }
     },
     methods: {
@@ -88,18 +118,22 @@
       loadLessonsForCourse: _.debounce(function (params) {
         if (!params) {
           this.error = null;
-          this.lessonsWithCourse = [];
-          this.lessonsForNewCourse = [];
+          this.withCourse = [];
+          this.forNewCourse = [];
+          this.withObligatory = [];
         } else {
           let self = this;
           this.$http.get('/teacher/api/course/lessonsForCreate', {
             params: params
           }).then(function (response) {
             self.error = null;
-            self.lessonsWithCourse = response.data.withCourse;
-            self.lessonsForNewCourse = response.data.forNewCourse;
+            self.withCourse = response.data.withCourse;
+            self.forNewCourse = response.data.forNewCourse;
+            if (self.obligatory) {
+              self.withObligatory = response.data.withObligatory || [];
+            }
 
-            let room = (self.lessonsWithCourse.length === 0 && self.lessonsForNewCourse.length > 0) ? self.lessonsForNewCourse[0].room : null;
+            let room = (self.withCourse.length === 0 && self.forNewCourse.length > 0) ? self.forNewCourse[0].room : null;
             if (!self.room || self.room === self.roomOriginal) {
               self.room = room;
             }

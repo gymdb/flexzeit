@@ -60,6 +60,7 @@
                     <a href="{{route('teacher.lessons.index')}}">@lang('nav.lessons.list')</a>
                     <a href="{{route('teacher.courses.index')}}">@lang('nav.courses.list')</a>
                     <a href="{{route('teacher.courses.create')}}">@lang('nav.courses.create')</a>
+                    <a href="{{route('teacher.courses.obligatory.create')}}">@lang('nav.courses.obligatory.create')</a>
                   </li>
                 </ul>
               </li>
@@ -91,6 +92,11 @@
                       <a href="{{route('teacher.feedback')}}">@lang('nav.feedback.list')</a>
                     </li>
                   @endcan
+                  @can('listObligatory', \App\Models\Course::class)
+                    <li>
+                      <a href="{{route('teacher.courses.obligatory.list')}}">@lang('nav.courses.obligatory.list')</a>
+                    </li>
+                  @endcan
                 </ul>
               </li>
             </ul>
@@ -117,7 +123,7 @@
 
   <main class="container">
     <div class="row">
-      <div class="col-md-10 col-md-offset-1">
+      <div class="col-md-10 col-md-offset-1 print-full-width">
         @yield('content')
       </div>
     </div>

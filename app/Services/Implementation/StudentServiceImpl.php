@@ -3,9 +3,8 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
-use App\Models\Absence;
-use App\Models\Student;
 use App\Repositories\Eloquent\RepositoryHelper;
+use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\StudentService;
 use App\Services\WebUntisService;
@@ -16,22 +15,29 @@ class StudentServiceImpl implements StudentService {
   /** @var ConfigService */
   private $configService;
 
+  /** @var StudentRepository */
+  private $studentRepository;
+
   /** @var WebUntisService */
   private $untisService;
 
-  function __construct(ConfigService $configService, WebUntisService $untisService) {
+  /**
+   * @param ConfigService $configService
+   * @param StudentRepository $studentRepository
+   * @param WebUntisService $untisService
+   */
+  function __construct(ConfigService $configService, StudentRepository $studentRepository, WebUntisService $untisService) {
     $this->configService = $configService;
+    $this->studentRepository = $studentRepository;
     $this->untisService = $untisService;
   }
 
   public function loadAbsences(Date $date) {
     $absences = $this->untisService->getAbsences($date);
     $times = $this->configService->getLessonTimes();
-    $students = Student::whereIn('untis_id', $absences->pluck('id'))
-        ->with('absences')
-        ->get(['id', 'untis_id']);
+    $students = $this->studentRepository->queryForUntisId($absences->pluck('id'))->get(['id', 'untis_id']);
 
-    Absence::where('date', $date)->delete();
+    $this->studentRepository->deleteAbsences($date);
 
     $create = $absences->flatMap(function($absence) use ($times, $students) {
       $student = $students->first(function($item) use ($absence) {
@@ -39,7 +45,7 @@ class StudentServiceImpl implements StudentService {
       });
       if (!$student) {
         Log::warning('Could not find student for Untis ID ' . $absence['id'] . '.');
-        return collect([]);
+        return [];
       }
       $create = [];
 
@@ -59,10 +65,10 @@ class StudentServiceImpl implements StudentService {
         }
       }
 
-      return collect($create);
+      return $create;
     });
 
-    Absence::insert($create->toArray());
+    $this->studentRepository->insertAbsences($create);
   }
 
 }

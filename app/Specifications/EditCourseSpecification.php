@@ -8,11 +8,6 @@ use App\Models\Course;
 interface EditCourseSpecification {
 
   /**
-   * @return int
-   */
-  public function getId();
-
-  /**
    * @return Date|null
    */
   public function getLastDate();

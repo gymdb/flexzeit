@@ -28,7 +28,6 @@
                   <th>@lang('messages.teacher')</th>
                 @endif
                 <th>@lang('messages.course')</th>
-                <th>@lang('messages.room')</th>
                 <th></th>
               </tr>
               </thead>

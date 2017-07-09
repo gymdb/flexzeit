@@ -1,3 +1,5 @@
+/* global require */
+
 const { mix } = require('laravel-mix');
 
 /*

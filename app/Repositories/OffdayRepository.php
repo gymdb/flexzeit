@@ -23,11 +23,11 @@ interface OffdayRepository {
    * @param Relation|null $relation Relation to run the query on
    * @return Builder
    */
-  public function inRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null);
+  public function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null);
 
   /**
-   * Remove all days without lessons
+   * Remove all days without lessons without an assigned group
    */
-  public function removeAll();
+  public function deleteWithoutGroup();
 
 }

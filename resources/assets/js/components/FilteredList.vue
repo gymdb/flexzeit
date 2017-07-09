@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
   <div>
     <div class="row clearfix hidden-print">
@@ -9,7 +10,7 @@
         </select>
       </div>
 
-      <div v-if="groups" class="form-group col-sm-3 col-xs-6">
+      <div v-if="groups && requireGroup" class="form-group col-sm-3 col-xs-6">
         <label for="student" class="sr-only">{{$t('messages.student')}}</label>
         <select class="form-control" id="student" :disabled="!group" v-model="student">
           <option :value="null">{{$t('messages.student')}}</option>
@@ -45,7 +46,7 @@
                  :old-last-date="initialEnd"
                  :label-first="$t('messages.from')"
                  :label-last="$t('messages.to')"
-                 :hide-labels="true"
+                 hide-labels
                  v-on:first="setStart"
                  v-on:last="setEnd">
       </daterange>
@@ -180,6 +181,10 @@
         'type': Boolean,
         'default': true
       },
+      requireGroup: {
+        'type': Boolean,
+        'default': true
+      },
       requireStudent: {
         'type': Boolean,
         'default': true
@@ -214,7 +219,7 @@
         return this.groupsList && this.groupsList.length > 1;
       },
       filter() {
-        if (this.groupsList && (!this.group || (this.requireStudent && !this.student))) {
+        if (this.groupsList && this.requireGroup && (!this.group || (this.requireStudent && !this.student))) {
           return null;
         }
 

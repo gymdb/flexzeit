@@ -4,7 +4,6 @@ namespace App\Http\Requests\Course;
 
 use App\Helpers\Date;
 use App\Models\Course;
-use DateTime;
 use Illuminate\Foundation\Http\FormRequest;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -40,7 +39,7 @@ abstract class CourseRequest extends FormRequest {
         'name'        => 'required|string|max:50',
         'description' => 'nullable|string',
         'room'        => 'required|string|max:50',
-        'lastDate'    => 'nullable|bail|date|after:today|in_year'
+        'lastDate'    => 'nullable|bail|date|edit_allowed'
     ], $this->typeSpecificRules());
   }
 
@@ -60,28 +59,24 @@ abstract class CourseRequest extends FormRequest {
    */
   public function populateCourse(Course $course) {
     $course->name = $this->input('name');
-    $course->description = $this->input('description') ?: "";
+    $course->description = $this->input('description') ?: '';
     $course->room = $this->input('room');
 
     return $this->typeSpecificPopulate($course);
   }
 
   protected function validationData() {
-    $this->parseParameters();
+    $this->parse($this->getInputSource());
     return parent::validationData();
   }
 
-  protected function parseParameters() {
+  private function parse(ParameterBag $source) {
     if (!$this->parsed) {
       $this->parsed = true;
-      $this->parse($this->getInputSource());
-    }
-  }
-
-  protected function parse(ParameterBag $source) {
-    foreach ($this->dateFields as $field) {
-      if ($source->has($field) && ($value = $source->get($field)) && ($date = Date::checkedCreate($value))) {
-        $source->set($field, $date);
+      foreach ($this->dateFields as $field) {
+        if ($source->has($field) && ($value = $source->get($field)) && ($date = Date::checkedCreate($value))) {
+          $source->set($field, $date);
+        }
       }
     }
   }

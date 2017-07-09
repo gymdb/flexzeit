@@ -32,6 +32,7 @@ class Kernel extends ConsoleKernel {
    * @return void
    */
   protected function commands() {
+    /** @noinspection PhpIncludeInspection */
     require base_path('routes/console.php');
   }
 }

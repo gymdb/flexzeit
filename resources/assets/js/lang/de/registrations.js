@@ -1,4 +1,5 @@
 /* global module */
+//noinspection SpellCheckingInspection
 module.exports = {
   attendance: {
     present: 'Anwesend',

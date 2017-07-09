@@ -1,4 +1,5 @@
 /* global module */
+//noinspection SpellCheckingInspection
 module.exports = {
   '1': 'Für eine der gewählten Einheiten existiert bereits ein Kurs.',
   '2': 'Der Kurs konnte nicht in der Datenbank gespeichert werden.',

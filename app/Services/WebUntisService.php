@@ -5,6 +5,11 @@ namespace App\Services;
 use App\Helpers\Date;
 use Illuminate\Support\Collection;
 
+/**
+ * Service for accessing WebUntis
+ *
+ * @package App\Services
+ */
 interface WebUntisService {
 
   /**

@@ -1,4 +1,5 @@
 /* global module */
+//noinspection SpellCheckingInspection
 module.exports = {
   group: 'Klasse/Gruppe',
   student: 'SchülerIn',

@@ -32,7 +32,7 @@
                 <th></th>
               </tr>
               </thead>
-              <tr v-for="lesson in props.data">
+              <tr v-for="lesson in props.data" :class="{'text-muted': lesson.cancelled}">
                 <td>@{{lesson.date}}</td>
                 <td>@{{$t('messages.range', lesson.time)}}</td>
                 @if($teachers)

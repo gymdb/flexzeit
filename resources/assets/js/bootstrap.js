@@ -1,3 +1,4 @@
+/* global require */
 
 window._ = require('lodash');
 
@@ -27,10 +28,12 @@ window.Vue = require('vue');
 
 window.axios = require('axios');
 
+//noinspection JSUnresolvedVariable
 window.axios.defaults.headers.common = {
-    'X-CSRF-TOKEN': window.Laravel.csrfToken,
-    'X-Requested-With': 'XMLHttpRequest'
+  'X-CSRF-TOKEN': window.Laravel.csrfToken,
+  'X-Requested-With': 'XMLHttpRequest'
 };
+//noinspection JSUnresolvedVariable
 window.axios.defaults.baseURL = window.Laravel.baseURL;
 
 /**

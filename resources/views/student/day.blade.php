@@ -37,8 +37,8 @@
                     <td>{{$lesson->course->room}}</td>
                     @if($allowRegistration)
                       <td>
-                        @if($lesson->course->firstLesson()->date >= $firstRegisterDate && !$lesson->obligatory)
-                          <unregister :id="{{$lesson->course->id}}" :course="true" base-url="student" :button="false"
+                        @if($lesson->unregisterPossible)
+                          <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
                             <span class="glyphicon glyphicon-remove-sign register-link"></span>
@@ -53,7 +53,7 @@
                     <td>{{$lesson->room}}</td>
                     @if($allowRegistration)
                       <td>
-                        @if($lesson->date >= $firstRegisterDate)
+                        @if($lesson->unregisterPossible)
                           <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
@@ -116,7 +116,7 @@
       </div>
     </section>
 
-    @if($allowRegistration)
+    @if($allowRegistration && $hasMissing)
       <student-register ref="registerModal"></student-register>
     @endif
   @endif

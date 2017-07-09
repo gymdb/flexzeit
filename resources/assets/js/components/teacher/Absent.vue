@@ -1,4 +1,5 @@
 <script>
+  //noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {

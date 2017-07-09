@@ -6,6 +6,7 @@ use App\Http\Middleware\DateMiddleware;
 use App\Http\Middleware\ParametersMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\StripTags;
+use App\Http\Middleware\TransactionMiddleware;
 use App\Http\Middleware\TrimStrings;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -82,12 +83,13 @@ class Kernel extends HttpKernel {
    * @var array
    */
   protected $routeMiddleware = [
-      'auth'       => Authenticate::class,
-      'auth.basic' => AuthenticateWithBasicAuth::class,
-      'bindings'   => SubstituteBindings::class,
-      'can'        => Authorize::class,
-      'guest'      => RedirectIfAuthenticated::class,
-      'throttle'   => ThrottleRequests::class,
-      'params'     => ParametersMiddleware::class
+      'auth'        => Authenticate::class,
+      'auth.basic'  => AuthenticateWithBasicAuth::class,
+      'bindings'    => SubstituteBindings::class,
+      'can'         => Authorize::class,
+      'guest'       => RedirectIfAuthenticated::class,
+      'throttle'    => ThrottleRequests::class,
+      'params'      => ParametersMiddleware::class,
+      'transaction' => TransactionMiddleware::class
   ];
 }

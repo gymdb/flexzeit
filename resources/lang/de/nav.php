@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'toggle'        => 'Navigation ein-/ausblenden',
     'reports'       => 'Berichte',
@@ -8,8 +9,12 @@ return [
         'list'    => 'Alle Einheiten'
     ],
     'courses'       => [
-        'list'   => 'Alle Kurse',
-        'create' => 'Kurs erstellen'
+        'list'       => 'Alle Kurse',
+        'create'     => 'Kurs erstellen',
+        'obligatory' => [
+            'list'   => 'Klassenbindungen anzeigen',
+            'create' => 'Klassenbindung erstellen'
+        ]
     ],
     'documentation' => [
         'list'    => 'Dokumentation anzeigen',

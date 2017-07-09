@@ -11,6 +11,7 @@
 <script>
   const httpError = [401, 403, 404];
 
+  //noinspection JSUnusedGlobalSymbols
   export default {
     props: {
       error: {

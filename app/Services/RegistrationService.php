@@ -18,9 +18,10 @@ interface RegistrationService {
    * Registers a group for a complete course
    *
    * @param Course $course Course loaded from the database
-   * @param Group $group Group loaded from the database
+   * @param Collection $students IDs of students to add to the course
+   * @param Date|null $firstDate Only add for lessons on or after this date
    */
-  public function registerGroupForCourse(Course $course, Group $group);
+  public function registerStudentsForCourse(Course $course, Collection $students, Date $firstDate = null);
 
   /**
    * Registers a student for a complete course
@@ -61,14 +62,6 @@ interface RegistrationService {
   public function validateStudentForLesson(Lesson $lesson, Student $student, $ignoreDate = false, $force = false);
 
   /**
-   * Unregisters a group from a complete course
-   *
-   * @param Course $course Course loaded from the database
-   * @param Group $group Group loaded from the database
-   */
-  public function unregisterGroupFromCourse(Course $course, Group $group);
-
-  /**
    * Unregisters a student from a complete course
    *
    * @param Course $course Course loaded from the database
@@ -87,11 +80,28 @@ interface RegistrationService {
   public function unregisterStudentFromLesson(Registration $registration, $force = false);
 
   /**
-   * Unregisters all students from a single lesson
+   * Unregisters all students from a course
    *
-   * @param Lesson $lesson Lesson loaded from the database
+   * @param Course $course
+   * @param Date|null $firstDate Only delete registrations on or after the date
    */
-  public function unregisterAllFromLesson(Lesson $lesson);
+  public function unregisterAllFromCourse(Course $course, Date $firstDate = null);
+
+  /**
+   * Unregisters the given students from a course
+   *
+   * @param Course $course
+   * @param int[] $students IDs of students to unregister
+   */
+  public function unregisterStudentsFromCourse(Course $course, array $students);
+
+  /**
+   * Check whether registration is possible for the given date
+   *
+   * @param Date $value
+   * @return boolean
+   */
+  public function isRegistrationPossible(Date $value);
 
   /**
    * Set attendance of one student in a given lesson
@@ -111,27 +121,15 @@ interface RegistrationService {
 
   /**
    * @param Lesson $lesson
-   * @return Collection
+   * @return Collection<Registration>
    */
   public function getForLesson(Lesson $lesson);
 
   /**
    * @param Course $course
-   * @return Collection
-   */
-  public function getForCourse(Course $course);
-
-  /**
-   * Get registrations for a student
-   *
-   * @param Student $student
-   * @param Date|null $start
-   * @param Date|null $end
-   * @param Teacher|null $teacher
-   * @param Subject|null $subject
    * @return Collection<Registration>
    */
-  public function getForStudent(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getForCourse(Course $course);
 
   /**
    * @param Student $student
@@ -147,12 +145,11 @@ interface RegistrationService {
    * @param Student $student
    * @param Date|null $start
    * @param Date|null $end
-   * @param int|int[]|null $number
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Collection<array>
    */
-  public function getMappedForList(Student $student, Date $start = null, Date $end = null, $number = null, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * Get the registrations a student has for a given slot
@@ -180,6 +177,6 @@ interface RegistrationService {
    * @param Date|null $end
    * @return Collection<array>
    */
-  public function getAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
+  public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
 
 }

@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Helpers\Date;
 use App\Http\Requests\Course\CourseRequest;
 use App\Models\Course;
-use App\Validators\DateValidator;
+use App\Validators\CourseValidator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 use Mockery;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 abstract class CourseSpecificationTest extends TestCase {
 
   protected function mockValidator(Date $firstDate = null, Date $lastDate = null) {
-    $this->mock(['validator' => DateValidator::class]);
+    $this->mock(['validator' => CourseValidator::class]);
 
     $this->shouldReceive('validator', 'validateInYear')
         ->andReturnUsing(function($attribute, $value) use ($firstDate, $lastDate) {

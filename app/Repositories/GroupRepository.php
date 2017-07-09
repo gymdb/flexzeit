@@ -2,8 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Group;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Repository for accessing the groups table
@@ -13,14 +12,8 @@ use Illuminate\Database\Eloquent\Collection;
 interface GroupRepository {
 
   /**
-   * @return \Illuminate\Database\Eloquent\Builder
+   * @return Builder
    */
   public function query();
-
-  /**
-   * @param int|int[] $ids
-   * @return \Illuminate\Database\Eloquent\Builder
-   */
-  public function queryById($ids);
 
 }

@@ -29,6 +29,16 @@ interface DocumentationService {
   public function setFeedback(Registration $registration, $feedback);
 
   /**
+   * @param Student $student
+   * @param Date|null $start
+   * @param Date|null $end
+   * @param Teacher|null $teacher
+   * @param Subject|null $subject
+   * @return Collection<Registration>
+   */
+  public function getDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+
+  /**
    * Get documentation for a student for returning as JSON
    *
    * @param Student $student
@@ -50,7 +60,7 @@ interface DocumentationService {
    * @param Teacher|null $teacher
    * @return Collection <array>
    */
-  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null);
+  public function getMappedMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null);
 
   /**
    * Get feedback for a student for returning as JSON

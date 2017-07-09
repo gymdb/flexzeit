@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'missing'       => 'Anmeldung für diese Einheit fehlt!',
     'today'         => [

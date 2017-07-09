@@ -10,8 +10,4 @@ class GroupRepository implements \App\Repositories\GroupRepository {
     return Group::query();
   }
 
-  public function queryById($ids) {
-    return Group::whereKey($ids);
-  }
-
 }

@@ -8,11 +8,6 @@ use App\Services\WebUntisService;
 use Carbon\Carbon;
 use JsonRPC\Client;
 
-/**
- * Service for accessing config option values from database while using caches
- *
- * @package App\Services
- */
 class WebUntisServiceImpl implements WebUntisService {
 
   /** @var Client */
@@ -40,7 +35,7 @@ class WebUntisServiceImpl implements WebUntisService {
     $this->authenticated = true;
   }
 
-  private function logout() {
+  protected function logout() {
     if ($this->authenticated) {
       $this->connection->logout();
       $this->authenticated = false;
@@ -62,7 +57,10 @@ class WebUntisServiceImpl implements WebUntisService {
   }
 
   public function getOffdays() {
-    return collect($this->authenticatedConnection()->getHolidays())->flatMap(function($item) {
+    $result = $this->authenticatedConnection()->getHolidays();
+    $this->logout();
+
+    return collect($result)->flatMap(function($item) {
       return DateRange::getCollection($this->getDate($item['startDate']), $this->getDate($item['endDate']));
     });
   }

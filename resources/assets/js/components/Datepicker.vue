@@ -2,6 +2,7 @@
   <div>
     <input type="hidden" :value="isoVal" :name="name" :required="required"/>
     <div class="input-group date" :class="{'disabled': disabled}">
+      <!--suppress HtmlFormInputWithoutLabel -->
       <input type="text" class="form-control" :disabled="computedDisabled" :required="required" :id="name" readonly :placeholder="placeholder"/>
       <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
     </div>
@@ -9,12 +10,15 @@
 </template>
 
 <script>
+  /* global require */
   let $ = window.jQuery = require('jquery');
   import moment from 'moment';
+  //noinspection SpellCheckingInspection
   import eonosdandatetimepicker from 'eonasdan-bootstrap-datetimepicker';
 
   moment.locale('de');
 
+  //noinspection JSUnusedGlobalSymbols
   export default {
     name: 'vue-datetimepicker',
     data() {
@@ -67,9 +71,11 @@
     },
     watch: {
       options: function (options) {
+        //noinspection JSUnresolvedFunction
         $('.date', this.$el).datetimepicker('options', options);
       },
       value: function (value) {
+        //noinspection JSUnresolvedFunction
         $('.date', this.$el).datetimepicker('date', value || null);
       },
       val: function (val) {
@@ -120,6 +126,7 @@
     },
     mounted: function () {
       let self = this;
+      //noinspection JSUnresolvedFunction
       $('.date', this.$el)
           .datetimepicker($.extend({'defaultDate': this.value}, this.options))
           .on('dp.change', function (e) {
@@ -130,6 +137,7 @@
           });
     },
     destroyed: function () {
+      //noinspection JSUnresolvedFunction
       $('.date', this.$el).off().datetimepicker('destroy');
     }
   }

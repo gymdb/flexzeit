@@ -155,6 +155,17 @@ table .popover-container {
   max-height: 200px;
 }
 
+.btn-group.select-container {
+  display: block;
+
+  ul.dropdown-menu {
+    max-height: 250px;
+    width: 100%;
+    overflow-y: auto;
+  }
+
+}
+
 @media (max-width: 423px) {
   .date-range .date-range-connector {
     display: none;
@@ -214,6 +225,20 @@ table .popover-container {
 }
 
 @media print {
+  .container, .print-full-width {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  section:last-child {
+    margin-bottom: 0;
+
+    .panel-body {
+      padding-bottom: 0;
+    }
+  }
+
   .panel {
     border: 0;
   }

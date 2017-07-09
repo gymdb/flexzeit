@@ -28,7 +28,7 @@ class OffdayServiceImpl implements OffdayService {
   }
 
   public function getInRange(Date $start, Date $end = null, $dayOfWeek = null) {
-    return $this->offdayRepository->inRange($start, $end, $dayOfWeek)
+    return $this->offdayRepository->queryInRange($start, $end, $dayOfWeek)
         ->get(['date'])
         ->map(function(Offday $offday) {
           return $offday->date->toDateString();
@@ -38,7 +38,7 @@ class OffdayServiceImpl implements OffdayService {
 
   public function loadOffdays() {
     $dates = $this->untisService->getOffdays();
-    $this->offdayRepository->removeAll();
+    $this->offdayRepository->deleteWithoutGroup();
     $dates->each(function($date) {
       Offday::create(['date' => $date]);
     });

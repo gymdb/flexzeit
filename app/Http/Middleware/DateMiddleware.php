@@ -34,7 +34,6 @@ class DateMiddleware {
             throw new NotFoundHttpException("Missing parameter " . $parameter->name);
           }
         } else {
-
           try {
             $route->setParameter($parameter->name, Date::createFromFormat('Y-m-d', $parameters[$parameter->name]));
           } catch (InvalidArgumentException $ex) {

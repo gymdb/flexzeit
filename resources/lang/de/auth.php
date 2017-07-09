@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'login'    => 'Einloggen',
     'username' => 'Benutzername',

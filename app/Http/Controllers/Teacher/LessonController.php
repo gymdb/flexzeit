@@ -12,6 +12,7 @@ use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 /**
@@ -52,6 +53,8 @@ class LessonController extends Controller {
     $this->miscService = $miscService;
     $this->offdayService = $offdayService;
     $this->registrationService = $registrationService;
+
+    $this->middleware('transaction', ['only' => ['cancel']]);
   }
 
   /**
@@ -93,7 +96,7 @@ class LessonController extends Controller {
     $this->authorize('view', $lesson);
 
     $registrations = $this->registrationService->getForLesson($lesson);
-    $this->lessonService->setTime($lesson);
+    $this->configService->setTime($lesson);
 
     $attendanceChecked = $this->lessonService->isAttendanceChecked($lesson);
 
@@ -105,10 +108,24 @@ class LessonController extends Controller {
     $showRegister = !$lesson->date->isPast() && !$lesson->cancelled;
     $isAdmin = $this->getTeacher()->admin;
 
+    $allowCancel = $isAdmin && !$lesson->cancelled && !$lesson->date->isPast();
+
     $groups = $showRegister ? $this->miscService->getGroups() : null;
 
     return view('teacher.lessons.show', compact(
-        'lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance', 'showFeedback', 'showRegister', 'groups', 'isAdmin'));
+        'lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance', 'showFeedback', 'showRegister', 'groups', 'isAdmin', 'allowCancel'));
+  }
+
+  /**
+   * Remove the specified course
+   *
+   * @param  Lesson $lesson
+   * @return RedirectResponse
+   */
+  public function cancel(Lesson $lesson) {
+    $this->authorize('cancel', $lesson);
+    $this->lessonService->cancelLesson($lesson);
+    return redirect(route('teacher.lessons.show', [$lesson->id]));
   }
 
   /**
@@ -128,7 +145,7 @@ class LessonController extends Controller {
     $start = $start ?: $this->configService->getDefaultListStartDate();
     $end = $end ?: $this->configService->getDefaultListEndDate();
 
-    $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end);
+    $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end, null, null, true);
     return response()->json($lessons);
   }
 

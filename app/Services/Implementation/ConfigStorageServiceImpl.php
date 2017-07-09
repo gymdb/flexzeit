@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class ConfigStorageServiceImpl implements ConfigStorageService {
 
+  /** @var ConfigRepository */
   private $configRepository;
 
   private $prefix = 'config';
@@ -87,7 +88,7 @@ class ConfigStorageServiceImpl implements ConfigStorageService {
   }
 
   protected function getCache() {
-    return Cache::tags($this->prefix);
+    return Cache::getFacadeRoot();
   }
 
 }

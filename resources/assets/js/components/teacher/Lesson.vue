@@ -1,4 +1,5 @@
 <script>
+  //noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
@@ -47,9 +48,11 @@
         });
       },
       openFeedback(id) {
+        //noinspection JSUnresolvedVariable
         this.$refs.feedbackModal.open(id);
       },
       openRegister() {
+        //noinspection JSUnresolvedVariable
         this.$refs.registerModal.open();
       }
     }

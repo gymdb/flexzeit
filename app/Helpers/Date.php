@@ -25,7 +25,8 @@ class Date extends Carbon {
     }
   }
 
-  public static function createFromFormat($format, $time, $tz = null) {
+  public static function createFromFormat(/** @noinspection PhpSignatureMismatchDuringInheritanceInspection */
+      $format, $time, $tz = null) {
     $info = date_parse_from_format($format, $time);
     if ($info['error_count'] !== 0 || $info['warning_count'] !== 0) {
       throw new InvalidArgumentException(implode(PHP_EOL, array_merge($info['errors'], $info['warnings'])));

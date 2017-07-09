@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Helpers\Date;
 use App\Repositories\OffdayRepository;
-use App\Validators\DateValidator;
+use App\Validators\CourseValidator;
 use Tests\TestCase;
 use Tests\Traits\MockConfigTrait;
 use Tests\Traits\MockDbTrait;
@@ -21,30 +21,14 @@ class DateValidatorTest extends TestCase {
   use MockDbTrait;
   use MockOffdaysTrait;
 
-  /** @var DateValidator */
+  /** @var CourseValidator */
   private $validator;
 
   protected function setUp() {
     parent::setUp();
     $this->mock(['offdays' => OffdayRepository::class]);
     $this->mockConfig([]);
-    $this->validator = $this->app->make(DateValidator::class);
-  }
-
-  public function testInYear() {
-    $start = Date::createFromDate(2017, 4, 1);
-    $end = Date::createFromDate(2017, 5, 31);
-    $this->mockConfig(['year.start' => $start, 'year.end' => $end]);
-
-    $last = $end->copy()->addMonth();
-    for ($date = $start->copy()->addMonth(-1); $date <= $last; $date->addDay()) {
-      $this->assertSame($date->between($start, $end), $this->validator->validateInYear('date', $date));
-    }
-
-    $this->assertFalse($this->validator->validateInYear('date', $start->copy()->addDay(-1)));
-    $this->assertTrue($this->validator->validateInYear('date', $start));
-    $this->assertTrue($this->validator->validateInYear('date', $end));
-    $this->assertFalse($this->validator->validateInYear('date', $end->copy()->addDay()));
+    $this->validator = $this->app->make(CourseValidator::class);
   }
 
   public function testCreateAllowed() {

@@ -50,6 +50,8 @@ class DocumentationController extends Controller {
     $this->offdayService = $offdayService;
     $this->documentationService = $documentationService;
     $this->miscService = $miscService;
+
+    $this->middleware('transaction', ['only' => ['setFeedback']]);
   }
 
   /**
@@ -120,7 +122,7 @@ class DocumentationController extends Controller {
       $this->authorize('showMissingDocumentation', $group);
     }
 
-    $missing = $this->documentationService->getMissing($group, $student, $start, $end, $teacher);
+    $missing = $this->documentationService->getMappedMissing($group, $student, $start, $end, $teacher);
     return response()->json($missing);
   }
 

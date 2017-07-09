@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
 return [
     'format'        => [
         'date'  => 'd.m.Y',

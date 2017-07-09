@@ -1,5 +1,6 @@
+<!--suppress JSUnresolvedVariable -->
 <template>
-  <modal :value="show" effect="fade" :title="heading" @cancel="cancel" :large="true">
+  <modal :value="show" effect="fade" :title="heading" @cancel="cancel" large>
     <div class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('student.register.submit')}}</button>
@@ -13,9 +14,14 @@
         <ul>
           <li v-for="date in lesson.course.lessons">{{$d(moment(date), 'short')}}</li>
         </ul>
+        <p>{{lesson.course.description}}</p>
       </template>
       <template v-else>
-        <p>{{$t('student.register.lesson.info', {teacher: lesson.teacher, date: $d(moment(lesson.date), 'short'), time: $t('messages.range', lesson.time)})}}</p>
+        <p>{{$t('student.register.lesson.info', {
+          teacher: lesson.teacher,
+          date: $d(moment(lesson.date), 'short'),
+          time: $t('messages.range', lesson.time)
+        })}}</p>
       </template>
     </template>
   </modal>

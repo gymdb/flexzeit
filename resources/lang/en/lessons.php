@@ -37,5 +37,9 @@ return [
     ],
     'feedback'      => [
         'button' => 'Feedback'
+    ],
+    'cancel'       => [
+        'submit'  => 'Cancel lesson',
+        'confirm' => 'Do you really want to cancel this lesson?'
     ]
 ];

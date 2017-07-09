@@ -38,7 +38,7 @@
                   <td>@{{reg.name}}</td>
                   <td>
                     <teacher-attendance v-if="!moment().isBefore(reg.date)" :id="reg.id"
-                                :attendance="reg.attendance" :excused="reg.excused" :changeable="true"
+                                :attendance="reg.attendance" :excused="reg.excused" changeable
                                 v-on:success="setAttendanceSuccess" v-on:error="setAttendanceError"></teacher-attendance>
                   </td>
                   <td>
