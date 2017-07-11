@@ -5,7 +5,7 @@
     <h2 class="panel-heading">@lang('lessons.index.heading')</h2>
     <div class="panel-body">
       <filtered-list
-          url="/teacher/api/lessons"
+          url="{{route('teacher.api.lessons')}}"
           @if($teachers)
           :teachers='@json($teachers)'
           @endif

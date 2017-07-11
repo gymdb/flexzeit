@@ -78,7 +78,7 @@
       <h2 class="panel-heading">@lang('student.available.heading')</h2>
       <div class="panel-body">
         <filtered-list
-            url="/student/api/lessons/{{$date->toDateString()}}"
+            url="{{route('student.api.available', $date->toDateString())}}"
             :teachers='@json($teachers)'
             :subjects='@json($subjects)'
             error-text="@lang('student.available.error')">

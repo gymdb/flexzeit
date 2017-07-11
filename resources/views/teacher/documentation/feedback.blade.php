@@ -5,7 +5,7 @@
     <h2 class="panel-heading">@lang('registrations.feedback.heading')</h2>
     <div class="panel-body">
       <filtered-list
-          url="/teacher/api/feedback"
+          url="{{route('teacher.api.feedback')}}"
           :groups='@json($groups)'
           :teachers='@json($teachers)'
           :subjects='@json($subjects)'

@@ -35,7 +35,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   // API methods
   Route::group(['prefix' => 'api'], function() {
     // Course related API methods
-    Route::get('/courses', 'CourseController@getForTeacher')->middleware('params:teacher?;i|start?;d|end?;d');
+    Route::get('/courses', 'CourseController@getForTeacher')
+        ->middleware('params:teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.courses');
     Route::get('/courses/obligatory', 'CourseController@getObligatory')
         ->middleware('params:group?;i|teacher?;i|subject?;i|start?;d|end?;d')
         ->name('teacher.api.courses.obligatory');
@@ -45,28 +47,36 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
         ->middleware('params:course;i|lastDate?;d|groups*;i');
 
     // Lesson related API methods
-    Route::get('/lessons', 'LessonController@getForTeacher')->middleware('params:teacher?;i|start?;d|end?;d');
+    Route::get('/lessons', 'LessonController@getForTeacher')
+        ->middleware('params:teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.lessons');
 
     // Documentation/Feedback related API methods
     Route::get('/documentation', 'DocumentationController@getDocumentation')
-        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.documentation');
     Route::get('/documentation/missing', 'DocumentationController@getMissing')
-        ->middleware('params:group;i|student?;i|teacher?;i|start?;d|end?;d');
+        ->middleware('params:group;i|student?;i|teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.documentation.missing');
     Route::get('/feedback', 'DocumentationController@getFeedbackForStudent')
-        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.feedback');
     Route::get('/feedback/{registration}', 'DocumentationController@getFeedbackForRegistration');
     Route::post('/feedback/{registration}', 'DocumentationController@setFeedback')
         ->middleware('params:feedback?');
 
     // Registration related API methods
     Route::get('/registrations', 'RegistrationController@getForStudent')
-        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d');
+        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
+        ->name('teacher.api.registrations');
     Route::get('/registrations/{date}/{number}', 'RegistrationController@getForSlot')
         ->middleware('params:student;i');
     Route::get('/registrations/missing', 'RegistrationController@getMissing')
-        ->middleware('params:group;i|student?;i|start?;d|end?;d');
+        ->middleware('params:group;i|student?;i|start?;d|end?;d')
+        ->name('teacher.api.registrations.missing');
     Route::get('/registrations/absent', 'RegistrationController@getAbsent')
-        ->middleware('params:group;i|student?;i|start?;d|end?;d');
+        ->middleware('params:group;i|student?;i|start?;d|end?;d')
+        ->name('teacher.api.registrations.absent');
     Route::post('/attendance/{registration}', 'RegistrationController@setAttendance')
         ->middleware('params:attendance;b');
     Route::post('/attendanceChecked/{lesson}', 'RegistrationController@setAttendanceChecked');
@@ -94,7 +104,8 @@ Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => [
 
     // Lesson related API methods
     Route::get('/lessons/{date}', 'ApiController@getAvailableLessons')
-        ->middleware('params:subject?;i|teacher?;i');
+        ->middleware('params:subject?;i|teacher?;i')
+        ->name('student.api.available');
 
     // Registration related API methods
     Route::post('/register/course/{course}', 'ApiController@registerCourse');

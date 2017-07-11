@@ -5,7 +5,7 @@
     <h2 class="panel-heading">@lang('registrations.list.heading')</h2>
     <div class="panel-body">
       <filtered-list
-          url="/teacher/api/registrations"
+          url="{{route('teacher.api.registrations')}}"
           :groups='@json($groups)'
           :teachers='@json($teachers)'
           :subjects='@json($subjects)'

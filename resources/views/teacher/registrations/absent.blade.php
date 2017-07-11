@@ -6,7 +6,7 @@
     <div class="panel-body">
       <teacher-absent inline-template>
         <filtered-list
-            url="/teacher/api/registrations/absent"
+            url="{{route('teacher.api.registrations.absent')}}"
             :groups='@json($groups)'
             min-date='{{$minDate->toDateString()}}'
             max-date='{{$maxDate->toDateString()}}'
