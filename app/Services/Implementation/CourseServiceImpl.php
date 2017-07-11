@@ -171,7 +171,7 @@ class CourseServiceImpl implements CourseService {
       }
 
       // Check for existing courses on one of the newly added lessons
-      if ($firstChanged <= $lastDate) {
+      if ($firstChanged > $oldLastDate) {
         $this->coursePossible($teacher, $firstChanged, $lastDate, $number);
       }
     }

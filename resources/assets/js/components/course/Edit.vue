@@ -12,7 +12,7 @@
         room: this.old.room,
         description: this.old.description,
         yearFrom: this.old.yearFrom,
-        yearTo: this.old.yearFrom,
+        yearTo: this.old.yearTo,
         maxStudents: this.old.maxStudents,
         subject: this.old.subject,
         groups: this.old.groups || [],
