@@ -1,6 +1,6 @@
 /* global require */
 
-const { mix } = require('laravel-mix');
+const {mix} = require('laravel-mix');
 
 /*
  |--------------------------------------------------------------------------
@@ -13,6 +13,18 @@ const { mix } = require('laravel-mix');
  |
  */
 
+mix.webpackConfig({
+  module: {
+    rules: [{
+      test: /\/vue-strap\/src\/.*.js$/,
+      loader: 'babel-loader',
+      options: {
+        presets: ['es2015']
+      }
+    }]
+  }
+});
+
 mix.setResourceRoot('../');
 mix.js('resources/assets/js/app.js', 'public/js')
-   .sass('resources/assets/sass/app.scss', 'public/css');
+    .sass('resources/assets/sass/app.scss', 'public/css');

@@ -2,6 +2,7 @@
 # backup files (*~) and vim swap file (.swp), MacOS dir file (.DS_Store)
 *~
 *.lock
+*-lock.json
 *.DS_Store
 *.swp
 *.out
