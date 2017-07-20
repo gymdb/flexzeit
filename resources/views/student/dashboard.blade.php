@@ -4,7 +4,10 @@
   <student-registrations inline-template>
     <div>
       <section class="panel panel-default">
-        <h2 class="panel-heading">@lang('student.today.heading', ['date' => \App\Helpers\Date::today()])</h2>
+        <h2 class="panel-heading">
+          @lang('student.today.heading', ['date' => \App\Helpers\Date::today()])
+          <a href="javascript:print()" class="pull-right hidden-print"><span class="glyphicon glyphicon-print"></span></a>
+        </h2>
         <div class="panel-body">
           @if($today->isEmpty())
             @lang('student.today.none')
@@ -69,7 +72,7 @@
                     @if(!$lesson->id)
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
                       <td>
-                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')">
+                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')" class="hidden-print">
                           <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
                           <span class="sr-only">@lang('student.register.label')</span>
                         </a>
@@ -83,7 +86,7 @@
                           <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                            <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
                             <span class="sr-only"> @lang('student.unregister.label')</span>
                           </unregister>
                         @endif
@@ -97,7 +100,7 @@
                           <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
                                       confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
                                       v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                            <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
                             <span class="sr-only"> @lang('student.unregister.label')</span>
                           </unregister>
                         @endif
@@ -112,7 +115,7 @@
         </div>
       </section>
 
-      <section class="panel panel-default">
+      <section class="panel panel-default hidden-print">
         <h2 class="panel-heading">@lang('student.documentation.heading')</h2>
         <div class="panel-body">
           @if($documentation->isEmpty())
