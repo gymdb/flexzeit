@@ -1,9 +1,10 @@
+<!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
 <template>
   <div>
     <input type="hidden" :value="isoVal" :name="name" :required="required"/>
     <div class="input-group date" :class="{'disabled': disabled}">
       <!--suppress HtmlFormInputWithoutLabel -->
-      <input type="text" class="form-control" :disabled="computedDisabled" :required="required" :id="name" readonly :placeholder="placeholder"/>
+      <input class="form-control" :disabled="computedDisabled" :required="required" :id="name" readonly :placeholder="placeholder"/>
       <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
     </div>
   </div>
@@ -14,15 +15,19 @@
   let $ = window.jQuery = require('jquery');
   import moment from 'moment';
   //noinspection SpellCheckingInspection
-  import eonosdandatetimepicker from 'eonasdan-bootstrap-datetimepicker';
+  import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
+  const lang = window.Laravel.lang;
 
-  moment.locale('de');
+  moment.locale(lang);
+  datetimepicker.defaults.locale = lang;
+  datetimepicker.defaults.tooltips = require('../lang/' + lang + '/datetimepicker').tooltips;
 
   //noinspection JSUnusedGlobalSymbols
   export default {
     name: 'vue-datetimepicker',
     data() {
       return {
+        picker: null,
         val: this.value
       }
     },
@@ -70,17 +75,53 @@
       }
     },
     watch: {
-      options: function (options) {
-        //noinspection JSUnresolvedFunction
-        $('.date', this.$el).datetimepicker('options', options);
-      },
       value: function (value) {
-        //noinspection JSUnresolvedFunction
-        $('.date', this.$el).datetimepicker('date', value || null);
+        if (this.picker) {
+          this.picker.datetimepicker('date', value || null);
+        }
       },
       val: function (val) {
         this.$emit('input', val);
-      }
+      },
+      required(required) {
+        if (this.picker) {
+          this.picker.datetimepicker('showClear', !required);
+        }
+      },
+      computedShowToday(showToday) {
+        if (this.picker) {
+          this.picker.datetimepicker('showTodayButton', showToday);
+        }
+      },
+      computedDisabledDaysOfWeek(disabledDaysOfWeek) {
+        if (this.picker) {
+          this.picker.datetimepicker('daysOfWeekDisabled', disabledDaysOfWeek);
+        }
+      },
+      computedDisabledDates(disabledDates) {
+        if (this.picker) {
+          this.picker.datetimepicker('disabledDates', this.computedDisabled ? [] : disabledDates);
+        }
+      },
+      computedViewDate(viewDate) {
+        if (this.picker) {
+          this.picker.datetimepicker('viewDate', viewDate);
+        }
+      },
+      computedMinDate(minDate) {
+        if (this.picker) {
+          this.picker.datetimepicker('minDate', minDate);
+        }
+      },
+      computedMaxDate(maxDate) {
+        if (this.picker) {
+          this.picker.datetimepicker('maxDate', maxDate);
+        }
+      }, removeVal(removeVal) {
+        if (removeVal) {
+          this.val = null;
+        }
+      },
     },
     computed: {
       isoVal() {
@@ -89,56 +130,65 @@
       computedDisabled() {
         return this.disabled || !this.minDate || !this.maxDate || this.minDate.isAfter(this.maxDate);
       },
-      options() {
-        if (this.disabled) {
-          this.val = null;
-
-          return {
-            'allowInputToggle': true,
-            'ignoreReadonly': true,
-            'format': 'L',
-            'locale': 'de',
-            'useCurrent': false
-          }
+      computedShowToday() {
+        return !this.computedDisabled && this.showToday && !this.minDate.isAfter() && !this.maxDate.isBefore();
+      },
+      computedDisabledDaysOfWeek() {
+        return this.computedDisabled ? [] : this.disabledDaysOfWeek;
+      },
+      computedDisabledDates() {
+        return this.computedDisabled ? [] : this.disabledDates;
+      },
+      computedViewDate() {
+        if (this.computedDisabled) {
+          return null;
         }
-
-        if (this.val &&
-            (this.disabledDaysOfWeek.indexOf(this.val.day()) >= 0
-            || this.val.isBefore(this.minDate) || this.val.isAfter(this.maxDate))) {
-          this.val = null;
-        }
-
-        return {
-          'allowInputToggle': true,
-          'ignoreReadonly': true,
-          'format': 'L',
-          'locale': 'de',
-          'useCurrent': false,
-          'showClear': !this.required,
-          'showTodayButton': this.showToday && !this.minDate.isAfter() && !this.maxDate.isBefore(),
-          'daysOfWeekDisabled': this.disabledDaysOfWeek,
-          'disabledDates': this.disabledDates,
-          'viewDate': this.showToday ? false : this.minDate.clone(),
-          'minDate': this.minDate,
-          'maxDate': this.maxDate
-        }
+        return this.showToday ? false : this.minDate.clone();
+      },
+      computedMinDate() {
+        return this.computedDisabled ? false : this.minDate;
+      },
+      computedMaxDate() {
+        return this.computedDisabled ? false : this.maxDate;
+      },
+      removeVal() {
+        return this.computedDisabled || (this.val && (this.disabledDaysOfWeek.indexOf(this.val.day()) >= 0
+            || this.val.isBefore(this.minDate) || this.val.isAfter(this.maxDate)));
       }
     },
     mounted: function () {
       let self = this;
-      //noinspection JSUnresolvedFunction
-      $('.date', this.$el)
-          .datetimepicker($.extend({'defaultDate': this.value}, this.options))
+      this.picker = $('.date', this.$el);
+      const options = {
+        'allowInputToggle': true,
+        'ignoreReadonly': true,
+        'format': 'L',
+        'useCurrent': false,
+        'showClear': !this.required || true,
+        'showTodayButton': this.computedShowToday,
+        'daysOfWeekDisabled': this.computedDisabledDaysOfWeek,
+        'disabledDates': this.computedDisabledDates,
+        'viewDate': this.computedViewDate,
+        'minDate': this.computedMinDate,
+        'maxDate': this.computedMaxDate,
+        'defaultDate': this.value
+      };
+
+      this.picker.datetimepicker(options)
           .on('dp.change', function (e) {
             if (e.date) {
+              if (self.val && e.date.isSame(self.val)) {
+                return;
+              }
               e.date.startOf('day');
             }
             self.val = e.date || null;
           });
     },
     destroyed: function () {
-      //noinspection JSUnresolvedFunction
-      $('.date', this.$el).off().datetimepicker('destroy');
+      if (this.picker) {
+        this.picker.off().datetimepicker('destroy');
+      }
     }
   }
 </script>

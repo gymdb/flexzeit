@@ -1,4 +1,4 @@
-<!--suppress XmlInvalidId, JSUnresolvedVariable -->
+<!--suppress XmlInvalidId, JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
   <div class="col-sm-6 col-xs-12">
     <div class="date-range clearfix">
@@ -41,7 +41,7 @@
     'required': true,
     'course': true
   }, {
-    'today': true
+    'showToday': true
   }, {
     'firstDisabled': true,
     'course': true,
@@ -51,6 +51,7 @@
     'lastDisabled': true
   }];
 
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
