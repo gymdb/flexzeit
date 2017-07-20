@@ -4,7 +4,7 @@
 return [
     'format'        => [
         'date'  => 'd.m.Y',
-        'range' => ':start &ndash; :end'
+        'range' => 'Flex :number' //':start &ndash; :end'
     ],
     'date'          => 'Datum',
     'time'          => 'Zeit',

@@ -50,7 +50,7 @@
                 @foreach($lessons as $n=>$time)
                   <label class="checkbox-inline">
                     <input type="radio" name="lessonNumber" value="{{$n}}" disabled @if($n === $courseData['number']) checked @endif/>
-                    @lang('messages.format.range', $time)
+                    @lang('messages.format.range', ['number' => $n])
                   </label>
                 @endforeach
               </div>
@@ -98,13 +98,13 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="name">@lang('courses.data.name')</label>
-              <input type="text" id="name" name="name" class="form-control" v-model.trim="name" maxlength="50" required
+              <input id="name" name="name" class="form-control" v-model.trim="name" maxlength="50" required
                      placeholder="@lang('courses.data.name')"/>
             </div>
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <input type="text" id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
+              <input id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
                      placeholder="@lang('courses.data.room')"/>
             </div>
 
@@ -147,7 +147,7 @@
             @endif
 
             <div class="col-xs-12">
-              <button type="submit" class="btn btn-success" :disabled="buttonDisabled">@lang('courses.edit.submit')</button>
+              <button class="btn btn-success" :disabled="buttonDisabled">@lang('courses.edit.submit')</button>
             </div>
           </div>
         </form>

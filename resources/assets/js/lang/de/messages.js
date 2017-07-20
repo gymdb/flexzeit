@@ -12,5 +12,5 @@ module.exports = {
   emptyResult: 'Für die gewählten Filter wurden keine Daten gefunden.',
   studentsError: 'Fehler beim Laden der SchülerInnen in der gewählten Klasse/Gruppe.',
   cancel: 'Abbrechen',
-  range: '{start} \u2013 {end}'
+  range: 'Flex {number}' //'{start} \u2013 {end}'
 };

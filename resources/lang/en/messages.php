@@ -3,7 +3,7 @@
 return [
     'format'        => [
         'date'  => 'Y-m-d',
-        'range' => ':start &ndash; :end'
+        'range' => 'Flex :number' //':start &ndash; :end'
     ],
     'date'          => 'Date',
     'time'          => 'Time',

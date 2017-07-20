@@ -52,7 +52,7 @@
               <label>@lang('courses.data.lesson')</label>
               <div v-if="lessonsOnDay">
                 <label v-for="(time, n) in lessonsOnDay" class="checkbox-inline">
-                  <input type="radio" name="lessonNumber" :value="n" v-model="number" required/> @{{$t('messages.range', time)}}
+                  <input type="radio" name="lessonNumber" :value="n" v-model="number" required/> @{{$t('messages.range', {number: n})}}
                 </label>
               </div>
               <p v-else class="form-control-static">@lang('courses.data.chooseDay')</p>
@@ -92,13 +92,13 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="name">@lang('courses.data.name')</label>
-              <input type="text" id="name" name="name" class="form-control" v-model.trim="name" maxlength="50" required
+              <input id="name" name="name" class="form-control" v-model.trim="name" maxlength="50" required
                      placeholder="@lang('courses.data.name')"/>
             </div>
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <input type="text" id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
+              <input id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
                      placeholder="@lang('courses.data.room')"/>
             </div>
 
@@ -141,7 +141,7 @@
             @endif
 
             <div class="col-xs-12">
-              <button type="submit" class="btn btn-success" :disabled="buttonDisabled">@lang('courses.create.submit')</button>
+              <button class="btn btn-success" :disabled="buttonDisabled">@lang('courses.create.submit')</button>
             </div>
           </div>
         </form>

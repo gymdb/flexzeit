@@ -14,7 +14,7 @@ return [
         'details' => 'Details for lesson'
     ],
     'show'          => [
-        'heading'   => 'Lesson on <em>:date</em> at <em>:start &ndash; :end</em>',
+        'heading'   => 'Flex :number on <em>:date</em>', //'Lesson on <em>:date</em> at <em>:start &ndash; :end</em>',
         'cancelled' => 'This lesson has been cancelled.'
     ],
     'registrations' => [

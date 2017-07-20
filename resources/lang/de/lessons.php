@@ -15,7 +15,7 @@ return [
         'details' => 'Details zur Einheit'
     ],
     'show'          => [
-        'heading'   => 'Einheit am <em>:date</em> von <em>:start</em> bis <em>:end</em>',
+        'heading'   => 'Flex :number am <em>:date</em>', //'Einheit am <em>:date</em> von <em>:start</em> bis <em>:end</em>',
         'cancelled' => 'Diese Einheit wurde abgesagt.'
     ],
     'registrations' => [
@@ -39,7 +39,7 @@ return [
     'feedback'      => [
         'button' => 'Rückmeldung schreiben'
     ],
-    'cancel'       => [
+    'cancel'        => [
         'submit'  => 'Einheit absagen',
         'confirm' => 'Soll diese Einheit wirklich abgesagt werden?'
     ]

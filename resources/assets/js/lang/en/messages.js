@@ -11,5 +11,5 @@ module.exports = {
   emptyResult: 'No data found for the given selection.',
   studentsError: 'Error loading students for group.',
   cancel: 'Cancel',
-  range: '{start} \u2013 {end}'
+  range: 'Flex {number}' //'{start} \u2013 {end}'
 };
