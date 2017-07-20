@@ -35,6 +35,7 @@ use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -56,6 +57,12 @@ class AppServiceProvider extends ServiceProvider {
       /** @noinspection SpellCheckingInspection */
       return "<?php echo htmlspecialchars(json_encode($expression, JSON_HEX_APOS | JSON_HEX_QUOT), ENT_NOQUOTES, 'UTF-8', false); ?>";
     });
+
+    View::share('global', [
+        'csrfToken' => csrf_token(),
+        'baseURL'   => url('/'),
+        'lang'      => config('app.locale')
+    ]);
   }
 
   /**

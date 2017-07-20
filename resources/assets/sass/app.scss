@@ -11,6 +11,18 @@ body {
   min-width: 300px;
 }
 
+.navbar-brand {
+  &> img {
+    display: inline;
+    margin: -9px 0 -7px;
+    max-height: 38px;
+  }
+}
+
+.login-image {
+  max-width: 100%;
+}
+
 h2.panel-heading {
   margin: 0;
   font-size: inherit;

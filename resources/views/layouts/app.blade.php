@@ -15,12 +15,9 @@
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
   <!-- Scripts -->
+  <!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
   <script>
-    window.Laravel = @json([
-            'csrfToken' => csrf_token(),
-            'baseURL' => url('/'),
-            'lang' => config('app.locale')
-        ]);
+    window.Laravel = @json($global);
   </script>
 </head>
 <body>
@@ -30,6 +27,7 @@
       @if(Illuminate\Support\Facades\Auth::guest())
         <div class="navbar-header">
           <a class="navbar-brand" href="{{url('/')}}">
+            <img src="{{asset('images/logo.jpg')}}"/>
             {{ config('app.name', 'Flexzeit') }}
           </a>
         </div>
@@ -44,6 +42,7 @@
 
           <a class="navbar-brand"
              href="{{Illuminate\Support\Facades\Auth::user()->isStudent() ? route('student.dashboard') : route('teacher.dashboard')}}">
+            <img src="{{asset('images/logo.jpg')}}" class="clearfix"/>
             {{ config('app.name', 'Flexzeit') }}
           </a>
         </div>
@@ -52,7 +51,7 @@
           @if(Illuminate\Support\Facades\Auth::user()->isTeacher())
             <ul class="nav navbar-nav">
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                   @lang('nav.lessons.heading') <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" role="menu">
@@ -66,7 +65,7 @@
               </li>
 
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                   @lang('nav.reports') <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" role="menu">
@@ -105,7 +104,7 @@
           <ul class="nav navbar-nav navbar-right">
             <!-- Authentication Links -->
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                 {{ Illuminate\Support\Facades\Auth::user()->name() }} <span class="caret"></span>
               </a>
 

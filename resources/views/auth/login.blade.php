@@ -4,14 +4,14 @@
   <div class="panel panel-default">
     <div class="panel-heading">@lang('auth.login')</div>
     <div class="panel-body">
-      <form class="form-horizontal" role="form" method="POST" action="{{ route('loginTarget') }}">
+      <form class="form-horizontal" method="POST" action="{{ route('loginTarget') }}">
         {{ csrf_field() }}
 
         <div class="form-group{{ $errors->has('username') ? ' has-error' : '' }}">
           <label for="username" class="col-md-4 control-label">@lang('auth.username')</label>
 
           <div class="col-md-6">
-            <input id="username" type="text" class="form-control" name="username" value="{{ old('username') }}" required autofocus>
+            <input id="username" class="form-control" name="username" value="{{ old('username') }}" required autofocus>
 
             @if ($errors->has('username'))
               <span class="help-block">
@@ -47,12 +47,16 @@
 
         <div class="form-group">
           <div class="col-md-8 col-md-offset-4">
-            <button type="submit" class="btn btn-primary">@lang('auth.login')</button>
+            <button class="btn btn-primary">@lang('auth.login')</button>
 
             {{--<a class="btn btn-link" href="{{ route('password.request') }}">--}}
             {{--Forgot Your Password?--}}
             {{--</a>--}}
           </div>
+        </div>
+
+        <div class="form-group text-center">
+          <img src="{{asset('images/bottom.png')}}" class="login-image col-md-8 col-md-push-2"/>
         </div>
       </form>
     </div>
