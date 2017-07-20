@@ -92,7 +92,7 @@ interface CourseService {
    * @param Date|null $end
    * @return Collection<array>
    */
-  public function getMappedForTeacher(Teacher $teacher, Date $start, Date $end = null);
+  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null);
 
   /**
    * @param Group|null $group

@@ -6,9 +6,7 @@
     <div class="panel-body">
       <filtered-list
           url="{{route('teacher.api.courses')}}"
-          @if($teachers)
           :teachers='@json($teachers)'
-          @endif
           default-start-date='{{$defaultStartDate}}'
           default-end-date='{{$defaultEndDate}}'
           min-date='{{$minDate->toDateString()}}'
@@ -24,9 +22,7 @@
               <tr>
                 <th>@lang('messages.date')</th>
                 <th>@lang('messages.time')</th>
-                @if($teachers)
-                  <th>@lang('messages.teacher')</th>
-                @endif
+                <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.course')</th>
                 <th></th>
               </tr>
@@ -35,9 +31,7 @@
                 <td v-if="course.last">@{{$t('messages.range', {start: $d(moment(course.first), 'short'), end: $d(moment(course.last), 'short')})}}</td>
                 <td v-else>@{{$d(moment(course.first), 'short')}}</td>
                 <td>@{{$t('messages.range', course.time)}}</td>
-                @if($teachers)
-                  <td>@{{course.teacher}}</td>
-                @endif
+                <td>@{{course.teacher}}</td>
                 <td>@{{course.name}}</td>
                 <td>
                   <a :href="'{{route('teacher.courses.show', '')}}/' + course.id">@lang('courses.index.details')</a>

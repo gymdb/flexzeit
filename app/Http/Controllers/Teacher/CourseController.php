@@ -77,8 +77,7 @@ class CourseController extends Controller {
    * @return Response
    */
   public function index() {
-    $isAdmin = $this->getTeacher()->admin;
-    $teachers = $isAdmin ? $this->miscService->getTeachers() : null;
+    $teachers = $this->miscService->getTeachers();
 
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
@@ -87,7 +86,7 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.courses.index', compact('isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.courses.index', compact('teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -223,15 +222,16 @@ class CourseController extends Controller {
    * @return View
    */
   public function show(Course $course) {
-    $this->authorize('view', $course);
-
     $lessons = $this->lessonService->getForCourse($course);
     $registrations = $this->registrationService->getForCourse($course);
 
     $firstLesson = $lessons->first();
     $allowDestroy = $firstLesson && $firstLesson->date > Date::today();
 
-    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'allowDestroy'));
+    $teacher = $this->getTeacher();
+    $showLessonLink = $teacher->admin || $teacher->id === $firstLesson->teacher_id;
+
+    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'allowDestroy', 'showLessonLink'));
   }
 
   /**
@@ -413,11 +413,6 @@ class CourseController extends Controller {
    * @return JsonResponse
    */
   public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
-    if (!$teacher) {
-      $teacher = $this->getTeacher();
-    }
-    $this->authorize('viewCourses', $teacher);
-
     $start = $start ?: $this->configService->getDefaultListStartDate();
     $end = $end ?: $this->configService->getDefaultListEndDate();
 

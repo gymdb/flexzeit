@@ -307,7 +307,7 @@ class CourseServiceImpl implements CourseService {
     });
   }
 
-  public function getMappedForTeacher(Teacher $teacher, Date $start, Date $end = null) {
+  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null) {
     return $this->courseRepository->query($teacher, $start, $end)
         ->get()
         ->map(function(Course $course) {

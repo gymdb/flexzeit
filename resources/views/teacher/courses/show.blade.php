@@ -37,7 +37,7 @@
             {{csrf_field()}}
             {{method_field('delete')}}
             <p>
-              <button type="submit" class="btn btn-default">@lang('courses.destroy.submit')</button>
+              <button class="btn btn-default">@lang('courses.destroy.submit')</button>
             </p>
           </form>
         </confirm>
@@ -48,9 +48,13 @@
       <ul>
         @foreach($lessons as $lesson)
           <li @if($lesson->cancelled)class="text-muted"@endif>
-            <a href="{{route('teacher.lessons.show', $lesson->id)}}">
+            @if($showLessonLink)
+              <a href="{{route('teacher.lessons.show', $lesson->id)}}">
+                <strong>{{$lesson->date}}</strong>, @lang('messages.format.range', $lesson->time)
+              </a>
+            @else
               <strong>{{$lesson->date}}</strong>, @lang('messages.format.range', $lesson->time)
-            </a>
+            @endif
           </li>
         @endforeach
       </ul>
