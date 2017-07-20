@@ -76,6 +76,7 @@
             if (response.data.success) {
               self.original = self.text;
               self.saveError = null;
+              self.cancel();
             } else {
               self.saveError = response.data.error;
             }
