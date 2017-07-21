@@ -10,7 +10,6 @@ use App\Models\Lesson;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Repositories\CourseRepository;
-use App\Repositories\Eloquent\RepositoryHelper;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
@@ -24,6 +23,8 @@ use App\Specifications\ObligatorySpecification;
 use Illuminate\Support\Collection;
 
 class CourseServiceImpl implements CourseService {
+
+  use ServiceTrait;
 
   /** @var ConfigService */
   private $configService;
@@ -284,16 +285,16 @@ class CourseServiceImpl implements CourseService {
         ->queryForTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)
         ->get(['id', 'date', 'number', 'cancelled', 'room']);
 
-    if (!$lessons->contains(RepositoryHelper::matcher($firstDate, null, false))) {
+    if (!$lessons->contains($this->matcher($firstDate, null, false))) {
       // Teacher has no lesson at the first course date, so create them for all days except offdays
       $offdays = $this->offdayRepository->queryInRange($firstDate, $lastDate, $dayOfWeek, $numbers)->get(['date', 'number']);
 
       for ($d = $firstDate; $d <= ($lastDate ?: $firstDate); $d = $d->copy()->addWeek()) {
         foreach ($numbers as $n) {
-          if ($offdays->contains(RepositoryHelper::matcher($d, $n))) {
+          if ($offdays->contains($this->matcher($d, $n))) {
             continue;
           }
-          if (!$lessons->contains(RepositoryHelper::matcher($d, $n))) {
+          if (!$lessons->contains($this->matcher($d, $n))) {
             $lesson = new Lesson(['date' => $d, 'number' => $n, 'room' => '']);
             $lesson->teacher()->associate($teacher);
             $lessons->push($lesson);

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\BugReport;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
@@ -9,6 +10,7 @@ use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Policies\BugReportPolicy;
 use App\Policies\CoursePolicy;
 use App\Policies\GroupPolicy;
 use App\Policies\LessonPolicy;
@@ -28,6 +30,7 @@ class AuthServiceProvider extends ServiceProvider {
    * @var array
    */
   protected $policies = [
+      BugReport::class    => BugReportPolicy::class,
       Course::class       => CoursePolicy::class,
       Group::class        => GroupPolicy::class,
       Lesson::class       => LessonPolicy::class,

@@ -3,7 +3,6 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
-use App\Repositories\Eloquent\RepositoryHelper;
 use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\StudentService;
@@ -11,6 +10,8 @@ use App\Services\WebUntisService;
 use Illuminate\Support\Facades\Log;
 
 class StudentServiceImpl implements StudentService {
+
+  use ServiceTrait;
 
   /** @var ConfigService */
   private $configService;
@@ -57,7 +58,7 @@ class StudentServiceImpl implements StudentService {
           foreach ($times[$date->dayOfWeek] as $n => $time) {
             if ($date->toDateTime($time['start']) >= $absence['start']
                 && $date->toDateTime($time['end']) <= $absence['end']
-                && !$student->absences->contains(RepositoryHelper::matcher($date, $n))
+                && !$student->absences->contains($this->matcher($date, $n))
             ) {
               $create[] = ['student_id' => $student->id, 'date' => $date, 'number' => $n];
             }

@@ -42,6 +42,10 @@ class Student extends User {
     );
   }
 
+  public function formsString() {
+    return $this->forms->isEmpty() ? '' : " ({$this->forms->implode('group.name', ', ')})";
+  }
+
   public function registrations() {
     return $this->hasMany(Registration::class);
   }

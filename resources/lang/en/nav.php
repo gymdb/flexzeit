@@ -26,5 +26,9 @@ return [
         'list'    => 'Show registrations',
         'missing' => 'Show missing registrations',
         'absent'  => 'Show absences'
+    ],
+    'bugreports'    => [
+        'create' => 'Create bug report',
+        'list'   => 'Show bug reports'
     ]
 ];

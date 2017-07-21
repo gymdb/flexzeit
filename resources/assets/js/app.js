@@ -6,16 +6,18 @@ import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueI18n from 'vue-i18n';
 
+/** @namespace Vue.config */
 Vue.config.debug = true;
 Vue.config.devtools = true;
 
+/** @namespace Vue.use */
 Vue.use(VueAxios, axios);
 Vue.use(VueI18n);
 
 const messages = {};
 ['en', 'de'].forEach(lang => {
   messages[lang] = {};
-  ['messages', 'errors', 'registrations', 'student'].forEach(file => {
+  ['messages', 'errors', 'registrations', 'student', 'bugreports'].forEach(file => {
     messages[lang][file] = require('./lang/' + lang + '/' + file);
   });
 });
@@ -24,11 +26,17 @@ const dateTimeFormats = {
   'en': {
     short: {
       year: 'numeric', month: '2-digit', day: '2-digit'
+    },
+    datetime: {
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: true
     }
   },
   'de': {
     short: {
       year: 'numeric', month: '2-digit', day: '2-digit'
+    },
+    datetime: {
+      year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: false
     }
   }
 };
@@ -41,7 +49,10 @@ const i18n = new VueI18n({
   dateTimeFormats
 });
 
+/** @namespace Vue.component */
+
 // Register general components
+Vue.component('bug-report', require('./components/BugReport.vue'));
 Vue.component('confirm', require('./components/Confirm.vue'));
 Vue.component('datepicker', require('./components/Datepicker.vue'));
 Vue.component('daterange', require('./components/Daterange.vue'));

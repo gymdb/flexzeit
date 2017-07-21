@@ -77,12 +77,7 @@
                   <td class="popover-container">
                     <popover trigger="hover" placement="right">
                       <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
-                      <span>
-                                {{$reg->student->name()}}
-                        @if($reg->student->forms->isNotEmpty())
-                          ({{$reg->student->forms->implode('group.name', ', ')}})
-                        @endif
-                              </span>
+                      <span>{{$reg->student->name()}}{{$reg->student->formsString()}}</span>
                     </popover>
                   </td>
                   @if($showAttendance)

@@ -132,6 +132,18 @@ class Initial extends Migration {
       $table->index('student_id');
     });
 
+    Schema::create('bugreports', function(Blueprint $table) {
+      $table->increments('id');
+      $table->unsignedInteger('teacher_id')->nullable();
+      $table->unsignedInteger('student_id')->nullable();
+      $table->text('text');
+      $table->timestamp('date');
+
+      $table->foreign('teacher_id')->references('id')->on('teachers');
+      $table->foreign('student_id')->references('id')->on('students');
+      $table->index('date');
+    });
+
     // Last create association tables
     Schema::create('course_group', function(Blueprint $table) {
       $table->unsignedInteger('course_id');
@@ -189,6 +201,7 @@ class Initial extends Migration {
     Schema::dropIfExists('registrations');
     Schema::dropIfExists('lessons');
     Schema::dropIfExists('courses');
+    Schema::dropIfExists('bugreports');
 
     // drop tables without foreign keys
     Schema::dropIfExists('config');

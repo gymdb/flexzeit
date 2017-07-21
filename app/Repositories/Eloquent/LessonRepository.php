@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 
 class LessonRepository implements \App\Repositories\LessonRepository {
 
+  use RepositoryTrait;
+
   /**
    * Build a query for all lessons within a given range
    *
@@ -27,7 +29,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
    * @return Builder
    */
   private function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false, Relation $relation = null) {
-    $query = RepositoryHelper::inRange($relation ? $relation->getQuery() : Lesson::query(), $start, $end, $dayOfWeek, $number);
+    $query = $this->inRange($relation ? $relation->getQuery() : Lesson::query(), $start, $end, $dayOfWeek, $number);
     if ($withCourse) {
       $query->whereNotNull('course_id');
     }

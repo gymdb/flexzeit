@@ -11,13 +11,15 @@ use Illuminate\Support\Facades\DB;
 
 class CourseRepository implements \App\Repositories\CourseRepository {
 
+  use RepositoryTrait;
+
   public function query(Teacher $teacher = null, Date $start, Date $end = null) {
     return ($teacher ? $teacher->courses()->groupBy('pivot_teacher_id', 'pivot_course_id') : Course::query())
         ->whereExists(function($q1) use ($start, $end) {
           $q1->select(DB::raw(1))
               ->from('lessons as l')
               ->whereColumn('l.course_id', 'courses.id');
-          RepositoryHelper::inRange($q1, $start, $end, null, null, 'l.');
+          $this->inRange($q1, $start, $end, null, null, 'l.');
         })
         ->with('teacher')
         ->orderBy('first')

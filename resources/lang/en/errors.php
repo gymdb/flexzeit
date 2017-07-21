@@ -21,5 +21,7 @@ return [
     '23' => 'Feedback for this lesson cannot be created yet.',
     '24' => 'Invalid value for the documentation',
     '25' => 'Creating documentation is currently not possible for this lesson.',
-    '30' => 'Past lessons cannot be cancelled.'
+    '30' => 'Past lessons cannot be cancelled.',
+    '40' => 'The bug report must contain text.',
+    '41' => 'Creating bug reports is only possible with a valid user account.'
 ];

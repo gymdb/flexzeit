@@ -27,5 +27,9 @@ return [
         'list'    => 'Anmeldungen anzeigen',
         'missing' => 'Fehlende Anmeldungen anzeigen',
         'absent'  => 'Abwesenheiten anzeigen'
+    ],
+    'bugreports'    => [
+        'create' => 'Rückmeldung zum System',
+        'list'   => 'Rückmeldungen zum System anzeigen'
     ]
 ];

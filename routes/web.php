@@ -8,6 +8,12 @@ Route::get('/login', 'Auth\LoginController@showLoginForm');
 Route::post('/login', 'Auth\LoginController@login')->name('loginTarget');
 Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 
+Route::group(['prefix' => 'api'], function() {
+  // Bug reports related API methods
+  Route::post('/bugReport', 'Teacher\BugReportController@createBugReport')
+      ->middleware(['auth', 'params:text']);
+});
+
 // Pages for teachers
 Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => ['auth', 'can:teacher']], function() {
   // Lesson related pages
@@ -31,6 +37,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   Route::get('/registrations', 'RegistrationController@showRegistrations')->name('teacher.registrations.list');
   Route::get('/registrations/missing', 'RegistrationController@showMissing')->name('teacher.registrations.missing');
   Route::get('/registrations/absent', 'RegistrationController@showAbsent')->name('teacher.registrations.absent');
+
+  // Bug report related pages
+  Route::get('/bugreports', 'BugReportController@showBugReports')->name('teacher.bugreports.list');
 
   // API methods
   Route::group(['prefix' => 'api'], function() {
@@ -87,6 +96,11 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 
     // Students for filter
     Route::get('students', 'FilterController@getStudents')->middleware('params:group;i');
+
+    // Bug report related API methods
+    Route::get('/bugreports', 'BugReportController@getBugReports')
+        ->middleware('params:start?;d|end?;d')
+        ->name('teacher.api.bugreports');
   });
 });
 

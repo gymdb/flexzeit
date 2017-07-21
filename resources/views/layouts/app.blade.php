@@ -96,6 +96,11 @@
                       <a href="{{route('teacher.courses.obligatory.list')}}">@lang('nav.courses.obligatory.list')</a>
                     </li>
                   @endcan
+                  @can('show', \App\Models\BugReport::class)
+                    <li>
+                      <a href="{{route('teacher.bugreports.list')}}">@lang('nav.bugreports.list')</a>
+                    </li>
+                  @endcan
                 </ul>
               </li>
             </ul>
@@ -112,9 +117,14 @@
                 <li>
                   <a href="{{ route('logout') }}">@lang('auth.logout')</a>
                 </li>
+                <li>
+                  <a href="#" @click.prevent="$refs.bugReportModal.open()">@lang('nav.bugreports.create')</a>
+                </li>
               </ul>
             </li>
           </ul>
+
+          <bug-report ref="bugReportModal"></bug-report>
         </div>
       @endif
     </div>

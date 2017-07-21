@@ -22,5 +22,7 @@ return [
     '23' => 'Zu dieser Einheit können noch keine Rückmeldungen erstellt werden.',
     '24' => 'Ungültiger Wert für die Dokumentation.',
     '25' => 'Zu dieser Einheit kann derzeit keine Dokumentation verfasst werden.',
-    '30' => 'Vergangene Einheiten können nicht abgesagt werden.'
+    '30' => 'Vergangene Einheiten können nicht abgesagt werden.',
+    '40' => 'Die Rückmeldung darf nicht leer sein.',
+    '41' => 'Zur Erstellung von Rückmeldungen ist ein gültiger User-Account erforderlich.'
 ];

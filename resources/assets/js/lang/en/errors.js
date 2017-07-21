@@ -21,6 +21,8 @@ module.exports = {
   '24': 'Invalid value for the documentation',
   '25': 'Creating documentation is currently not possible for this lesson.',
   '30': 'Past lessons cannot be cancelled.',
+  '40': 'The bug report must contain text.',
+  '41': 'Creating bug reports is only possible with a valid user account.',
   '99': 'An unspecified error occurred. Please contact the system administrator.',
   '401': 'You are not authenticated. This might have happened because the session timed out.',
   '403': 'You are not authorized to use the requested resource. This might have happened because the session timed out.',

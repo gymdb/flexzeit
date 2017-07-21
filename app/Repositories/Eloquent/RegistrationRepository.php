@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationRepository implements \App\Repositories\RegistrationRepository {
 
+  use RepositoryTrait;
+
   public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
     $query = $student->registrations()
         ->join('lessons as l', 'l.id', 'lesson_id');
-    $query = RepositoryHelper::inRange($query, $start, $end, null, $number, 'l.');
+    $query = $this->inRange($query, $start, $end, null, $number, 'l.');
 
     if (!$showCancelled) {
       $query->where('l.cancelled', false);
@@ -191,7 +193,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   private function getSlotQuery(Date $start, Date $end = null) {
-    return RepositoryHelper::inRange(DB::table('lessons')->distinct()->select(['date', 'number']), $start, $end);
+    return $this->inRange(DB::table('lessons')->distinct()->select(['date', 'number']), $start, $end);
   }
 
   private function addExcused($query) {

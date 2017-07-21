@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Redirector;
+use App\Repositories\BugReportRepository;
 use App\Repositories\ConfigRepository;
 use App\Repositories\CourseRepository;
 use App\Repositories\GroupRepository;
@@ -12,10 +13,12 @@ use App\Repositories\RegistrationRepository;
 use App\Repositories\StudentRepository;
 use App\Repositories\SubjectRepository;
 use App\Repositories\TeacherRepository;
+use App\Services\BugReportService;
 use App\Services\ConfigService;
 use App\Services\ConfigStorageService;
 use App\Services\CourseService;
 use App\Services\DocumentationService;
+use App\Services\Implementation\BugReportServiceImpl;
 use App\Services\Implementation\ConfigServiceImpl;
 use App\Services\Implementation\ConfigStorageServiceImpl;
 use App\Services\Implementation\CourseServiceImpl;
@@ -57,12 +60,6 @@ class AppServiceProvider extends ServiceProvider {
       /** @noinspection SpellCheckingInspection */
       return "<?php echo htmlspecialchars(json_encode($expression, JSON_HEX_APOS | JSON_HEX_QUOT), ENT_NOQUOTES, 'UTF-8', false); ?>";
     });
-
-    View::share('global', [
-        'csrfToken' => csrf_token(),
-        'baseURL'   => url('/'),
-        'lang'      => config('app.locale')
-    ]);
   }
 
   /**
@@ -80,6 +77,7 @@ class AppServiceProvider extends ServiceProvider {
     });
 
     // Bind repositories
+    $this->app->bind(BugReportRepository::class, \App\Repositories\Eloquent\BugReportRepository::class);
     $this->app->bind(ConfigRepository::class, \App\Repositories\Eloquent\ConfigRepository::class);
     $this->app->bind(CourseRepository::class, \App\Repositories\Eloquent\CourseRepository::class);
     $this->app->bind(GroupRepository::class, \App\Repositories\Eloquent\GroupRepository::class);
@@ -91,6 +89,7 @@ class AppServiceProvider extends ServiceProvider {
     $this->app->bind(TeacherRepository::class, \App\Repositories\Eloquent\TeacherRepository::class);
 
     // Bind services
+    $this->app->bind(BugReportService::class, BugReportServiceImpl::class);
     $this->app->bind(ConfigService::class, ConfigServiceImpl::class);
     $this->app->bind(ConfigStorageService::class, ConfigStorageServiceImpl::class);
     $this->app->bind(CourseService::class, CourseServiceImpl::class);
