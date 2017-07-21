@@ -1,4 +1,4 @@
-<!--suppress JSUnresolvedVariable -->
+<!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
   <modal :value="show" effect="fade" :title="heading" @cancel="cancel" large>
     <div class="modal-footer" slot="modal-footer">
@@ -10,7 +10,7 @@
 
     <template v-if="lesson">
       <template v-if="lesson.course">
-        <p>{{$t('student.register.course.info', {teacher: lesson.teacher, course: lesson.course.name})}}</p>
+        <p>{{$t('student.register.course.info', {teacher: lesson.teacher.name, course: lesson.course.name})}}</p>
         <ul>
           <li v-for="date in lesson.course.lessons">{{$d(moment(date), 'short')}}</li>
         </ul>
@@ -18,7 +18,7 @@
       </template>
       <template v-else>
         <p>{{$t('student.register.lesson.info', {
-          teacher: lesson.teacher,
+          teacher: lesson.teacher.name,
           date: $d(moment(lesson.date), 'short'),
           time: $t('messages.range', lesson.time)
         })}}</p>
@@ -28,6 +28,7 @@
 </template>
 
 <script>
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
@@ -43,7 +44,7 @@
         }
         return this.lesson.course
             ? this.$t('student.register.course.heading', {course: this.lesson.course.name})
-            : this.$t('student.register.lesson.heading', {teacher: this.lesson.teacher});
+            : this.$t('student.register.lesson.heading', {teacher: this.lesson.teacher.name});
       },
       saveDisabled() {
         return !this.lesson;

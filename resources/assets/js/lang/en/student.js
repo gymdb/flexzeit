@@ -2,10 +2,10 @@
 module.exports = {
   register: {
     submit: 'Register',
-    error: 'The registration failed.',
+    saveError: 'The registration failed.',
     lesson: {
       heading: 'Register for lesson with {teacher}',
-      info: 'Do you want to register for the lesson with {teacher} on {date} at {time}?'
+      info: 'Do you want to register for the lesson {time} with {teacher} on {date}?'
     },
     course: {
       heading: 'Register for the course {course}',

@@ -3,10 +3,10 @@
 module.exports = {
   register: {
     submit: 'Anmelden',
-    error: 'Die Anmeldung ist fehlgeschlagen.',
+    saveError: 'Die Anmeldung ist fehlgeschlagen.',
     lesson: {
       heading: 'Für Einheit von {teacher} anmelden',
-      info: 'Willst Du dich für die Einheit von {teacher} am {date} um {time} anmelden?'
+      info: 'Willst Du dich für die Einheit {time} von {teacher} am {date} anmelden?'
     },
     course: {
       heading: 'Für Kurs {course} anmelden',

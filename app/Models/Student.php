@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Collection;
  * Representation of a student
  *
  * @package App\Models
- * @property string $image
  * @property int $untis_id
  * @property Collection $absences
  * @property Collection $groups

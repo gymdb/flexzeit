@@ -13,6 +13,7 @@ use Illuminate\Foundation\Auth\User as AuthUser;
  * @property string $lastname
  * @property string $username
  * @property string $password
+ * @property string $image
  */
 abstract class User extends AuthUser {
 

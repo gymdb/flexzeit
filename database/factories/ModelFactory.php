@@ -1,6 +1,7 @@
 <?php
 
 /** @var Factory $factory */
+
 use App\Models\Lesson;
 use App\Models\Registration;
 use \App\Models\Student;
@@ -46,6 +47,7 @@ $factory->define(Teacher::class, function(Generator $faker) {
   return [
       'firstname' => $faker->firstName,
       'lastname'  => $faker->lastName,
+      'image'     => 'https://api.adorable.io/avatars/200/' . $faker->word . '.png',
       'info'      => $faker->words(2, true)
   ];
 });

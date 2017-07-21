@@ -67,7 +67,7 @@
           @foreach($registrations as $reg)
             <li>
               <popover trigger="hover" placement="right">
-                <img slot="content" class="student-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
+                <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
                 <span>
                         {{$reg->student->name()}}
                   @if($reg->student->forms->isNotEmpty())

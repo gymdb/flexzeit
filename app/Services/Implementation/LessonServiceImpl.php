@@ -102,7 +102,7 @@ class LessonServiceImpl implements LessonService {
 
     $lessons = $this->lessonRepository
         ->queryAvailable($student, $date, $numbers, $teacher, $subject)
-        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.teacher_id', 'lessons.course_id'])
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.teacher_id', 'lessons.course_id'])
         ->map(function(Lesson $lesson) use ($student) {
           if ($lesson->course && $this->registrationService->validateStudentForCourse($lesson->course, $student, true) !== 0) {
             return null;
@@ -117,7 +117,13 @@ class LessonServiceImpl implements LessonService {
               'id'      => $lesson->id,
               'date'    => $lesson->date->toDateString(),
               'time'    => $lesson->time,
-              'teacher' => $lesson->teacher->name()
+              'room'    => $lesson->room,
+              'teacher' => [
+                  'name'     => $lesson->teacher->name(),
+                  'image'    => $lesson->teacher->image,
+                  'info'     => $lesson->teacher->info,
+                  'subjects' => $lesson->teacher->subjects->implode('name', ', ')
+              ]
           ];
           if ($lesson->course) {
             $associated = $lesson->course->lessons()
@@ -128,6 +134,7 @@ class LessonServiceImpl implements LessonService {
                   return $l->date->toDateString();
                 })->unique();
 
+            $data['room'] = $lesson->course->room;
             $data['course'] = [
                 'id'          => $lesson->course->id,
                 'name'        => $lesson->course->name,

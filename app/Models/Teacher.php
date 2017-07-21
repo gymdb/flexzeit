@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @package App\Models
  * @property bool $admin
+ * @property string $info
  * @property Form $form The form of which the teacher is the head
  * @property Collection $groups
  * @property Collection $lessons

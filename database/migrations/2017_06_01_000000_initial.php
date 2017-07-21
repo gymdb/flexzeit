@@ -48,6 +48,7 @@ class Initial extends Migration {
       $table->string('password');
       $table->boolean('admin')->default(false);
       $table->string('info', 32)->nullable();
+      $table->string('image')->nullable();
     });
 
     // Now create tables with foreign key relations to the previously created ones

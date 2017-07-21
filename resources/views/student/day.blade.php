@@ -91,6 +91,7 @@
                   <th>@lang('messages.time')</th>
                   <th>@lang('messages.teacher')</th>
                   <th>@lang('messages.course')</th>
+                  <th>@lang('messages.room')</th>
                   @if($allowRegistration)
                     <th></th>
                   @endif
@@ -98,8 +99,21 @@
                 </thead>
                 <tr v-for="lesson in props.data">
                   <td>@{{$t('messages.range', lesson.time)}}</td>
-                  <td>@{{lesson.teacher}}</td>
+                  <td class="popover-container">
+                    <popover trigger="hover" placement="right">
+                      <div slot="content">
+                        <p v-if="lesson.teacher.subjects">@{{lesson.teacher.subjects}}</p>
+                        <p v-if="lesson.teacher.info">@{{lesson.teacher.info}}</p>
+                        <p>
+                          <img class="popover-image" src="{{url('/images/avatar.png')}}"
+                               :src="lesson.teacher.image || '{{url('/images/avatar.png')}}'"/>
+                        </p>
+                      </div>
+                      <span>@{{lesson.teacher.name}}</span>
+                    </popover>
+                  </td>
                   <td><span v-if="lesson.course">@{{lesson.course.name}}</span></td>
+                  <td>@{{lesson.room}}</td>
                   @if ($allowRegistration)
                     <td>
                       <a href="#" @click.prevent="$refs.registerModal.open(lesson)" title="@lang('student.register.button')">
