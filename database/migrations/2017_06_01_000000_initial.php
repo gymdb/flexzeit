@@ -180,6 +180,19 @@ class Initial extends Migration {
       $table->foreign('subject_id')->references('id')->on('subjects');
       $table->foreign('teacher_id')->references('id')->on('teachers');
     });
+
+    // Table for laravel job queue
+    Schema::create('jobs', function(Blueprint $table) {
+      $table->bigIncrements('id');
+      $table->string('queue');
+      $table->longText('payload');
+      $table->tinyInteger('attempts')->unsigned();
+      $table->unsignedInteger('reserved_at')->nullable();
+      $table->unsignedInteger('available_at');
+      $table->unsignedInteger('created_at');
+
+      $table->index(['queue', 'reserved_at']);
+    });
   }
 
   /**
@@ -209,5 +222,8 @@ class Initial extends Migration {
     Schema::dropIfExists('students');
     Schema::dropIfExists('subjects');
     Schema::dropIfExists('teachers');
+
+    // Drop queue table
+    Schema::dropIfExists('jobs');
   }
 }

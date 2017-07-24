@@ -51,7 +51,10 @@ class ConfigSeeder extends Seeder {
 
       // Year starts on monday one month ago and ends on friday in three months
         'year.start'              => Date::today()->addMonth(-1)->setToDayOfWeek(Date::MONDAY)->toDateString(),
-        'year.end'                => Date::today()->addMonths(3)->setToDayOfWeek(Date::FRIDAY)->toDateString()
+        'year.end'                => Date::today()->addMonths(3)->setToDayOfWeek(Date::FRIDAY)->toDateString(),
+
+      // Mail notifications to test address (just send to itself for testing)
+        'notification.recipients' => [config('mail.from.address')]
     ];
 
     foreach ($config as $key => $value) {

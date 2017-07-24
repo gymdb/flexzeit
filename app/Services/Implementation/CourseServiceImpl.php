@@ -4,6 +4,7 @@ namespace App\Services\Implementation;
 
 use App\Exceptions\CourseException;
 use App\Helpers\Date;
+use App\Mail\ObligatoryCreated;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
@@ -21,6 +22,7 @@ use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
 use App\Specifications\ObligatorySpecification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 
 class CourseServiceImpl implements CourseService {
 
@@ -139,6 +141,9 @@ class CourseServiceImpl implements CourseService {
 
       $students = $this->studentRepository->queryForGroups($groups)->pluck('id');
       $this->registrationService->registerStudentsForCourse($course, $students);
+
+      Mail::to($this->configService->getNotificationRecipients())
+          ->send(new ObligatoryCreated($teacher, $course, $lessons->sortBy('date')));
     }
 
     return $course;

@@ -112,6 +112,10 @@ class ConfigServiceImpl implements ConfigService {
     ];
   }
 
+  public function getNotificationRecipients() {
+    return $this->configService->get('notification.recipients', []);
+  }
+
   /**
    * Return the date boundary (earliest or last possible date for some action) specified by a day/week config pair
    *

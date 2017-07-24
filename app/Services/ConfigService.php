@@ -150,4 +150,11 @@ interface ConfigService {
    */
   public function setTime(Lesson $lesson);
 
+  /**
+   * Get the mail addresses that should receive email notifications about events
+   *
+   * @return string|string[]
+   */
+  public function getNotificationRecipients();
+
 }
