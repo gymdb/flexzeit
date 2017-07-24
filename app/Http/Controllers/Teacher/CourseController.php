@@ -226,7 +226,7 @@ class CourseController extends Controller {
     $registrations = $this->registrationService->getForCourse($course);
 
     $firstLesson = $lessons->first();
-    $allowDestroy = $firstLesson && $firstLesson->date > Date::today();
+    $allowDestroy = $firstLesson && $firstLesson->date->isFuture();
 
     $teacher = $this->getTeacher();
     $showLessonLink = $teacher->admin || $teacher->id === $firstLesson->teacher_id;

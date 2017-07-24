@@ -157,9 +157,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$this->isRegistrationPossible($lesson->date)) {
         throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
       }
-    }
-
-    if ($lesson->date < Date::today()) {
+    } else if ($lesson->date->isPast()) {
       throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
     }
 
@@ -179,9 +177,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$this->isRegistrationPossible($lesson->date)) {
         throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
       }
-    }
-
-    if ($lesson->date < Date::today()) {
+    } else if ($lesson->date->isPast()) {
       throw new RegistrationException(RegistrationException::REGISTRATION_PERIOD);
     }
 

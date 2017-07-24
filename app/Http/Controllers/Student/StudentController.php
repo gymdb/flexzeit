@@ -48,7 +48,7 @@ class StudentController extends Controller {
     $student = $this->getStudent();
 
     $today = $this->registrationService->getSlots($student);
-    $upcoming = $this->registrationService->getSlots($student, Date::today()->addDay(), $this->configService->getLastRegisterDate());
+    $upcoming = $this->registrationService->getSlots($student, Date::tomorrow(), $this->configService->getLastRegisterDate());
     $documentation = $this->documentationService->getDocumentation($student, $this->configService->getFirstDocumentationDate(), $this->configService->getLastDocumentationDate());
 
     return view('student.dashboard', compact('today', 'upcoming', 'documentation'));
