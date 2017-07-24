@@ -10,6 +10,10 @@
         @endif
 
         <dl class="dl-horizontal dl-narrow">
+          @if($isAdmin)
+            <dt>@lang('messages.teacher')</dt>
+            <dd>{{$lesson->teacher->name()}}</dd>
+          @endif
           @if($lesson->course)
             <dt>@lang('messages.course')</dt>
             <dd><a href="{{route('teacher.courses.show', $lesson->course->id)}}">{{$lesson->course->name}}</a></dd>
@@ -26,7 +30,7 @@
             <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)">
               {{csrf_field()}}
               <p>
-                <button type="submit" class="btn btn-default">@lang('lessons.cancel.submit')</button>
+                <button class="btn btn-default">@lang('lessons.cancel.submit')</button>
               </p>
             </form>
           </confirm>
@@ -34,6 +38,11 @@
 
         <h3>@lang('lessons.registrations.heading')</h3>
         @if($registrations->isEmpty())
+          @if($showRegister)
+            <p>
+              <a href="#" class="btn btn-default" @click.prevent="openRegister">@lang('lessons.register.button')</a>
+            </p>
+          @endif
           <p>@lang('lessons.registrations.none')</p>
         @else
           <error :error="attendanceError">@lang('lessons.attendance.error')</error>
@@ -70,6 +79,9 @@
                 @if($showFeedback)
                   <th></th>
                 @endif
+                @if($isAdmin)
+                  <th></th>
+                @endif
               </tr>
               </thead>
               @foreach($registrations as $reg)
@@ -104,6 +116,14 @@
                       </a>
                     </td>
                   @endif
+                  @if($isAdmin)
+                    <td>
+                      <a href="#" class="btn btn-xs btn-default"
+                         @click.prevent='openChangeRegistration(@json(["id" => $reg->student->id, "name" => $reg->student->name()]), "{{$lesson->date->toDateString()}}", {{$lesson->number}})'>
+                        @lang('lessons.register.change')
+                      </a>
+                    </td>
+                  @endif
                 </tr>
               @endforeach
             </table>
@@ -113,15 +133,19 @@
             <teacher-feedback ref="feedbackModal"></teacher-feedback>
           @endif
 
-          @if($showRegister)
-            <teacher-register ref="registerModal"
-                              :groups='@json($groups)'
-                              date="{{$lesson->date->toDateString()}}"
-                              :number="{{$lesson->number}}"
-                              :admin="@json($isAdmin)"
-                              :lesson="{{$lesson->id}}">
-            </teacher-register>
+          @if($isAdmin)
+            <teacher-register-student ref="changeRegistrationModal"></teacher-register-student>
           @endif
+        @endif
+
+        @if($showRegister)
+          <teacher-register ref="registerModal"
+                            :groups='@json($groups)'
+                            date="{{$lesson->date->toDateString()}}"
+                            :number="{{$lesson->number}}"
+                            :admin="@json($isAdmin)"
+                            :lesson="{{$lesson->id}}">
+          </teacher-register>
         @endif
       </div>
     </teacher-lesson>

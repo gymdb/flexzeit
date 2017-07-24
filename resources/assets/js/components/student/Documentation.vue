@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
 <template>
   <modal :value="show" effect="fade" :title="title" @cancel="cancel">
     <div class="modal-footer" slot="modal-footer">
@@ -17,6 +18,7 @@
 </template>
 
 <script>
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
@@ -26,6 +28,7 @@
         original: null,
         text: null,
         teacher: null,
+        saving: false,
         loadError: null,
         saveError: null
       }
@@ -55,7 +58,7 @@
     },
     computed: {
       saveDisabled() {
-        return this.loadError || this.loading || this.original === this.text;
+        return this.saving || this.loadError || this.loading || this.original === this.text;
       },
       title() {
         return this.loadError ? this.$t('student.documentation.loadError') : this.$t('student.documentation.heading', {teacher: this.teacher});
@@ -72,6 +75,7 @@
       save() {
         if (!this.saveDisabled) {
           let self = this;
+          this.saving = true;
           this.$http.post('/student/api/documentation/' + this.id, {documentation: this.text}).then(function (response) {
             if (response.data.success) {
               self.original = self.text;
@@ -80,7 +84,9 @@
             } else {
               self.saveError = response.data.error;
             }
+            self.saving = false;
           }).catch(function (error) {
+            self.saving = false;
             self.saveError = error;
           });
         }

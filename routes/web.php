@@ -57,7 +57,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 
     // Lesson related API methods
     Route::get('/lessons', 'LessonController@getForTeacher')
-        ->middleware('params:teacher?;i|start?;d|end?;d')
+        ->middleware('params:teacher?;i|start?;d|end?;d|number?;i')
         ->name('teacher.api.lessons');
 
     // Documentation/Feedback related API methods
@@ -78,7 +78,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/registrations', 'RegistrationController@getForStudent')
         ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
         ->name('teacher.api.registrations');
-    Route::get('/registrations/{date}/{number}', 'RegistrationController@getForSlot')
+    Route::get('/registrations/warnings/{lesson}', 'RegistrationController@getWarnings')
         ->middleware('params:student;i');
     Route::get('/registrations/missing', 'RegistrationController@getMissing')
         ->middleware('params:group;i|student?;i|start?;d|end?;d')

@@ -76,7 +76,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$ignoreDate && !$this->isRegistrationPossible($firstLesson->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
-      if ($course->maxstudents && $firstLesson->students()->count() >= $course->maxstudents) {
+      if ($course->maxstudents && $course->students()->count() >= $course->maxstudents) {
         return RegistrationException::MAXSTUDENTS;
       }
       if ($student->offdays()->whereIn('date', $course->lessons->pluck('date'))->exists()) {
@@ -90,11 +90,10 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($course->yearto && (!$form || $form->year > $course->yearto)) {
         return RegistrationException::YEAR;
       }
-    }
-
-    if (!$ignoreDate && $firstLesson->date < Date::today()) {
+    } else if (!$ignoreDate && $firstLesson->isPast()) {
       return RegistrationException::REGISTRATION_PERIOD;
     }
+
     if ($this->registrationRepository->queryForLessons($course->lessons->pluck('id')->all(), [$student->id])->exists()) {
       return RegistrationException::ALREADY_REGISTERED;
     }
@@ -123,11 +122,10 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
         return RegistrationException::OFFDAY;
       }
-    }
-
-    if (!$ignoreDate && $lesson->date < Date::today()) {
+    } else if (!$ignoreDate && $lesson->date->isPast()) {
       return RegistrationException::REGISTRATION_PERIOD;
     }
+
     if ($this->lessonRepository->queryForStudent($student, $lesson->date, null, null, $lesson->number)->exists()) {
       return RegistrationException::ALREADY_REGISTERED;
     }
@@ -239,8 +237,8 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function getForCourse(Course $course) {
-    return $this->registrationRepository->queryOrdered($course->registrations())
-        ->groupBy('registrations.student_id', 'lessons.course_id', 'students.lastname', 'students.firstname', 'students.id')
+    return $this->registrationRepository->queryOrdered($course->students())
+        ->groupBy('lessons.course_id', 'students.lastname', 'students.firstname', 'students.id')
         ->get(['registrations.student_id']);
   }
 
@@ -291,21 +289,6 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getMappedForSlot(Student $student, Date $date, $number) {
-    return $this->registrationRepository
-        ->queryForStudent($student, $date, null, $number)
-        ->with('lesson.course')
-        ->get(['lesson_id'])
-        ->map(function(Registration $registration) {
-          $lesson = $registration->lesson;
-          return [
-              'lesson_id' => $lesson->id,
-              'teacher'   => $lesson->teacher->name(),
-              'course'    => $lesson->course ? $lesson->course->name : null
-          ];
-        });
-  }
-
   public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
     $start = $start ?: $this->configService->getYearStart();
     $end = $end ?: $this->configService->getFirstRegisterDate()->addDay(-1);
@@ -345,6 +328,70 @@ class RegistrationServiceImpl implements RegistrationService {
               'excused'    => boolval($registration->excused)
           ];
         });
+  }
+
+  public function getWarnings(Lesson $lesson, Student $student) {
+    $warnings = [];
+
+    if ($lesson->course) {
+      $course = $lesson->course;
+
+      if ($course->groups->isNotEmpty()) {
+        $warnings['obligatory'] = $course->groups->pluck('name');
+      }
+
+      $participants = $course->students()->count();
+      $maxstudents = $course->maxstudents;
+
+      $form = $student->forms()->first(['year']);
+      if ($course->yearfrom && (!$form || $form->year < $course->yearfrom)) {
+        $warnings['yearfrom'] = [
+            'year'     => $form->year,
+            'yearfrom' => $course->yearfrom
+        ];
+      }
+      if ($course->yearto && (!$form || $form->year > $course->yearto)) {
+        $warnings['yearto'] = [
+            'year'   => $form->year,
+            'yearto' => $course->yearto
+        ];
+      }
+    } else {
+      $participants = $lesson->students()->count();
+      $maxstudents = $this->configService->getMaxStudents();
+    }
+
+    if ($maxstudents && $participants >= $maxstudents) {
+      $warnings['maxstudents'] = [
+          'students'    => $participants,
+          'maxstudents' => $maxstudents
+      ];
+    }
+
+    if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
+      $warnings['offday'] = true;
+    }
+
+    $registeredLesson = $this->lessonRepository
+        ->queryForStudent($student, $lesson->date, null, null, $lesson->number)
+        ->with('teacher', 'course')
+        ->first(['lessons.id', 'lessons.teacher_id', 'lessons.course_id']);
+    if ($registeredLesson) {
+      if ($registeredLesson->course) {
+        $warnings['course'] = [
+            'id'      => $registeredLesson->id,
+            'teacher' => $registeredLesson->teacher->name(),
+            'course'  => $registeredLesson->course->name
+        ];
+      } else {
+        $warnings['lesson'] = [
+            'id'      => $registeredLesson->id,
+            'teacher' => $registeredLesson->teacher->name()
+        ];
+      }
+    }
+
+    return $warnings;
   }
 
   private function isObligatoryFor(Course $course, Student $student) {

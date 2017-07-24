@@ -21,7 +21,7 @@
     computed: {
       code() {
         if (typeof this.error === 'object') {
-          return this.error ? ((this.error.response ? this.error.response.status : error.code) || 99) : null;
+          return this.error ? ((this.error.response ? this.error.response.status : this.error.code) || 99) : null;
         }
         return this.error || null;
       },

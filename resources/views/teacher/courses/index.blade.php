@@ -24,15 +24,17 @@
                 <th>@lang('messages.time')</th>
                 <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.course')</th>
+                <th>@lang('messages.participants')</th>
                 <th></th>
               </tr>
               </thead>
               <tr v-for="course in props.data">
-                <td v-if="course.last">@{{$t('messages.range', {start: $d(moment(course.first), 'short'), end: $d(moment(course.last), 'short')})}}</td>
+                <td v-if="course.last">@{{$t('messages.daterange', {start: $d(moment(course.first), 'short'), end: $d(moment(course.last), 'short')})}}</td>
                 <td v-else>@{{$d(moment(course.first), 'short')}}</td>
                 <td>@{{$t('messages.range', course.time)}}</td>
                 <td>@{{course.teacher}}</td>
                 <td>@{{course.name}}</td>
+                <td>@{{course.students}}<span v-if="course.maxstudents">/@{{course.maxstudents}}</span></td>
                 <td>
                   <a :href="'{{route('teacher.courses.show', '')}}/' + course.id">@lang('courses.index.details')</a>
                 </td>

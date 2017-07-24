@@ -316,12 +316,14 @@ class CourseServiceImpl implements CourseService {
           $this->configService->setTime($first);
 
           return [
-              'id'      => $course->id,
-              'name'    => $course->name,
-              'first'   => $course->first,
-              'last'    => $course->last !== $course->first ? $course->last : null,
-              'time'    => $first->time,
-              'teacher' => $course->teacher->first()->name()
+              'id'          => $course->id,
+              'name'        => $course->name,
+              'first'       => $course->first,
+              'last'        => $course->last !== $course->first ? $course->last : null,
+              'time'        => $first->time,
+              'teacher'     => $course->teacher->first()->name(),
+              'students'    => $course->students()->count(),
+              'maxstudents' => $course->maxstudents
           ];
         });
   }

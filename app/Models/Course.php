@@ -47,6 +47,10 @@ class Course extends Model {
     return $this->hasManyThrough(Registration::class, Lesson::class);
   }
 
+  public function students() {
+    return $this->registrations()->groupBy('registrations.student_id');
+  }
+
   public function teacher() {
     return $this->belongsToMany(Teacher::class, 'lessons');
   }

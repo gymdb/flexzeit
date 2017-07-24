@@ -26,7 +26,7 @@ class CourseRepository implements \App\Repositories\CourseRepository {
         ->orderBy('last')
         ->orderBy('number')
         ->groupBy('courses.id', 'courses.name')
-        ->select(['courses.id', 'courses.name'])
+        ->select(['courses.id', 'courses.name', 'courses.maxstudents'])
         ->addSelect(DB::raw('(SELECT MIN(date) FROM lessons WHERE course_id = courses.id) as first'))
         ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'))
         ->addSelect(DB::raw('(SELECT MIN(number) FROM lessons WHERE course_id = courses.id) as number'));

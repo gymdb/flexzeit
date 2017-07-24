@@ -39,8 +39,8 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $query;
   }
 
-  public function queryForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
-    return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $teacher->lessons());
+  public function queryForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
+    return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $teacher ? $teacher->lessons() : null);
   }
 
   public function queryForStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {

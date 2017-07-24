@@ -12,6 +12,7 @@ return [
     'teacher'       => 'Teacher',
     'course'        => 'Course',
     'room'          => 'Room',
+    'participants'  => 'Participants',
     'documentation' => 'Documentation',
     'feedback'      => 'Feedback'
 ];

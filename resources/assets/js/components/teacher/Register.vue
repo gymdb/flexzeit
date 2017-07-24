@@ -1,4 +1,4 @@
-<!--suppress JSUnresolvedVariable -->
+<!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
   <modal :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" large>
     <div class="modal-footer" slot="modal-footer">
@@ -7,17 +7,25 @@
     </div>
 
     <filtered-list ref="filter"
-                    :url="url"
-                    :groups="groups"
-                    :error-text="$t('registrations.register.loadError')"
-                    :keep-filter="false"
-                    v-on:filter="setFilter"
-                    v-on:data="setData">
+                   :url="url"
+                   :groups="groups"
+                   :error-text="$t('registrations.register.loadError')"
+                   :keep-filter="false"
+                   v-on:filter="setFilter"
+                   v-on:data="setData">
       <template slot="chooseStudent"></template>
       <template slot="empty"></template>
       <template scope="props">
-        <div class="alert alert-warning">
-          {{$t('registrations.register.registered')}}: {{props.data[0].teacher}} <span v-if="props.data[0].course">({{props.data[0].course}}</span>
+        <div v-if="isSameLesson" class="alert alert-danger">
+          <strong>{{$t('registrations.warnings.sameLesson')}}</strong>
+        </div>
+        <div v-else class="alert alert-warning">
+          <strong>{{$t('registrations.warnings.heading')}}</strong>
+          <ul>
+            <li v-for="(data, key) in props.data">
+              {{$t('registrations.warnings.' + key, data)}}
+            </li>
+          </ul>
         </div>
       </template>
     </filtered-list>
@@ -32,9 +40,10 @@
     data() {
       return {
         show: false,
-        url: '/teacher/api/registrations/' + this.date + '/' + this.number,
+        url: '/teacher/api/registrations/warnings/' + this.lesson,
         student: null,
-        registration: null,
+        registeredLesson: null,
+        saving: false,
         error: null,
         reload: false
       }
@@ -62,11 +71,14 @@
       }
     },
     computed: {
+      isSameLesson() {
+        return this.registeredLesson && this.registeredLesson === this.lesson;
+      },
       saveDisabled() {
-        return !this.student || (this.registration && (!this.admin || this.registration === this.lesson));
+        return this.saving || !this.student || (this.registeredLesson && (!this.admin || this.isSameLesson));
       },
       submitLabel() {
-        return (this.admin && this.registration && this.registration !== this.lesson)
+        return (this.admin && this.registeredLesson && !this.isSameLesson)
             ? this.$t('registrations.register.change')
             : this.$t('registrations.register.submit');
       }
@@ -87,7 +99,13 @@
       setData(data) {
         if (data) {
           this.student = this.$refs.filter.student;
-          this.registration = data.length ? data[0].lesson_id : null;
+          if (data.lesson) {
+            this.registeredLesson = data.lesson.id;
+          } else if (data.course) {
+            this.registeredLesson = data.course.id;
+          } else {
+            this.registeredLesson = null;
+          }
         } else {
           this.student = null;
         }
@@ -95,16 +113,19 @@
       save() {
         if (!this.saveDisabled) {
           let self = this;
+          this.saving = true;
           this.$http.post('/teacher/api/register/' + this.lesson + '/' + this.student, {}).then(function (response) {
             if (response.data.success) {
               self.error = null;
               self.reload = true;
-              self.$refs.filter.loadData();
+              self.$refs.filter.student = null;
             } else {
               self.error = response.data.error;
             }
+            self.saving = false;
           }).catch(function (error) {
-            self.error = error.response ? error.response.status : 100;
+            self.saving = false;
+            self.error = error;
           });
         }
       }

@@ -26,12 +26,13 @@
       return {
         show: false,
         text: null,
+        saving: false,
         error: null
       }
     },
     computed: {
       saveDisabled() {
-        return !this.text
+        return this.saving || !this.text;
       }
     },
     methods: {
@@ -46,6 +47,7 @@
       save() {
         if (!this.saveDisabled) {
           let self = this;
+          this.saving = true;
           this.$http.post('/api/bugReport', {text: this.text}).then(function (response) {
             if (response.data.success) {
               self.error = null;
@@ -54,7 +56,9 @@
             } else {
               self.error = response.data.error;
             }
+            self.saving = false;
           }).catch(function (error) {
+            self.saving = false;
             self.error = error;
           });
         }

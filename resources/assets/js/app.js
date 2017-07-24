@@ -67,13 +67,14 @@ Vue.component('teacher-excused', require('./components/teacher/Excused.vue'));
 Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
 Vue.component('teacher-register', require('./components/teacher/Register.vue'));
+Vue.component('teacher-register-student', require('./components/teacher/RegisterStudent.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
 Vue.component('course-edit', require('./components/course/Edit.vue'));
 
 // Register components for student pages
-Vue.component('student-documentation',require('./components/student/Documentation.vue'));
+Vue.component('student-documentation', require('./components/student/Documentation.vue'));
 Vue.component('student-register', require('./components/student/Register.vue'));
-Vue.component('student-registrations',require('./components/student/Registrations.vue'));
+Vue.component('student-registrations', require('./components/student/Registrations.vue'));
 
 // Register vue-strap components
 require('vue-strap/dist/vue-strap-lang');
@@ -83,6 +84,24 @@ Vue.component('popover', require('vue-strap/src/Popover.vue'));
 Vue.component('v-select', require('vue-strap/src/Select.vue'));
 
 Vue.prototype.moment = require('moment');
+
+// Workaround: Bug in Popover component
+// noinspection JSUnresolvedVariable
+Vue.options.components.popover.options.methods.position = function () {
+  // noinspection JSUnresolvedFunction
+  this.$nextTick(() => {
+    // noinspection JSUnresolvedVariable
+    const popover = this.$refs.popover;
+    if (!popover) {
+      return;
+    }
+    const trigger = this.$refs.trigger.children[0];
+    this.left = trigger.offsetLeft + trigger.offsetWidth;
+    this.top = trigger.offsetTop + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
+    popover.style.top = this.top + 'px';
+    popover.style.left = this.left + 'px';
+  });
+};
 
 const app = new Vue({
   i18n,

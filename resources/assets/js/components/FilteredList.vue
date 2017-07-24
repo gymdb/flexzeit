@@ -84,10 +84,12 @@
     <slot v-if="!filter" name="chooseStudent">
       <div class="alert alert-info">{{$t(requireStudent ? 'messages.chooseStudent' : 'messages.chooseGroup')}}</div>
     </slot>
-    <slot v-else-if="!data || !data.length" name="empty">
+    <p v-else-if="loading" class="lead text-center"><span class="glyphicon glyphicon-refresh spin"></span></p>
+    <slot v-else-if="!hasData" name="empty">
       <div class="alert alert-warning">{{$t('messages.emptyResult')}}</div>
     </slot>
-    <slot v-else :data="data" :filter="filter"></slot>
+
+    <slot v-if="hasData" :data="data" :filter="filter"></slot>
   </div>
 </template>
 
@@ -95,6 +97,7 @@
   import moment from 'moment';
   import _ from 'lodash';
 
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       let params = {};
@@ -128,6 +131,7 @@
         start: params.start ? moment(params.start) : null,
         end: params.end ? moment(params.end) : null,
         data: null,
+        loading: false,
         studentsError: null,
         dataError: null
       }
@@ -148,6 +152,14 @@
       subjects: {
         'type': Array,
         'default': null
+      },
+      date: {
+        'type': String,
+        'default': null
+      },
+      number: {
+        'type': Number,
+        'default': null,
       },
       defaultStartDate: {
         'type': String,
@@ -207,6 +219,7 @@
       },
       query(query) {
         if (this.keepFilter) {
+          // noinspection JSCheckFunctionSignatures
           window.history.replaceState(null, null, '?' + query);
         }
       }
@@ -215,6 +228,9 @@
       this.loadData(this.filter);
     },
     computed: {
+      hasData() {
+        return !_.isEmpty(this.data);
+      },
       showGroup() {
         return this.groupsList && this.groupsList.length > 1;
       },
@@ -235,9 +251,15 @@
         if (this.subjectsList) {
           filter.subject = this.subject;
         }
-        if (this.minDate) {
+        if (this.date) {
+          filter.start = this.date;
+          filter.end = this.date;
+        } else if (this.minDate) {
           filter.start = this.start ? this.start.format('YYYY-MM-DD') : null;
           filter.end = this.end ? this.end.format('YYYY-MM-DD') : null;
+        }
+        if (this.number) {
+          filter.number = this.number;
         }
         return filter;
       },
@@ -306,12 +328,15 @@
           this.data = null;
         } else {
           let self = this;
+          this.loading = true;
           this.$http.get(this.url, {params: filter}).then(function (response) {
             self.dataError = null;
             self.data = response.data;
+            self.loading = false;
           }).catch(function (error) {
             self.dataError = error;
             self.data = null;
+            self.loading = false;
           });
         }
       },

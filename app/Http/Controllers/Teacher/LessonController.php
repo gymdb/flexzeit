@@ -101,13 +101,12 @@ class LessonController extends Controller {
     $attendanceChecked = $this->lessonService->isAttendanceChecked($lesson);
 
     $isOwnLesson = ($lesson->teacher->id == $this->getTeacher()->id);
+    $isAdmin = $this->getTeacher()->admin;
 
     $attendanceChangeable = $isOwnLesson && $lesson->date->isToday() && !$lesson->cancelled;
     $showAttendance = !$lesson->date->isFuture() && !$lesson->cancelled;
     $showFeedback = $isOwnLesson && !$lesson->date->isFuture() && !$lesson->cancelled;
-    $showRegister = !$lesson->date->isPast() && !$lesson->cancelled;
-    $isAdmin = $this->getTeacher()->admin;
-
+    $showRegister = ($isAdmin || !$lesson->date->isPast()) && !$lesson->cancelled;
     $allowCancel = $isAdmin && !$lesson->cancelled && !$lesson->date->isPast();
 
     $groups = $showRegister ? $this->miscService->getGroups() : null;
@@ -134,18 +133,20 @@ class LessonController extends Controller {
    * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to currently logged in user
    * @param Date|null $start
    * @param Date|null $end
+   * @param int|null $number
    * @return JsonResponse
    */
-  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
+  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null, $number = null) {
     if (!$teacher) {
-      $teacher = $this->getTeacher();
+      $user = $this->getTeacher();
+      $teacher = $user->admin ? null : $user;
     }
-    $this->authorize('viewLessons', $teacher);
+    $this->authorize('viewLessons', $teacher ?: Teacher::class);
 
     $start = $start ?: $this->configService->getDefaultListStartDate();
     $end = $end ?: $this->configService->getDefaultListEndDate();
 
-    $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end, null, null, true);
+    $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end, null, $number, true);
     return response()->json($lessons);
   }
 

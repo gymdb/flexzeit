@@ -5,6 +5,8 @@
     <h2 class="panel-heading">@lang('courses.show.heading', ['name' => $course->name])</h2>
     <div class="panel-body">
       <dl class="dl-horizontal">
+        <dt>@lang('messages.teacher')</dt>
+        <dd>{{$course->teacher()->first()->name()}}</dd>
         <dt>@lang('courses.data.room')</dt>
         <dd>{{$course->room}}</dd>
         <dt>@lang('courses.data.description')</dt>
@@ -37,12 +39,14 @@
             {{csrf_field()}}
             {{method_field('delete')}}
             <p>
+              <a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a>
               <button class="btn btn-default">@lang('courses.destroy.submit')</button>
             </p>
           </form>
         </confirm>
+      @else
+        <p><a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a></p>
       @endif
-      <p><a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a></p>
 
       <h3>@lang('courses.show.lessons')</h3>
       <ul>

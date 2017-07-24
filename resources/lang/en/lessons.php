@@ -28,7 +28,8 @@ return [
         'button'  => 'Attendance checked'
     ],
     'register'      => [
-        'button' => 'Register student'
+        'button' => 'Register student',
+        'change' => 'Change registration'
     ],
     'unregister'    => [
         'heading' => 'Unregister student',

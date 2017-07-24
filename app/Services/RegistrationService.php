@@ -152,16 +152,6 @@ interface RegistrationService {
   public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
 
   /**
-   * Get the registrations a student has for a given slot
-   *
-   * @param Student $student
-   * @param Date $date
-   * @param $number
-   * @return Collection<array>
-   */
-  public function getMappedForSlot(Student $student, Date $date, $number);
-
-  /**
    * @param Group $group
    * @param Student|null $student
    * @param Date|null $start
@@ -178,5 +168,12 @@ interface RegistrationService {
    * @return Collection<array>
    */
   public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
+
+  /**
+   * @param Student $student
+   * @param Lesson $lesson
+   * @return array
+   */
+  public function getWarnings(Lesson $lesson, Student $student);
 
 }

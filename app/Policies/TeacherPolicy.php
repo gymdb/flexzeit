@@ -24,7 +24,10 @@ class TeacherPolicy {
    * @param  Teacher $teacher
    * @return bool
    */
-  public function viewLessons(User $user, Teacher $teacher) {
+  public function viewLessons(User $user, Teacher $teacher = null) {
+    if (!$teacher) {
+      return false;
+    }
     return $user->isTeacher() && $teacher->id === $user->id;
   }
 

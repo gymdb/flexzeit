@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
 <script>
   //noinspection JSUnusedGlobalSymbols
   export default {
@@ -48,12 +49,13 @@
         });
       },
       openFeedback(id) {
-        //noinspection JSUnresolvedVariable
         this.$refs.feedbackModal.open(id);
       },
       openRegister() {
-        //noinspection JSUnresolvedVariable
         this.$refs.registerModal.open();
+      },
+      openChangeRegistration(student, date, number) {
+        this.$refs.changeRegistrationModal.open(student, date, number);
       }
     }
   }

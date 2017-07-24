@@ -88,14 +88,15 @@ class RegistrationController extends Controller {
     $this->authorize('showRegistrations', Student::class);
 
     $user = $this->getTeacher();
-    $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
+    $isAdmin = $user->admin;
+    $groups = $isAdmin ? $this->miscService->getGroups() : [$user->form->group];
 
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getFirstRegisterDate()->addDay(-1);
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.registrations.missing', compact('groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.registrations.missing', compact('isAdmin', 'groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -206,16 +207,15 @@ class RegistrationController extends Controller {
   }
 
   /**
-   * Get registrations for a student in JSON format
+   * Get all warnings when registering a student
    *
+   * @param Lesson $lesson
    * @param Student $student
-   * @param Date $date
-   * @param int $number
    * @return JsonResponse
    */
-  public function getForSlot(Student $student, Date $date, $number) {
-    $registrations = $this->registrationService->getMappedForSlot($student, $date, $number);
-    return response()->json($registrations);
+  public function getWarnings(Lesson $lesson, Student $student) {
+    $warnings = $this->registrationService->getWarnings($lesson, $student);
+    return response()->json($warnings);
   }
 
   /**

@@ -26,7 +26,7 @@ interface LessonRepository {
    * @param bool $withCourse Only show lessons with an assigned course
    * @return Builder
    */
-  public function queryForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
+  public function queryForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
 
   /**
    * @param Student $student

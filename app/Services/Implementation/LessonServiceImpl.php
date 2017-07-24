@@ -47,7 +47,7 @@ class LessonServiceImpl implements LessonService {
     $lesson->save();
   }
 
-  public function getForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
+  public function getForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
     $lessons = $this->lessonRepository
         ->queryForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)
         ->with('course', 'teacher')
@@ -59,7 +59,7 @@ class LessonServiceImpl implements LessonService {
     return $lessons;
   }
 
-  public function getMappedForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
+  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
     return $this->getForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)->map(function(Lesson $lesson) {
       $data = [
           'id'        => $lesson->id,
@@ -75,6 +75,11 @@ class LessonServiceImpl implements LessonService {
             'name' => $lesson->course->name,
             'room' => $lesson->course->room
         ];
+        $data['maxstudents'] = $lesson->course->maxstudents;
+        $data['students'] = $lesson->course->students()->count();
+      } else {
+        $data['maxstudents'] = $this->configService->getMaxStudents();
+        $data['students'] = $lesson->students()->count();
       }
       return $data;
     });
@@ -104,10 +109,10 @@ class LessonServiceImpl implements LessonService {
         ->queryAvailable($student, $date, $numbers, $teacher, $subject)
         ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.teacher_id', 'lessons.course_id'])
         ->map(function(Lesson $lesson) use ($student) {
-          if ($lesson->course && $this->registrationService->validateStudentForCourse($lesson->course, $student, true) !== 0) {
-            return null;
-          }
-          if (!$lesson->course && $this->registrationService->validateStudentForLesson($lesson, $student, true) !== 0) {
+          $error = $lesson->course
+              ? $this->registrationService->validateStudentForCourse($lesson->course, $student, true)
+              : $this->registrationService->validateStudentForLesson($lesson, $student, true);
+          if ($error) {
             return null;
           }
 

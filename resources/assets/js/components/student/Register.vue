@@ -34,6 +34,7 @@
       return {
         show: false,
         lesson: null,
+        saving: false,
         error: null
       }
     },
@@ -47,7 +48,7 @@
             : this.$t('student.register.lesson.heading', {teacher: this.lesson.teacher.name});
       },
       saveDisabled() {
-        return !this.lesson;
+        return this.saving || !this.lesson;
       }
     },
     methods: {
@@ -61,6 +62,7 @@
       save() {
         if (!this.saveDisabled) {
           let self = this;
+          this.saving = true;
 
           const url = this.lesson.course
               ? '/student/api/register/course/' + this.lesson.course.id
@@ -73,8 +75,10 @@
             } else {
               self.error = response.data.error;
             }
+            self.saving = false;
           }).catch(function (error) {
-            self.error = error.response ? error.response.status : 100;
+            self.saving = false;
+            self.error = error;
           });
         }
       }
