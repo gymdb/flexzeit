@@ -15,7 +15,7 @@ class Initial extends Migration {
     // First create all tables that don't have foreign key relations
     Schema::create('config', function(Blueprint $table) {
       $table->string('key', 32);
-      $table->json('value');
+      $table->text('value');
 
       $table->primary('key');
     });
@@ -184,7 +184,7 @@ class Initial extends Migration {
     // Table for laravel job queue
     Schema::create('jobs', function(Blueprint $table) {
       $table->bigIncrements('id');
-      $table->string('queue');
+      $table->string('queue', 64);
       $table->longText('payload');
       $table->tinyInteger('attempts')->unsigned();
       $table->unsignedInteger('reserved_at')->nullable();
