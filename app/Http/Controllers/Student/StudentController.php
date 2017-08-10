@@ -64,9 +64,10 @@ class StudentController extends Controller {
     $lessons = $this->registrationService->getSlots($student, $date);
     $subjects = $this->miscService->getSubjects();
     $teachers = $this->miscService->getTeachers();
+    $roomTypes = $this->miscService->getRoomTypes();
     $allowRegistration = $this->registrationService->isRegistrationPossible($date);
 
-    return view('student.day', compact('date', 'lessons', 'subjects', 'teachers', 'allowRegistration'));
+    return view('student.day', compact('date', 'lessons', 'subjects', 'teachers', 'roomTypes', 'allowRegistration'));
   }
 
 }

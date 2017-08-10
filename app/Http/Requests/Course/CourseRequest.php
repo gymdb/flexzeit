@@ -38,7 +38,7 @@ abstract class CourseRequest extends FormRequest {
     return array_merge([
         'name'        => 'required|string|max:50',
         'description' => 'nullable|string',
-        'room'        => 'required|string|max:50',
+        'room'        => 'required|integer|exists:rooms,id',
         'lastDate'    => 'nullable|bail|date|edit_allowed'
     ], $this->typeSpecificRules());
   }
@@ -52,6 +52,13 @@ abstract class CourseRequest extends FormRequest {
   }
 
   /**
+   * @return int
+   */
+  public function getRoom() {
+    return $this->input('room');
+  }
+
+  /**
    * Populate a course model with the specified data
    *
    * @param Course $course
@@ -60,7 +67,6 @@ abstract class CourseRequest extends FormRequest {
   public function populateCourse(Course $course) {
     $course->name = $this->input('name');
     $course->description = $this->input('description') ?: '';
-    $course->room = $this->input('room');
 
     return $this->typeSpecificPopulate($course);
   }

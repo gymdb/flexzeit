@@ -47,7 +47,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $student->lessons());
   }
 
-  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null) {
+  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null, $type = null) {
     $query = $this->queryInRange($date, null, null, $numbers, false, false, $teacher ? $teacher->lessons() : null)
         // Must no be part of an obligatory course
         ->whereNotExists(function($exists) {
@@ -63,14 +63,21 @@ class LessonRepository implements \App\Repositories\LessonRepository {
               ->whereColumn('sub.date', '<', 'lessons.date');
         })
         ->orderBy('lessons.number')
-        ->with('course', 'teacher');
+        ->with('course', 'teacher', 'room');
 
     if ($subject) {
-      $query->whereExists(function($exists) use ($subject) {
-        $exists->select(DB::raw(1))
+      $query->whereIn('lessons.teacher_id', function($in) use ($subject) {
+        $in->select('s.teacher_id')
             ->from('subject_teacher as s')
-            ->whereColumn('s.teacher_id', 'lessons.teacher_id')
             ->where('s.subject_id', $subject->id);
+      });
+    }
+
+    if ($type) {
+      $query->whereIn('lessons.room_id', function($in) use ($type) {
+        $in->select('r.id')
+            ->from('rooms as r')
+            ->where('r.type', $type);
       });
     }
 
@@ -79,17 +86,16 @@ class LessonRepository implements \App\Repositories\LessonRepository {
 
   public function queryForGroups(array $groups, Date $start, Date $end = null, $dayOfWeek = null, $number = null, Course $exclude = null) {
     $query = $this->queryInRange($start, $end, $dayOfWeek, $number)
-        ->whereExists(function($exists) use ($groups) {
-          $exists->select(DB::raw(1))
+        ->whereIn('lessons.course_id', function($exists) use ($groups) {
+          $exists->select('g.course_id')
               ->from('course_group as g')
-              ->whereColumn('g.course_id', 'lessons.course_id')
               ->whereIn('g.group_id', $groups);
         });
     if ($exclude) {
       $query->where('lessons.course_id', '!=', $exclude->id);
     }
 
-    return $query->with('course', 'course.groups');
+    return $query;
   }
 
 }

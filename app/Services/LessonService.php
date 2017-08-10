@@ -60,9 +60,10 @@ interface LessonService {
    * @param Date $date
    * @param Teacher|null $teacher
    * @param Subject|null $subject
-   * @return Collection<array>
+   * @param string|null $type
+   * @return Collection <array>
    */
-  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null);
+  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null);
 
   /**
    * Checks if attendance has been checked for the given lesson

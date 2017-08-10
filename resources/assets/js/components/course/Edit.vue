@@ -1,7 +1,9 @@
+<!--suppress JSUnresolvedVariable -->
 <script>
   import moment from 'moment';
   import _ from 'lodash';
 
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
@@ -14,14 +16,16 @@
         yearFrom: this.old.yearFrom,
         yearTo: this.old.yearTo,
         maxStudents: this.old.maxStudents,
+        maxStudentsOriginal: this.getRoomCapacity(this.old.room),
         subject: this.old.subject,
         groups: this.old.groups || [],
         withCourse: [],
         added: [],
         removed: [],
+        roomOccupation: [],
         withObligatory: [],
         error: null
-      }
+      };
     },
     props: {
       obligatory: {
@@ -30,6 +34,10 @@
       },
       lessons: {
         'type': Object
+      },
+      rooms: {
+        'type': Array,
+        'required': true
       },
       minYear: {
         'type': Number,
@@ -51,9 +59,29 @@
     watch: {
       loadLessonsOptions(options) {
         this.loadLessonsForCourse(options);
+      },
+      room(room) {
+        if (room) {
+          const capacity = this.getRoomCapacity(room);
+          if (!this.maxStudents || this.maxStudents === this.maxStudentsOriginal) {
+            this.maxStudents = capacity;
+          }
+          this.maxStudentsOriginal = capacity;
+        }
       }
     },
     computed: {
+      parsedRooms() {
+        return _.map(this.rooms, (room) => {
+          return {
+            id: room.id,
+            label: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length) ? '<span class="text-muted">' + room.name + '</span>' : room.name
+          };
+        });
+      },
+      occupied() {
+        return (this.room && this.roomOccupation[this.room]) ? this.roomOccupation[this.room] : [];
+      },
       maxYearFrom() {
         //noinspection JSCheckFunctionSignatures
         return this.yearTo ? Math.min(this.maxYear, this.yearTo) : this.maxYear;
@@ -63,16 +91,12 @@
         return this.yearFrom ? Math.max(this.minYear, this.yearFrom) : this.minYear;
       },
       loadLessonsOptions() {
-        if (!this.changed) {
-          return null;
-        } else {
-          return {
-            course: this.data.id,
-            lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
-            number: this.number,
-            groups: this.groups.length ? this.groups : null
-          };
-        }
+        return {
+          course: this.data.id,
+          lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
+          number: this.number,
+          groups: this.groups.length ? this.groups : null
+        };
       },
       buttonDisabled() {
         if (!this.changed) {
@@ -96,29 +120,26 @@
       setLastDate(date) {
         this.lastDate = date;
       },
+      getRoomCapacity(room) {
+        const data = _.find(this.rooms, {id: room});
+        return (data && data.capacity) ? data.capacity : null;
+      },
       loadLessonsForCourse: _.debounce(function (params) {
-        if (!params) {
-          this.error = null;
-          this.withCourse = [];
-          this.added = [];
-          this.removed = [];
-          this.withObligatory = [];
-        } else {
-          let self = this;
-          this.$http.get('/teacher/api/course/lessonsForEdit', {
-            params: params
-          }).then(function (response) {
-            self.error = null;
-            self.withCourse = response.data.withCourse || [];
-            self.added = response.data.added || [];
-            self.removed = response.data.removed || [];
-            if (self.obligatory) {
-              self.withObligatory = response.data.withObligatory || [];
-            }
-          }).catch(function (error) {
-            self.error = error;
-          });
-        }
+        let self = this;
+        this.$http.get('/teacher/api/course/dataForEdit', {
+          params: params
+        }).then(function (response) {
+          self.error = null;
+          self.withCourse = response.data.withCourse || [];
+          self.added = response.data.added || [];
+          self.removed = response.data.removed || [];
+          self.roomOccupation = response.data.roomOccupation || [];
+          if (self.obligatory) {
+            self.withObligatory = response.data.withObligatory || [];
+          }
+        }).catch(function (error) {
+          self.error = error;
+        });
       }, 50)
     }
   }

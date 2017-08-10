@@ -87,7 +87,7 @@ class ConfigStorageServiceImpl implements ConfigStorageService {
     $this->invalidateCache($key);
   }
 
-  protected function getCache() {
+  private function getCache() {
     return Cache::getFacadeRoot();
   }
 

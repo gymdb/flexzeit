@@ -11,6 +11,7 @@ use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
 use App\Repositories\StudentRepository;
+use App\Repositories\RoomRepository;
 use App\Repositories\SubjectRepository;
 use App\Repositories\TeacherRepository;
 use App\Services\BugReportService;
@@ -38,7 +39,6 @@ use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider {
@@ -77,29 +77,30 @@ class AppServiceProvider extends ServiceProvider {
     });
 
     // Bind repositories
-    $this->app->bind(BugReportRepository::class, \App\Repositories\Eloquent\BugReportRepository::class);
-    $this->app->bind(ConfigRepository::class, \App\Repositories\Eloquent\ConfigRepository::class);
-    $this->app->bind(CourseRepository::class, \App\Repositories\Eloquent\CourseRepository::class);
-    $this->app->bind(GroupRepository::class, \App\Repositories\Eloquent\GroupRepository::class);
-    $this->app->bind(LessonRepository::class, \App\Repositories\Eloquent\LessonRepository::class);
-    $this->app->bind(OffdayRepository::class, \App\Repositories\Eloquent\OffdayRepository::class);
-    $this->app->bind(RegistrationRepository::class, \App\Repositories\Eloquent\RegistrationRepository::class);
-    $this->app->bind(StudentRepository::class, \App\Repositories\Eloquent\StudentRepository::class);
-    $this->app->bind(SubjectRepository::class, \App\Repositories\Eloquent\SubjectRepository::class);
-    $this->app->bind(TeacherRepository::class, \App\Repositories\Eloquent\TeacherRepository::class);
+    $this->app->singleton(BugReportRepository::class, \App\Repositories\Eloquent\BugReportRepository::class);
+    $this->app->singleton(ConfigRepository::class, \App\Repositories\Eloquent\ConfigRepository::class);
+    $this->app->singleton(CourseRepository::class, \App\Repositories\Eloquent\CourseRepository::class);
+    $this->app->singleton(GroupRepository::class, \App\Repositories\Eloquent\GroupRepository::class);
+    $this->app->singleton(LessonRepository::class, \App\Repositories\Eloquent\LessonRepository::class);
+    $this->app->singleton(OffdayRepository::class, \App\Repositories\Eloquent\OffdayRepository::class);
+    $this->app->singleton(RegistrationRepository::class, \App\Repositories\Eloquent\RegistrationRepository::class);
+    $this->app->singleton(RoomRepository::class, \App\Repositories\Eloquent\RoomRepository::class);
+    $this->app->singleton(StudentRepository::class, \App\Repositories\Eloquent\StudentRepository::class);
+    $this->app->singleton(SubjectRepository::class, \App\Repositories\Eloquent\SubjectRepository::class);
+    $this->app->singleton(TeacherRepository::class, \App\Repositories\Eloquent\TeacherRepository::class);
 
     // Bind services
-    $this->app->bind(BugReportService::class, BugReportServiceImpl::class);
-    $this->app->bind(ConfigService::class, ConfigServiceImpl::class);
-    $this->app->bind(ConfigStorageService::class, ConfigStorageServiceImpl::class);
-    $this->app->bind(CourseService::class, CourseServiceImpl::class);
-    $this->app->bind(DocumentationService::class, DocumentationServiceImpl::class);
-    $this->app->bind(LessonService::class, LessonServiceImpl::class);
-    $this->app->bind(MiscService::class, MiscServiceImpl::class);
-    $this->app->bind(OffdayService::class, OffdayServiceImpl::class);
-    $this->app->bind(RegistrationService::class, RegistrationServiceImpl::class);
-    $this->app->bind(StudentService::class, StudentServiceImpl::class);
-    $this->app->bind(WebUntisService::class, WebUntisServiceImpl::class);
+    $this->app->singleton(BugReportService::class, BugReportServiceImpl::class);
+    $this->app->singleton(ConfigService::class, ConfigServiceImpl::class);
+    $this->app->singleton(ConfigStorageService::class, ConfigStorageServiceImpl::class);
+    $this->app->singleton(CourseService::class, CourseServiceImpl::class);
+    $this->app->singleton(DocumentationService::class, DocumentationServiceImpl::class);
+    $this->app->singleton(LessonService::class, LessonServiceImpl::class);
+    $this->app->singleton(MiscService::class, MiscServiceImpl::class);
+    $this->app->singleton(OffdayService::class, OffdayServiceImpl::class);
+    $this->app->singleton(RegistrationService::class, RegistrationServiceImpl::class);
+    $this->app->singleton(StudentService::class, StudentServiceImpl::class);
+    $this->app->singleton(WebUntisService::class, WebUntisServiceImpl::class);
   }
 
 }

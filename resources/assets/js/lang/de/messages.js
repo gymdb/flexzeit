@@ -5,6 +5,7 @@ module.exports = {
   student: 'SchülerIn',
   teacher: 'Lehrkraft',
   subject: 'Fach',
+  type: 'Typ',
   date: 'Datum',
   time: 'Zeit',
   course: 'Kurs',

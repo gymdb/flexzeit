@@ -31,35 +31,28 @@
                     @if($allowRegistration)
                       <td></td>
                     @endif
-                  @elseif($lesson->course)
-                    <td>{{$lesson->teacher->name()}}</td>
-                    <td>{{$lesson->course->name}}</td>
-                    <td>{{$lesson->course->room}}</td>
-                    @if($allowRegistration)
-                      <td>
-                        @if($lesson->unregisterPossible)
-                          <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
-                                      confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
-                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
-                            <span class="sr-only"> @lang('student.unregister.label')</span>
-                          </unregister>
-                        @endif
-                      </td>
-                    @endif
                   @else
                     <td>{{$lesson->teacher->name()}}</td>
-                    <td></td>
-                    <td>{{$lesson->room}}</td>
+                    <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
+                    <td>{{$lesson->room->name}}</td>
                     @if($allowRegistration)
                       <td>
                         @if($lesson->unregisterPossible)
-                          <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
-                                      confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
-                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link"></span>
-                            <span class="sr-only"> @lang('student.unregister.label')</span>
-                          </unregister>
+                          @if($lesson->course)
+                            <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
+                                        confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
+                                        v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                              <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                              <span class="sr-only"> @lang('student.unregister.label')</span>
+                            </unregister>
+                          @else
+                            <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
+                                        confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
+                                        v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                              <span class="glyphicon glyphicon-remove-sign register-link"></span>
+                              <span class="sr-only"> @lang('student.unregister.label')</span>
+                            </unregister>
+                          @endif
                         @endif
                       </td>
                     @endif
@@ -81,6 +74,7 @@
             url="{{route('student.api.available', $date->toDateString())}}"
             :teachers='@json($teachers)'
             :subjects='@json($subjects)'
+            :room-types='@json($roomTypes)'
             error-text="@lang('student.available.error')">
           <div slot="empty" class="alert alert-warning">@lang('student.available.none')</div>
           <template scope="props">
@@ -112,7 +106,7 @@
                       <span>@{{lesson.teacher.name}}</span>
                     </popover>
                   </td>
-                  <td><span v-if="lesson.course">@{{lesson.course.name}}</span></td>
+                  <td>@{{lesson.course ? lesson.course.name : ''}}</td>
                   <td>@{{lesson.room}}</td>
                   @if ($allowRegistration)
                     <td>

@@ -2,6 +2,7 @@
 
 use App\Models\Form;
 use App\Models\Group;
+use App\Models\Room;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -79,5 +80,9 @@ class DummySeeder extends Seeder {
         'password' => Hash::make('admin'),
         'admin'    => true
     ]);
+
+    factory(Room::class)
+        ->times(50)
+        ->create();
   }
 }

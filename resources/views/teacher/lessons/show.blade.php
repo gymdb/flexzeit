@@ -17,12 +17,9 @@
           @if($lesson->course)
             <dt>@lang('messages.course')</dt>
             <dd><a href="{{route('teacher.courses.show', $lesson->course->id)}}">{{$lesson->course->name}}</a></dd>
-            <dt>@lang('messages.room')</dt>
-            <dd>{{$lesson->course->room}}</dd>
-          @else
-            <dt>@lang('messages.room')</dt>
-            <dd>{{$lesson->room}}</dd>
           @endif
+          <dt>@lang('messages.room')</dt>
+          <dd>{{$lesson->room->name}}</dd>
         </dl>
 
         @if($allowCancel)

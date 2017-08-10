@@ -20,13 +20,12 @@
             @foreach($lessons as $lesson)
               <tr @if($lesson->cancelled)class="text-muted"@endif>
                 <td>@lang('messages.format.range', $lesson->time)</td>
-                @if($lesson->course)
-                  <td><a href="{{route('teacher.courses.show', $lesson->course->id)}}">{{$lesson->course->name}}</a></td>
-                  <td>{{$lesson->course->room}}</td>
-                @else
-                  <td></td>
-                  <td>{{$lesson->room}}</td>
-                @endif
+                <td>
+                  @if($lesson->course)
+                    <a href="{{route('teacher.courses.show', $lesson->course->id)}}">{{$lesson->course->name}}</a>
+                  @endif
+                </td>
+                <td>{{$lesson->room->name}}</td>
                 <td>
                   @if($lesson->cancelled)
                     @lang('lessons.dashboard.cancelled')

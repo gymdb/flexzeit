@@ -89,7 +89,7 @@ class DocumentationServiceImpl implements DocumentationService {
 
   public function getMappedMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null) {
     $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getFirstDocumentationDate()->addDay(-1);
+    $end = $end ?: $this->configService->getFirstDocumentationDate()->copy()->addDay(-1);
 
     return $this->registrationRepository
         ->queryDocumentation($student ?: $group, $start, $end, $teacher)

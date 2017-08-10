@@ -98,7 +98,7 @@ class DocumentationController extends Controller {
     $teachers = $this->miscService->getTeachers();
 
     $minDate = $this->configService->getYearStart();
-    $maxDate = $this->configService->getFirstDocumentationDate()->addDay(-1);
+    $maxDate = $this->configService->getFirstDocumentationDate()->copy()->addDay(-1);
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 

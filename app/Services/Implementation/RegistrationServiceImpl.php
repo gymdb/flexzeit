@@ -76,7 +76,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$ignoreDate && !$this->isRegistrationPossible($firstLesson->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
-      if ($course->maxstudents && $course->students()->count() >= $course->maxstudents) {
+      if ($course->maxstudents && $course->students()->count('student_id') >= $course->maxstudents) {
         return RegistrationException::MAXSTUDENTS;
       }
       if ($student->offdays()->whereIn('date', $course->lessons->pluck('date'))->exists()) {
@@ -116,7 +116,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if (!$ignoreDate && !$this->isRegistrationPossible($lesson->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
-      if ($lesson->students()->count() >= $this->configService->getMaxStudents()) {
+      if ($lesson->students()->count() >= $lesson->room->capacity) {
         return RegistrationException::MAXSTUDENTS;
       }
       if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
@@ -227,20 +227,19 @@ class RegistrationServiceImpl implements RegistrationService {
   public function getForLesson(Lesson $lesson) {
     return $this->registrationRepository->queryOrdered($lesson->registrations())
         ->with(['student.absences' => function($query) use ($lesson) {
-          $query->where('date', $lesson->date);
+          $query->where('date', $lesson->date)->where('number', $lesson->number);
         }])
         ->get(['registrations.id', 'registrations.attendance', 'registrations.lesson_id', 'registrations.student_id']);
   }
 
   public function getForCourse(Course $course) {
     return $this->registrationRepository->queryOrdered($course->students())
-        ->groupBy('lessons.course_id', 'students.lastname', 'students.firstname', 'students.id')
-        ->get(['registrations.student_id']);
+        ->get(['registrations.student_id', 'students.lastname', 'students.firstname', 'students.id']);
   }
 
   public function getSlots(Student $student, Date $date = null, Date $end = null) {
     $lessons = $this->registrationRepository->querySlots($student, $date ?: Date::today(), $end)
-        ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
+        ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room_id', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
 
     $lessons->each(function(Lesson $lesson) use ($student) {
       $this->configService->setTime($lesson);
@@ -258,7 +257,7 @@ class RegistrationServiceImpl implements RegistrationService {
   public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
     return $this->registrationRepository
         ->queryWithExcused($student, $start, $end, null, true, $teacher, $subject)
-        ->with('lesson.course')
+        ->with('lesson.course', 'lesson.room')
         ->addSelect(['registrations.id', 'lesson_id', 'attendance'])
         ->get()
         ->map(function(Registration $registration) {
@@ -270,15 +269,14 @@ class RegistrationServiceImpl implements RegistrationService {
               'id'         => $registration->id,
               'date'       => $lesson->date->toDateString(),
               'time'       => $lesson->time,
-              'room'       => $lesson->room,
+              'room'       => $lesson->room->name,
               'teacher'    => $lesson->teacher->name(),
               'cancelled'  => $lesson->cancelled
           ];
           if ($lesson->course) {
             $data['course'] = [
                 'id'   => $lesson->course->id,
-                'name' => $lesson->course->name,
-                'room' => $lesson->course->room
+                'name' => $lesson->course->name
             ];
           }
           return $data;
@@ -287,7 +285,7 @@ class RegistrationServiceImpl implements RegistrationService {
 
   public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
     $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getFirstRegisterDate()->addDay(-1);
+    $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
 
     return $this->registrationRepository->queryMissing($group, $student, $start, $end)
         ->get(['id', 'firstname', 'lastname', 'date', 'number'])
@@ -336,7 +334,7 @@ class RegistrationServiceImpl implements RegistrationService {
         $warnings['obligatory'] = $course->groups->pluck('name');
       }
 
-      $participants = $course->students()->count();
+      $participants = $course->students()->count('student_id');
       $maxstudents = $course->maxstudents;
 
       $form = $student->forms()->first(['year']);
@@ -354,7 +352,7 @@ class RegistrationServiceImpl implements RegistrationService {
       }
     } else {
       $participants = $lesson->students()->count();
-      $maxstudents = $this->configService->getMaxStudents();
+      $maxstudents = $lesson->room->capacity;
     }
 
     if ($maxstudents && $participants >= $maxstudents) {

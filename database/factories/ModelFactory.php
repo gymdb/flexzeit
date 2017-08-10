@@ -4,6 +4,7 @@
 
 use App\Models\Lesson;
 use App\Models\Registration;
+use App\Models\Room;
 use \App\Models\Student;
 use App\Models\Teacher;
 use Faker\Generator;
@@ -11,7 +12,6 @@ use Illuminate\Database\Eloquent\Factory;
 
 $factory->define(Lesson::class, function(Generator $faker) {
   return [
-      'room'      => $faker->numberBetween(0, 3) * 100 + $faker->numberBetween(1, 25),
       'cancelled' => $faker->boolean(5)
   ];
 });
@@ -49,5 +49,14 @@ $factory->define(Teacher::class, function(Generator $faker) {
       'lastname'  => $faker->lastName,
       'image'     => 'https://api.adorable.io/avatars/200/' . $faker->word . '.png',
       'info'      => $faker->words(2, true)
+  ];
+});
+
+$factory->define(Room::class, function(Generator $faker) {
+  $number = $faker->unique()->numberBetween(1, 100);
+  return [
+      'name'     => floor($number / 25) * 100 + ($number % 25) + 1,
+      'type'     => $faker->randomElement(['Sport', 'Listening', null, null, null, null, null]),
+      'capacity' => $faker->numberBetween(3, 6) * 5
   ];
 });

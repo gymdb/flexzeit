@@ -9,6 +9,7 @@ return [
         'chooseDay'     => 'Zuerst Kursbeginn auswählen.',
         'name'          => 'Kursname',
         'room'          => 'Raum',
+        'selectRoom'    => 'Raum auswählen',
         'description'   => 'Beschreibung',
         'year'          => [
             'title'  => 'Jahrgänge',
@@ -50,6 +51,7 @@ return [
         'submit'       => 'Kurs erstellen',
         'withCourse'   => 'Für Einheiten innerhalb des gewählten Zeitraums existieren bereits Kurse:',
         'forNewCourse' => 'Der neue Kurs wird in folgenden Einheiten abgehalten werden:',
+        'occupied'     => 'Der Raum ist bereits belegt:',
         'saveError'    => 'Fehler beim Speichern des Kurses.',
         'loadError'    => 'Informationen zu den gewählten Einheiten konnten nicht geladen werden.',
         'obligatory'   => [
@@ -68,6 +70,7 @@ return [
         'withCourse'     => 'Für zusätzlich gewählte Einheiten existieren bereits Kurse:',
         'addedLessons'   => 'Der Kurs wird auf folgenden Einheiten verlängert:',
         'removedLessons' => 'Der Kurs findet in den folgenden Einheiten nicht mehr statt:',
+        'occupied'       => 'Der Raum ist bereits belegt:',
         'saveError'      => 'Fehler beim Speichern des Kurses.',
         'loadError'      => 'Informationen zu den Einheiten konnten nicht geladen werden.',
         'obligatory'     => [

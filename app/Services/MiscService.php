@@ -38,4 +38,18 @@ interface MiscService {
    */
   public function getSubjects();
 
+  /**
+   * Get a list of all rooms, sorted by name
+   *
+   * @return Collection
+   */
+  public function getRooms();
+
+  /**
+   * Get a list of all room types, sorted alphabetically
+   *
+   * @return Collection
+   */
+  public function getRoomTypes();
+
 }

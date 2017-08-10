@@ -30,16 +30,14 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     }
     if ($subject) {
       $query->where(function($q1) use ($subject) {
-        $q1->whereExists(function($q2) use ($subject) {
-          $q2->select(DB::raw(1))
+        $q1->whereIn('l.course_id', function($q2) use ($subject) {
+          $q2->select('c.id')
               ->from('courses as c')
-              ->whereColumn('c.id', 'l.course_id')
               ->where('c.subject_id', $subject->id);
         });
-        $q1->orWhereExists(function($q2) use ($subject) {
-          $q2->select(DB::raw(1))
+        $q1->orWhereIn('l.teacher_id', function($q2) use ($subject) {
+          $q2->select('s.teacher_id')
               ->from('subject_teacher as s')
-              ->whereColumn('s.teacher_id', 'l.teacher_id')
               ->where('s.subject_id', $subject->id);
         });
       });
@@ -126,7 +124,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     $query->addBinding($slotQuery->getBindings(), 'join');
     $query->addBinding($joinQuery->getBindings(), 'join');
 
-    return $query->with('teacher', 'course');
+    return $query->with('teacher', 'course', 'room');
   }
 
   public function queryWithExcused(Student $student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
@@ -173,13 +171,12 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function deleteForCourse(Course $course, Date $firstDate = null, array $students = null) {
-    $query = Registration::whereExists(function($exists) use ($course, $firstDate) {
-      $exists->select(DB::raw(1))
+    $query = Registration::whereIn('lesson_id', function($in) use ($course, $firstDate) {
+      $in->select('l.id')
           ->from('lessons as l')
-          ->whereColumn('l.id', 'registrations.lesson_id')
           ->where('l.course_id', $course->id);
       if ($firstDate) {
-        $exists->where('l.date', '>=', $firstDate);
+        $in->where('l.date', '>=', $firstDate);
       }
     });
     if ($students) {

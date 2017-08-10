@@ -8,6 +8,7 @@ return [
         'chooseDay'     => 'Choose a date first.',
         'name'          => 'Course name',
         'room'          => 'Room',
+        'selectRoom'    => 'Select room',
         'description'   => 'Description',
         'year'          => [
             'title'  => 'Grades',
@@ -49,6 +50,7 @@ return [
         'submit'       => 'Create course',
         'withCourse'   => 'Courses already exist for some lessons within the chosen timeframe:',
         'forNewCourse' => 'The new course will be held at the following lessons:',
+        'occupied'     => 'The room is already occupied:',
         'saveError'    => 'Error saving the course.',
         'loadError'    => 'Error loading the lesson information.',
         'obligatory'   => [
@@ -67,6 +69,7 @@ return [
         'withCourse'     => 'Courses already exist for some of the additional lessons:',
         'addedLessons'   => 'The course will additionally be held at the following lessons:',
         'removedLessons' => 'The course will no longer be held at the following lessons:',
+        'occupied'       => 'The room is already occupied:',
         'saveError'      => 'Error saving the course.',
         'loadError'      => 'Error loading the lesson information.',
         'obligatory'     => [

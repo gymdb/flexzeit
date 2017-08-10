@@ -6,6 +6,8 @@ use App\Helpers\Date;
 use App\Models\Lesson;
 use App\Services\ConfigService;
 use App\Services\ConfigStorageService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Service for accessing config option values from database while using caches
@@ -17,22 +19,35 @@ class ConfigServiceImpl implements ConfigService {
   /** @var ConfigStorageService */
   private $configService;
 
+  /** @var string Cache prefix for unlimited cached data */
+  private $prefix = 'parsed';
+
+  /** @var int Duration in minutes for daily updated cache entries */
+  private $cacheDuration;
+
   function __construct(ConfigStorageService $configService) {
     $this->configService = $configService;
+    $this->cacheDuration = Carbon::now()->secondsUntilEndOfDay() / 60;
   }
 
   public function getYearStart(Date $min = null) {
-    $date = $this->configService->getAsDate('year.start');
+    $date = $this->getCache()->rememberForever($this->prefix . '.year.start', function() {
+      return $this->configService->getAsDate('year.start');
+    });
     return $min ? max($date, $min) : $date;
   }
 
   public function getYearEnd(Date $max = null) {
-    $date = $this->configService->getAsDate('year.end');
+    $date = $this->getCache()->rememberForever($this->prefix . '.year.end', function() {
+      return $this->configService->getAsDate('year.end');
+    });
     return $max ? min($date, $max) : $date;
   }
 
   public function getFirstCourseCreateDate() {
-    return $this->getYearStart($this->getDateBound('course.create'));
+    return $this->getCache()->remember($this->prefix . '.course.create', $this->cacheDuration, function() {
+      return $this->getYearStart($this->getDateBound('course.create'));
+    });
   }
 
   public function getLastCourseCreateDate() {
@@ -47,10 +62,6 @@ class ConfigServiceImpl implements ConfigService {
     return $this->configService->getAsInt('year.max', 1);
   }
 
-  public function getMaxStudents() {
-    return $this->configService->getAsInt("maxstudents", 0);
-  }
-
   public function getLessonCount(Date $date) {
     return count($this->getLessonTimes()[$date->dayOfWeek]);
   }
@@ -59,15 +70,17 @@ class ConfigServiceImpl implements ConfigService {
     return $this->configService->get('lessons', []);
   }
 
-  public function getDaysWithoutLessons($lessons = null) {
-    $lessons = $this->getLessonTimes();
-    $daysWithoutLessons = [];
-    for ($d = 0; $d < 7; $d++) {
-      if (empty($lessons[$d])) {
-        $daysWithoutLessons[] = $d;
+  public function getDaysWithoutLessons() {
+    return $this->getCache()->rememberForever($this->prefix . '.daysWithoutLessons', function() {
+      $lessons = $this->getLessonTimes();
+      $daysWithoutLessons = [];
+      for ($d = 0; $d < 7; $d++) {
+        if (empty($lessons[$d])) {
+          $daysWithoutLessons[] = $d;
+        }
       }
-    }
-    return $daysWithoutLessons;
+      return $daysWithoutLessons;
+    });
   }
 
   public function getLessonStart(Date $date, $number) {
@@ -81,15 +94,21 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   public function getFirstRegisterDate() {
-    return $this->getDateBound('registration.end');
+    return $this->getCache()->remember($this->prefix . '.registration.first', $this->cacheDuration, function() {
+      return $this->getDateBound('registration.end');
+    });
   }
 
   public function getLastRegisterDate() {
-    return $this->getDateBound('registration.begin')->addDay(-1);
+    return $this->getCache()->remember($this->prefix . '.registration.last', $this->cacheDuration, function() {
+      return $this->getDateBound('registration.begin')->addDay(-1);
+    });
   }
 
   public function getFirstDocumentationDate() {
-    return $this->getDateBound('documentation', -1)->addDay(-1);
+    return $this->getCache()->remember($this->prefix . '.documentation.first', $this->cacheDuration, function() {
+      return $this->getDateBound('documentation', -1);
+    });
   }
 
   public function getLastDocumentationDate() {
@@ -97,11 +116,15 @@ class ConfigServiceImpl implements ConfigService {
   }
 
   public function getDefaultListStartDate() {
-    return max(Date::today()->addWeek(-1), $this->getYearStart());
+    return $this->getCache()->remember($this->prefix . '.list.start', $this->cacheDuration, function() {
+      return max(Date::today()->addWeek(-1), $this->getYearStart());
+    });
   }
 
   public function getDefaultListEndDate() {
-    return min(Date::today()->addWeek(1), $this->getYearEnd());
+    return $this->getCache()->remember($this->prefix . '.list.end', $this->cacheDuration, function() {
+      return min(Date::today()->addWeek(1), $this->getYearEnd());
+    });
   }
 
   public function setTime(Lesson $lesson) {
@@ -138,6 +161,10 @@ class ConfigServiceImpl implements ConfigService {
         ? $today->addDays($future * $day)
       // Allow creation up to given weeks before the date, in relation to the start of the week for the given day of week
         : $today->setToDayOfWeek($day)->startOfWeek()->addWeeks($future * $week);
+  }
+
+  private function getCache() {
+    return Cache::getFacadeRoot();
   }
 
 }

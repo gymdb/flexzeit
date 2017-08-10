@@ -29,14 +29,12 @@ class ConfigSeeder extends Seeder {
       // Lesson count and times
         'lessons'                 => $lessons,
 
-      // Course creation possible until sunday one week earlier
+      // Course creation possible until wednesday one week earlier
         'course.create.day'       => 3,
         'course.create.week'      => 1,
-      // Default maximum students for a lesson
-        'maxstudents'             => 20,
 
-      // Registration is possible on each day the week before
-        'registration.begin.day'  => 4,
+      // Registration is possible starting on thursday one week earlier until two days before
+        'registration.begin.day'  => 3,
         'registration.begin.week' => 1,
         'registration.end.day'    => 2,
         'registration.end.week'   => 0,

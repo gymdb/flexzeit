@@ -92,7 +92,7 @@ class RegistrationController extends Controller {
     $groups = $isAdmin ? $this->miscService->getGroups() : [$user->form->group];
 
     $minDate = $this->configService->getYearStart();
-    $maxDate = $this->configService->getFirstRegisterDate()->addDay(-1);
+    $maxDate = $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 

@@ -27,14 +27,10 @@
                     <td>@lang('messages.format.range', $lesson->time)</td>
                     @if(!$lesson->id)
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
-                    @elseif($lesson->course)
-                      <td>{{$lesson->teacher->name()}}</td>
-                      <td>{{$lesson->course->name}}</td>
-                      <td>{{$lesson->course->room}}</td>
                     @else
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td></td>
-                      <td>{{$lesson->room}}</td>
+                      <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td>{{$lesson->room->name}}</td>
                     @endif
                   </tr>
                 @endforeach
@@ -72,37 +68,33 @@
                     @if(!$lesson->id)
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
                       <td>
-                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')" class="hidden-print">
+                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')"
+                           class="hidden-print">
                           <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
                           <span class="sr-only">@lang('student.register.label')</span>
                         </a>
                       </td>
-                    @elseif($lesson->course)
-                      <td>{{$lesson->teacher->name()}}</td>
-                      <td>{{$lesson->course->name}}</td>
-                      <td>{{$lesson->course->room}}</td>
-                      <td>
-                        @if($lesson->unregisterPossible)
-                          <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
-                                      confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
-                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
-                            <span class="sr-only"> @lang('student.unregister.label')</span>
-                          </unregister>
-                        @endif
-                      </td>
                     @else
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td></td>
-                      <td>{{$lesson->room}}</td>
+                      <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td>{{$lesson->room->name}}</td>
                       <td>
                         @if($lesson->unregisterPossible)
-                          <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
-                                      confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
-                                      v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
-                            <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
-                            <span class="sr-only"> @lang('student.unregister.label')</span>
-                          </unregister>
+                          @if($lesson->course)
+                            <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
+                                        confirm-text="@lang('student.unregister.confirmCourse', ['course' => $lesson->course->name])"
+                                        v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                              <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
+                              <span class="sr-only"> @lang('student.unregister.label')</span>
+                            </unregister>
+                          @else
+                            <unregister :id="{{$lesson->registration_id}}" :course="false" base-url="student" :button="false"
+                                        confirm-text="@lang('student.unregister.confirm', ['teacher' => $lesson->teacher->name()])"
+                                        v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
+                              <span class="glyphicon glyphicon-remove-sign register-link hidden-print"></span>
+                              <span class="sr-only"> @lang('student.unregister.label')</span>
+                            </unregister>
+                          @endif
                         @endif
                       </td>
                     @endif
@@ -145,7 +137,8 @@
                       <td></td>
                     @endif
                     <td>
-                      <a href="#" class="btn btn-xs {{$reg->documentation ? 'btn-default' : 'btn-danger'}}" @click.prevent="openDocumentation({{$reg->id}})">
+                      <a href="#" class="btn btn-xs {{$reg->documentation ? 'btn-default' : 'btn-danger'}}"
+                         @click.prevent="openDocumentation({{$reg->id}})">
                         @lang($reg->documentation ? 'student.documentation.edit' : 'student.documentation.add')
                       </a>
                     </td>

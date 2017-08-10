@@ -8,12 +8,14 @@ use App\Mail\ObligatoryCreated;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
+use App\Models\Room;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Repositories\CourseRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
+use App\Repositories\RoomRepository;
 use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\CourseService;
@@ -40,74 +42,25 @@ class CourseServiceImpl implements CourseService {
   /** @var LessonRepository */
   private $lessonRepository;
 
-  /** @var  OffdayRepository */
+  /** @var OffdayRepository */
   private $offdayRepository;
+
+  /** @var RoomRepository */
+  private $roomRepository;
 
   /** @var StudentRepository */
   private $studentRepository;
 
   function __construct(ConfigService $configService, RegistrationService $registrationService, CourseRepository $courseRepository,
-      GroupRepository $groupRepository, LessonRepository $lessonRepository, OffdayRepository $offdayRepository, StudentRepository $studentRepository) {
+      GroupRepository $groupRepository, LessonRepository $lessonRepository, OffdayRepository $offdayRepository, RoomRepository $roomRepository,
+      StudentRepository $studentRepository) {
     $this->configService = $configService;
     $this->registrationService = $registrationService;
     $this->courseRepository = $courseRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
+    $this->roomRepository = $roomRepository;
     $this->studentRepository = $studentRepository;
-  }
-
-  public function coursePossible(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number) {
-    if ($this->lessonRepository->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true)->exists()) {
-      throw new CourseException(CourseException::EXISTS);
-    }
-  }
-
-  public function obligatoryPossible(array $groups, Date $firstDate, Date $lastDate = null, $number, Course $exclude = null) {
-    if ($this->lessonRepository->queryForGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, $exclude)->exists()) {
-      throw new CourseException(CourseException::OBLIGATORY_EXISTS);
-    }
-  }
-
-  public function getLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
-    return $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $numbers)
-        ->sortBy('date')
-        ->map(function(Lesson $lesson) {
-          $this->configService->setTime($lesson);
-
-          return [
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time,
-              'room' => $lesson->room
-          ];
-        })->values();
-  }
-
-  public function getLessonsWithObligatory(array $groups, Date $firstDate, Date $lastDate = null, $number, Course $exclude = null) {
-    return $this->lessonRepository->queryForGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, $exclude)
-        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.course_id'])
-        ->map(function(Lesson $lesson) {
-          $this->configService->setTime($lesson);
-
-          return [
-              'date'   => $lesson->date->toDateString(),
-              'time'   => $lesson->time,
-              'course' => [
-                  'name'   => $lesson->course->name,
-                  'groups' => $lesson->course->groups->pluck('name')
-              ]
-          ];
-        })->values();
-  }
-
-  private function assignCourse(Collection $lessons, Course $course) {
-    $lessons->each(function(Lesson $lesson) use ($course) {
-      if ($lesson->exists) {
-        $lesson->course()->associate($course);
-        $lesson->save();
-      } else {
-        $course->lessons()->save($lesson);
-      }
-    });
   }
 
   public function createCourse(CreateCourseSpecification $spec, Teacher $teacher) {
@@ -131,8 +84,10 @@ class CourseServiceImpl implements CourseService {
     }
 
     // Load all of the teachers lessons for the given slot
-    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number);
+    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, $spec->getRoom());
     $this->assignCourse($lessons, $course);
+
+    $course->lessons()->update(['room_id' => $spec->getRoom()]);
 
     if ($spec instanceof ObligatorySpecification) {
       $course->groups()->sync($groups);
@@ -169,7 +124,7 @@ class CourseServiceImpl implements CourseService {
     $number = $firstLesson->number;
 
     // Load first modified date
-    $firstChanged = $this->getFirstChanged($oldLastDate, $lastDate);
+    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate);
     if ($firstChanged) {
       // Check if changing course duration is still possible
       if ($oldLastDate->copy()->addWeek() < $firstCreateDate) {
@@ -208,10 +163,8 @@ class CourseServiceImpl implements CourseService {
         $this->registrationService->unregisterAllFromCourse($course, $firstChanged);
         $course->lessons()->where('date', '>=', $firstChanged)->update(['course_id' => null]);
       } else {
-        // Load already registered students
-
         // Add lessons
-        $lessons = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number);
+        $lessons = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, $spec->getRoom());
         $this->assignCourse($lessons, $course);
 
         // Register students for added lessons
@@ -219,6 +172,8 @@ class CourseServiceImpl implements CourseService {
         $this->registrationService->registerStudentsForCourse($course, $students, $firstChanged);
       }
     }
+
+    $course->lessons()->update(['room_id' => $spec->getRoom()]);
 
     if ($spec instanceof ObligatorySpecification) {
       // Set new subject
@@ -249,7 +204,204 @@ class CourseServiceImpl implements CourseService {
     return $course;
   }
 
-  public function getFirstChanged(Date $oldLastDate, Date $lastDate = null) {
+  public function removeCourse(Course $course) {
+    if (!$course->firstLesson()->date->isFuture()) {
+      throw new CourseException(CourseException::DELETE_PERIOD);
+    }
+
+    $this->registrationService->unregisterAllFromCourse($course);
+    $course->lessons()->update(['course_id' => null]);
+    $course->groups()->sync([]);
+    $course->delete();
+  }
+
+  private function coursePossible(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number) {
+    if ($this->lessonRepository->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true)->exists()) {
+      throw new CourseException(CourseException::EXISTS);
+    }
+  }
+
+  private function obligatoryPossible(array $groups, Date $firstDate, Date $lastDate = null, $number, Course $exclude = null) {
+    if ($this->lessonRepository->queryForGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, $exclude)->exists()) {
+      throw new CourseException(CourseException::OBLIGATORY_EXISTS);
+    }
+  }
+
+  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers, $room = null) {
+    if (is_scalar($numbers)) {
+      $numbers = [$numbers];
+    }
+    $dayOfWeek = $firstDate->dayOfWeek;
+
+    $lessons = $this->lessonRepository
+        ->queryForTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)
+        ->get(['id', 'date', 'number', 'cancelled']);
+
+    if (!$lessons->contains($this->matcher($firstDate, null, false))) {
+      // Teacher has no lesson at the first course date, so create them for all days except offdays
+      $offdays = $this->offdayRepository->queryInRange($firstDate, $lastDate, $dayOfWeek, $numbers)->get(['date', 'number']);
+
+      for ($d = $firstDate; $d <= ($lastDate ?: $firstDate); $d = $d->copy()->addWeek()) {
+        foreach ($numbers as $n) {
+          if ($offdays->contains($this->matcher($d, $n))) {
+            continue;
+          }
+          if (!$lessons->contains($this->matcher($d, $n))) {
+            $lesson = new Lesson(['date' => $d, 'number' => $n, 'room_id' => $room]);
+            $lesson->teacher()->associate($teacher);
+            $lessons->push($lesson);
+          }
+        }
+      }
+    }
+
+    return $lessons->filter(function(Lesson $lesson) {
+      return empty($lesson->cancelled);
+    });
+  }
+
+  private function assignCourse(Collection $lessons, Course $course) {
+    $lessons->each(function(Lesson $lesson) use ($course) {
+      if ($lesson->exists) {
+        $lesson->course()->associate($course);
+        $lesson->save();
+      } else {
+        $course->lessons()->save($lesson);
+      }
+    });
+  }
+
+  public function getDataForCreate(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number, array $groups = null) {
+    $withCourse = $this->getWithCourse($teacher, $firstDate, $lastDate, $number);
+    if ($withCourse->isNotEmpty()) {
+      return compact('withCourse');
+    }
+
+    if ($groups) {
+      $withObligatory = $this->getWithObligatory($groups, $firstDate, $lastDate, $number);
+      if ($withObligatory->isNotEmpty()) {
+        return compact('withObligatory');
+      }
+    }
+
+    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number);
+    $forNewCourse = $this->mapLessons($lessons);
+
+    $roomOccupation = $this->getRoomOccupation($lessons, $teacher);
+    $room = $this->getDefaultRoom($teacher, $firstDate, $lastDate, $number);
+
+    return compact('forNewCourse', 'roomOccupation', 'room');
+  }
+
+  public function getDataForEdit(Course $course, Date $lastDate = null, array $groups = null) {
+    $firstLesson = $course->firstLesson();
+    $lastLesson = $course->lastLesson();
+
+    $teacher = $firstLesson->teacher;
+
+    $firstDate = $firstLesson->date;
+    $number = $firstLesson->number;
+    $oldLastDate = $lastLesson->date;
+
+    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate);
+
+    if ($firstChanged) {
+      if ($firstChanged <= $oldLastDate) {
+        $lessons = $course->lessons->groupBy(function(Lesson $lesson) use ($firstChanged) {
+          return $lesson->date >= $firstChanged ? 'removed' : 'kept';
+        });
+
+        $removed = $this->mapLessons($lessons['removed']);
+        $roomOccupation = $this->getRoomOccupation($lessons['kept'], $teacher);
+      } else {
+        $lessons = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number);
+        $withCourse = $this->getWithCourse($teacher, $firstChanged, $lastDate, $number);
+        $added = $this->mapLessons($lessons);
+        $roomOccupation = $this->getRoomOccupation($lessons->merge($course->lessons), $teacher);
+      }
+    } else {
+      $roomOccupation = $this->getRoomOccupation($course->lessons, $teacher);
+    }
+
+    if ($groups) {
+      $withObligatory = $this->getWithObligatory($groups, $firstDate, $lastDate, $number, $course);
+    }
+
+    return compact('withCourse', 'added', 'removed', 'withObligatory', 'roomOccupation');
+  }
+
+  private function mapLessons(Collection $lessons) {
+    return $lessons
+        ->sortBy('date')
+        ->map(function(Lesson $lesson) {
+          $this->configService->setTime($lesson);
+          return [
+              'date' => $lesson->date->toDateString(),
+              'time' => $lesson->time
+          ];
+        })
+        ->values();
+  }
+
+  private function getWithCourse(Teacher $teacher = null, Date $firstDate, Date $lastDate = null, $number) {
+    return $this->lessonRepository
+        ->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true)
+        ->with('course')
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.course_id'])
+        ->map(function(Lesson $lesson) {
+          $this->configService->setTime($lesson);
+          return [
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time,
+              'course' => $lesson->course->name
+          ];
+        });
+  }
+
+  private function getWithObligatory(array $groups, Date $firstDate, Date $lastDate = null, $number, Course $exclude = null) {
+    return $this->lessonRepository
+        ->queryForGroups($groups, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, $exclude)
+        ->with('course', 'course.groups')
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.course_id'])
+        ->map(function(Lesson $lesson) {
+          $this->configService->setTime($lesson);
+          return [
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time,
+              'course' => $lesson->course->name,
+              'groups' => $lesson->course->groups->pluck('name')
+          ];
+        })->values();
+  }
+
+  private function getRoomOccupation(Collection $lessons, Teacher $teacher) {
+    return $this->roomRepository->queryOccupation($lessons, $teacher)
+        ->get(['id'])
+        ->reduce(function(array $occupation = null, Room $room) {
+          $occupation = $occupation ?: [];
+          $occupation[$room->id] = $room->lessons->map(function(Lesson $lesson) {
+            $this->configService->setTime($lesson);
+            return [
+                'date'    => $lesson->date->toDateString(),
+                'time'    => $lesson->time,
+                'teacher' => $lesson->teacher->name()
+            ];
+          });
+          return $occupation;
+        });
+  }
+
+  private function getDefaultRoom(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number) {
+    return $this->lessonRepository
+        ->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number)
+        ->orderBy('date')
+        ->orderBy('number')
+        ->take(1)
+        ->pluck('room_id')
+        ->first();
+  }
+
+  private function getFirstChangedDate(Date $oldLastDate, Date $lastDate = null) {
     if (!$lastDate) {
       return null;
     }
@@ -269,50 +421,6 @@ class CourseServiceImpl implements CourseService {
     return null;
   }
 
-  public function removeCourse(Course $course) {
-    if (!$course->firstLesson()->date->isFuture()) {
-      throw new CourseException(CourseException::DELETE_PERIOD);
-    }
-
-    $this->registrationService->unregisterAllFromCourse($course);
-    $course->lessons()->update(['course_id' => null]);
-    $course->groups()->sync([]);
-    $course->delete();
-  }
-
-  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers) {
-    if (is_scalar($numbers)) {
-      $numbers = [$numbers];
-    }
-    $dayOfWeek = $firstDate->dayOfWeek;
-
-    $lessons = $this->lessonRepository
-        ->queryForTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)
-        ->get(['id', 'date', 'number', 'cancelled', 'room']);
-
-    if (!$lessons->contains($this->matcher($firstDate, null, false))) {
-      // Teacher has no lesson at the first course date, so create them for all days except offdays
-      $offdays = $this->offdayRepository->queryInRange($firstDate, $lastDate, $dayOfWeek, $numbers)->get(['date', 'number']);
-
-      for ($d = $firstDate; $d <= ($lastDate ?: $firstDate); $d = $d->copy()->addWeek()) {
-        foreach ($numbers as $n) {
-          if ($offdays->contains($this->matcher($d, $n))) {
-            continue;
-          }
-          if (!$lessons->contains($this->matcher($d, $n))) {
-            $lesson = new Lesson(['date' => $d, 'number' => $n, 'room' => '']);
-            $lesson->teacher()->associate($teacher);
-            $lessons->push($lesson);
-          }
-        }
-      }
-    }
-
-    return $lessons->filter(function(Lesson $lesson) {
-      return empty($lesson->cancelled);
-    });
-  }
-
   public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null) {
     return $this->courseRepository->query($teacher, $start, $end)
         ->get()
@@ -327,7 +435,7 @@ class CourseServiceImpl implements CourseService {
               'last'        => $course->last !== $course->first ? $course->last : null,
               'time'        => $first->time,
               'teacher'     => $course->teacher->first()->name(),
-              'students'    => $course->students()->count(),
+              'students'    => $course->students()->count('student_id'),
               'maxstudents' => $course->maxstudents
           ];
         });
@@ -350,22 +458,6 @@ class CourseServiceImpl implements CourseService {
               'groups'  => $course->groups->pluck('name')
           ];
         });
-  }
-
-  public function getMappedRemovedLessons(Course $course, Date $firstRemoved) {
-    return $course->lessons()
-        ->where('date', '>=', $firstRemoved)
-        ->orderBy('date')
-        ->orderBy('number')
-        ->get(['date', 'number'])
-        ->map(function(Lesson $lesson) {
-          $this->configService->setTime($lesson);
-
-          return [
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time
-          ];
-        })->values();
   }
 
 }

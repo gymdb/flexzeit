@@ -15,11 +15,10 @@ class CourseRepository implements \App\Repositories\CourseRepository {
 
   public function query(Teacher $teacher = null, Date $start, Date $end = null) {
     return ($teacher ? $teacher->courses()->groupBy('pivot_teacher_id', 'pivot_course_id') : Course::query())
-        ->whereExists(function($q1) use ($start, $end) {
-          $q1->select(DB::raw(1))
-              ->from('lessons as l')
-              ->whereColumn('l.course_id', 'courses.id');
-          $this->inRange($q1, $start, $end, null, null, 'l.');
+        ->whereIn('courses.id', function($in) use ($start, $end) {
+          $in->select('l.course_id')
+              ->from('lessons as l');
+          $this->inRange($in, $start, $end, null, null, 'l.');
         })
         ->with('teacher')
         ->orderBy('first')
@@ -34,12 +33,12 @@ class CourseRepository implements \App\Repositories\CourseRepository {
 
   public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null) {
     $query = $this->query($teacher, $start, $end)
-        ->whereExists(function($exists) use ($group) {
-          $exists->select(DB::raw(1))
+        ->whereIn('courses.id', function($in) use ($group) {
+          $in->select('g.course_id')
               ->from('course_group as g')
-              ->whereColumn('g.course_id', 'courses.id');
+              ->distinct();
           if ($group) {
-            $exists->where('g.group_id', $group->id);
+            $in->where('g.group_id', $group->id);
           }
         });
 

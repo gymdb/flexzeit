@@ -10,7 +10,7 @@
         </select>
       </div>
 
-      <div v-if="groups && requireGroup" class="form-group col-sm-3 col-xs-6">
+      <div v-if="groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
         <label for="student" class="sr-only">{{$t('messages.student')}}</label>
         <select class="form-control" id="student" :disabled="!group" v-model="student">
           <option :value="null">{{$t('messages.student')}}</option>
@@ -18,7 +18,7 @@
         </select>
       </div>
 
-      <div v-if="teachers" class="form-group col-sm-3 col-xs-6">
+      <div v-if="teachersList" class="form-group col-sm-3 col-xs-6">
         <label for="teacher" class="sr-only">{{$t('messages.teacher')}}</label>
         <select class="form-control" id="teacher" v-model="teacher">
           <option :value="null">{{$t('messages.teacher')}}</option>
@@ -26,11 +26,19 @@
         </select>
       </div>
 
-      <div v-if="subjects" class="form-group col-sm-3 col-xs-6">
+      <div v-if="subjectsList" class="form-group col-sm-3 col-xs-6">
         <label for="subject" class="sr-only">{{$t('messages.subject')}}</label>
         <select class="form-control" id="subject" v-model="subject">
           <option :value="null">{{$t('messages.subject')}}</option>
           <option v-for="s in subjectsList" :value="s.id">{{s.name}}</option>
+        </select>
+      </div>
+
+      <div v-if="typesList" class="form-group col-sm-3 col-xs-6">
+        <label for="type" class="sr-only">{{$t('messages.type')}}</label>
+        <select class="form-control" id="type" v-model="type">
+          <option :value="null">{{$t('messages.type')}}</option>
+          <option v-for="type in typesList">{{type}}</option>
         </select>
       </div>
 
@@ -73,6 +81,9 @@
 
       <dt v-if="subjectName">{{$t('messages.subject')}}</dt>
       <dd v-if="subjectName">{{subjectName}}</dd>
+
+      <dt v-if="type">{{$t('messages.type')}}</dt>
+      <dd v-if="type">{{type}}</dd>
 
       <dt v-if="start">{{$t('messages.from')}}</dt>
       <dd v-if="start">{{start.format('L')}}</dd>
@@ -122,10 +133,12 @@
         studentsList: [],
         teachersList: this.teachers,
         subjectsList: this.subjects,
+        typesList: this.roomTypes,
         group: group,
         student: params.student || null,
         teacher: params.teacher || null,
         subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : (params.subject || null),
+        type: params.type || null,
         initialStart: params.start || null,
         initialEnd: params.end || null,
         start: params.start ? moment(params.start) : null,
@@ -150,6 +163,10 @@
         'default': null
       },
       subjects: {
+        'type': Array,
+        'default': null
+      },
+      roomTypes: {
         'type': Array,
         'default': null
       },
@@ -251,6 +268,9 @@
         if (this.subjectsList) {
           filter.subject = this.subject;
         }
+        if (this.typesList) {
+          filter.type = this.type;
+        }
         if (this.date) {
           filter.start = this.date;
           filter.end = this.date;
@@ -279,6 +299,9 @@
         }
         if (this.subjectsList && this.subject) {
           params.subject = this.subject;
+        }
+        if (this.typesList && this.type) {
+          params.type = this.type;
         }
         if (this.minDate) {
           if (this.start) {

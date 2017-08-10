@@ -123,10 +123,11 @@ class CourseController extends Controller {
     $minYear = $this->configService->getMinYear();
     $maxYear = $this->configService->getMaxYear();
 
+    $oldMaxStudents = $this->parseOldNumber('maxStudents');
     $oldYearFrom = $this->parseOldNumber('yearFrom');
     $oldYearTo = $this->parseOldNumber('yearTo');
 
-    return $this->viewCreate(compact('minYear', 'maxYear', 'oldYearFrom', 'oldYearTo'));
+    return $this->viewCreate(compact('minYear', 'maxYear', 'oldMaxStudents', 'oldYearFrom', 'oldYearTo'));
   }
 
   /**
@@ -159,12 +160,15 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
+    $rooms = $this->miscService->getRooms();
+
     $oldFirstDate = $this->parseOldDate('firstDate');
     $oldLastDate = $this->parseOldDate('lastDate');
     $oldNumber = $this->parseOldNumber('lessonNumber');
+    $oldRoom = $this->parseOldNumber('room');
 
     return view('teacher.courses.create', array_merge($data, compact('minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek',
-        'offdays', 'type', 'obligatory', 'oldFirstDate', 'oldLastDate', 'oldNumber')));
+        'offdays', 'rooms', 'type', 'obligatory', 'oldFirstDate', 'oldLastDate', 'oldNumber', 'oldRoom')));
   }
 
   private function parseOldDate($key) {
@@ -231,7 +235,7 @@ class CourseController extends Controller {
     $teacher = $this->getTeacher();
     $showLessonLink = $teacher->admin || $teacher->id === $firstLesson->teacher_id;
 
-    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'allowDestroy', 'showLessonLink'));
+    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'firstLesson', 'allowDestroy', 'showLessonLink'));
   }
 
   /**
@@ -257,20 +261,22 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate, $firstDate->dayOfWeek);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
+    $rooms = $this->miscService->getRooms();
+
     $courseData = [
         'id'          => $course->id,
         'firstDate'   => $firstDate->toDateString(),
         'lastDate'    => $lastDate->toDateString(),
         'number'      => $firstLesson->number,
         'name'        => $course->name,
-        'room'        => $course->room,
+        'room'        => $firstLesson->room->id,
         'description' => $course->description
     ];
 
     $old = [
         'lastDate'    => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
         'name'        => old('name') ?: $courseData['name'],
-        'room'        => old('room') ?: $courseData['room'],
+        'room'        => $this->parseOldNumber('room') ?: $courseData['room'],
         'description' => old('description') ?: $courseData['description']
     ];
 
@@ -305,7 +311,7 @@ class CourseController extends Controller {
     }
 
     return view('teacher.courses.edit', array_merge($data, compact('type', 'obligatory', 'allowDateChange', 'minDate', 'maxDate',
-        'lessons', 'disabledDaysOfWeek', 'offdays', 'courseData', 'old')));
+        'lessons', 'disabledDaysOfWeek', 'offdays', 'rooms', 'courseData', 'old')));
   }
 
   /**
@@ -357,16 +363,9 @@ class CourseController extends Controller {
    * @param array|null $groups
    * @return JsonResponse
    */
-  public function getLessonsForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null) {
-    $teacher = $this->getTeacher();
-
-    $withCourse = $this->lessonService->getMappedForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true);
-    $forNewCourse = $this->courseService->getLessonsForCourse($teacher, $firstDate, $lastDate, $number);
-    if ($groups) {
-      $withObligatory = $this->courseService->getLessonsWithObligatory($groups, $firstDate, $lastDate, $number);
-    }
-
-    return response()->json(compact('withCourse', 'forNewCourse', 'withObligatory'));
+  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null) {
+    $data = $this->courseService->getDataForCreate($this->getTeacher(), $firstDate, $lastDate, $number, $groups);
+    return response()->json($data);
   }
 
   /**
@@ -377,31 +376,9 @@ class CourseController extends Controller {
    * @param array|null $groups
    * @return JsonResponse
    */
-  public function getLessonsForEdit(Course $course, Date $lastDate = null, array $groups = null) {
-    $teacher = $this->getTeacher();
-
-    $firstLesson = $course->firstLesson();
-    $lastLesson = $course->lastLesson();
-
-    $firstDate = $firstLesson->date;
-    $number = $firstLesson->number;
-    $oldLastDate = $lastLesson->date;
-
-    $firstChanged = $this->courseService->getFirstChanged($oldLastDate, $lastDate);
-    if ($firstChanged && $lastDate) {
-      if ($firstChanged <= $oldLastDate) {
-        $removed = $this->courseService->getMappedRemovedLessons($course, $firstChanged);
-      } else {
-        $added = $this->courseService->getLessonsForCourse($teacher, $firstChanged, $lastDate, $number);
-        $withCourse = $this->lessonService->getMappedForTeacher($teacher, $firstChanged, $lastDate, $firstChanged->dayOfWeek, $number, false, true);
-      }
-    }
-
-    if ($groups) {
-      $withObligatory = $this->courseService->getLessonsWithObligatory($groups, $firstDate, $lastDate, $number, $course);
-    }
-
-    return response()->json(compact('withCourse', 'added', 'removed', 'withObligatory'));
+  public function getDataForEdit(Course $course, Date $lastDate = null, array $groups = null) {
+    $data = $this->courseService->getDataForEdit($course, $lastDate, $groups);
+    return response()->json($data);
   }
 
   /**

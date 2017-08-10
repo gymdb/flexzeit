@@ -1,3 +1,4 @@
+<!--suppress JSUnresolvedVariable -->
 <script>
   import moment from 'moment';
   import _ from 'lodash';
@@ -12,15 +13,18 @@
         name: this.oldName,
         room: this.oldRoom,
         roomOriginal: null,
+        maxStudents: this.oldMaxStudents,
+        maxStudentsOriginal: null,
         yearFrom: this.oldYearFrom,
         yearTo: this.oldYearFrom,
         subject: this.oldSubject,
         groups: this.oldGroups,
         withCourse: [],
         forNewCourse: [],
+        roomOccupation: [],
         withObligatory: [],
         error: null
-      }
+      };
     },
     props: {
       obligatory: {
@@ -29,6 +33,10 @@
       },
       lessons: {
         'type': Object
+      },
+      rooms: {
+        'type': Array,
+        'required': true
       },
       minYear: {
         'type': Number,
@@ -47,7 +55,11 @@
         'default': null
       },
       oldRoom: {
-        'type': String,
+        'type': Number,
+        'default': null
+      },
+      oldMaxStudents: {
+        'type': Number,
         'default': null
       },
       oldYearFrom: {
@@ -72,11 +84,31 @@
     watch: {
       loadLessonsOptions(options) {
         this.loadLessonsForCourse(options);
+      },
+      room(room) {
+        if (room) {
+          const capacity = this.getRoomCapacity(room);
+          if (!this.maxStudents || this.maxStudents === this.maxStudentsOriginal) {
+            this.maxStudents = capacity;
+          }
+          this.maxStudentsOriginal = capacity;
+        }
       }
     },
     computed: {
       lessonsOnDay() {
         return (this.firstDate && this.lessons[this.firstDate.day()]) ? this.lessons[this.firstDate.day()] : null;
+      },
+      parsedRooms() {
+        return _.map(this.rooms, (room) => {
+          return {
+            id: room.id,
+            label: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length) ? '<span class="text-muted">' + room.name + '</span>' : room.name
+          };
+        });
+      },
+      occupied() {
+        return (this.room && this.roomOccupation[this.room]) ? this.roomOccupation[this.room] : [];
       },
       maxYearFrom() {
         //noinspection JSCheckFunctionSignatures
@@ -115,29 +147,34 @@
       setLastDate(date) {
         this.lastDate = date;
       },
+      getRoomCapacity(room) {
+        const data = _.find(this.rooms, {id: room});
+        return (data && data.capacity) ? data.capacity : null;
+      },
       loadLessonsForCourse: _.debounce(function (params) {
         if (!params) {
           this.error = null;
           this.withCourse = [];
           this.forNewCourse = [];
+          this.roomOccupation = [];
           this.withObligatory = [];
         } else {
           let self = this;
-          this.$http.get('/teacher/api/course/lessonsForCreate', {
+          this.$http.get('/teacher/api/course/dataForCreate', {
             params: params
           }).then(function (response) {
             self.error = null;
-            self.withCourse = response.data.withCourse;
-            self.forNewCourse = response.data.forNewCourse;
+            self.withCourse = response.data.withCourse || [];
+            self.forNewCourse = response.data.forNewCourse || [];
+            self.roomOccupation = response.data.roomOccupation || [];
             if (self.obligatory) {
               self.withObligatory = response.data.withObligatory || [];
             }
 
-            let room = (self.withCourse.length === 0 && self.forNewCourse.length > 0) ? self.forNewCourse[0].room : null;
             if (!self.room || self.room === self.roomOriginal) {
-              self.room = room;
+              self.room = response.data.room || null;
             }
-            self.roomOriginal = room;
+            self.roomOriginal = response.data.room || null;
           }).catch(function (error) {
             self.error = error;
           });

@@ -46,9 +46,10 @@ interface LessonRepository {
    * @param array $numbers
    * @param Teacher|null $teacher
    * @param Subject|null $subject
+   * @param string|null $type
    * @return Builder
    */
-  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null);
+  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null, $type = null);
 
   /**
    * @param array $groups

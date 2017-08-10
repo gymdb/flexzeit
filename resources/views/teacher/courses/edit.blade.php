@@ -6,6 +6,7 @@
     <div class="panel-body">
       <course-edit inline-template
                    :lessons='@json($lessons)'
+                   :rooms='@json($rooms)'
                    :data='@json($courseData)'
                    :old='@json($old)'
                    @if($obligatory)
@@ -63,7 +64,7 @@
                 <strong>@lang('courses.edit.withCourse')</strong>
                 <ul>
                   <li v-for="lesson in withCourse">
-                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.course.name}}
+                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.course}}
                   </li>
                 </ul>
               </div>
@@ -73,26 +74,37 @@
                   <ul>
                     <li v-for="lesson in withObligatory">
                       <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}:
-                      @{{lesson.course.groups.join(', ')}} (@{{lesson.course.name}})
+                      @{{lesson.groups.join(', ')}} (@{{lesson.course}})
                     </li>
                   </ul>
                 </div>
               @endif
-              <div v-else-if="added.length" class="alert alert-info">
-                <strong>@lang('courses.edit.addedLessons')</strong>
-                <ul>
-                  <li v-for="lesson in added">
-                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
-                  </li>
-                </ul>
-              </div>
-              <div v-else-if="removed.length" class="alert alert-info">
-                <strong>@lang('courses.edit.removedLessons')</strong>
-                <ul>
-                  <li v-for="lesson in removed">
-                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
-                  </li>
-                </ul>
+              <div v-else>
+                <div v-if="added.length" class="alert alert-info">
+                  <strong>@lang('courses.edit.addedLessons')</strong>
+                  <ul>
+                    <li v-for="lesson in added">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                    </li>
+                  </ul>
+                </div>
+                <div v-else-if="removed.length" class="alert alert-info">
+                  <strong>@lang('courses.edit.removedLessons')</strong>
+                  <ul>
+                    <li v-for="lesson in removed">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                    </li>
+                  </ul>
+                </div>
+
+                <div v-if="occupied.length" class="alert alert-warning">
+                  <strong>@lang('courses.edit.occupied')</strong>
+                  <ul>
+                    <li v-for="lesson in occupied">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.teacher}}
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
@@ -104,8 +116,8 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <input id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
-                     placeholder="@lang('courses.data.room')"/>
+              <v-select v-model="room" name="room" class="select-container" placeholder="@lang('courses.data.selectRoom')" search
+                        :options="parsedRooms" options-value="id"></v-select>
             </div>
 
             <div class="form-group col-xs-12">

@@ -6,9 +6,9 @@
     <div class="panel-body">
       <dl class="dl-horizontal">
         <dt>@lang('messages.teacher')</dt>
-        <dd>{{$course->teacher()->first()->name()}}</dd>
+        <dd>{{$firstLesson->teacher->name()}}</dd>
         <dt>@lang('courses.data.room')</dt>
-        <dd>{{$course->room}}</dd>
+        <dd>{{$firstLesson->room->name}}</dd>
         <dt>@lang('courses.data.description')</dt>
         <dd>{{$course->description}}</dd>
         @if($course->yearfrom || $course->yearto)

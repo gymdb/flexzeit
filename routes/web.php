@@ -50,9 +50,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/courses/obligatory', 'CourseController@getObligatory')
         ->middleware('params:group?;i|teacher?;i|subject?;i|start?;d|end?;d')
         ->name('teacher.api.courses.obligatory');
-    Route::get('/course/lessonsForCreate', 'CourseController@getLessonsForCreate')
+    Route::get('/course/dataForCreate', 'CourseController@getDataForCreate')
         ->middleware('params:firstDate;d|lastDate?;d|number;i|groups*;i');
-    Route::get('/course/lessonsForEdit', 'CourseController@getLessonsForEdit')
+    Route::get('/course/dataForEdit', 'CourseController@getDataForEdit')
         ->middleware('params:course;i|lastDate?;d|groups*;i');
 
     // Lesson related API methods
@@ -118,7 +118,7 @@ Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => [
 
     // Lesson related API methods
     Route::get('/lessons/{date}', 'ApiController@getAvailableLessons')
-        ->middleware('params:subject?;i|teacher?;i')
+        ->middleware('params:subject?;i|teacher?;i|type?;s')
         ->name('student.api.available');
 
     // Registration related API methods

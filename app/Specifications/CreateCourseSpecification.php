@@ -23,6 +23,11 @@ interface CreateCourseSpecification {
   public function getLessonNumber();
 
   /**
+   * @return int
+   */
+  public function getRoom();
+
+  /**
    * Populate a course model with the specified data
    *
    * @param Course|null $course

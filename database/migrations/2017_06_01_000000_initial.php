@@ -25,6 +25,15 @@ class Initial extends Migration {
       $table->string('name', 32)->unique();
     });
 
+    Schema::create('rooms', function(Blueprint $table) {
+      $table->increments('id');
+      $table->string('name', 32)->unique();
+      $table->string('type', 32)->nullable();
+      $table->unsignedSmallInteger('capacity');
+
+      $table->index('type');
+    });
+
     Schema::create('students', function(Blueprint $table) {
       $table->increments('id');
       $table->string('firstname', 32);
@@ -67,7 +76,6 @@ class Initial extends Migration {
       $table->increments('id');
       $table->string('name', 64);
       $table->text('description');
-      $table->string('room', 32);
       $table->unsignedInteger('subject_id')->nullable();
       $table->unsignedSmallInteger('maxstudents')->nullable();
       $table->unsignedTinyInteger('yearfrom')->nullable();
@@ -91,11 +99,12 @@ class Initial extends Migration {
       $table->increments('id');
       $table->date('date');
       $table->unsignedTinyInteger('number');
-      $table->string('room', 32);
       $table->boolean('cancelled')->default(false);
+      $table->unsignedInteger('room_id');
       $table->unsignedInteger('teacher_id');
       $table->unsignedInteger('course_id')->nullable();
 
+      $table->foreign('room_id')->references('id')->on('rooms');
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('course_id')->references('id')->on('courses');
       $table->unique(['teacher_id', 'date', 'number']);
@@ -219,6 +228,7 @@ class Initial extends Migration {
     // drop tables without foreign keys
     Schema::dropIfExists('config');
     Schema::dropIfExists('groups');
+    Schema::dropIfExists('rooms');
     Schema::dropIfExists('students');
     Schema::dropIfExists('subjects');
     Schema::dropIfExists('teachers');

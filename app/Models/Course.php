@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $description
  * @property Subject $subject
  * @property int $maxstudents
- * @property string $room
  * @property int $yearfrom
  * @property int $yearto
  * @property Collection $groups
@@ -31,10 +30,16 @@ class Course extends Model {
     return $this->hasMany(Lesson::class);
   }
 
+  /**
+   * @return Lesson
+   */
   public function firstLesson() {
     return $this->lessons()->orderBy('date')->orderBy('number')->first();
   }
 
+  /**
+   * @return Lesson
+   */
   public function lastLesson() {
     return $this->lessons()->orderBy('date', 'desc')->orderBy('number', 'desc')->first();
   }
@@ -48,7 +53,7 @@ class Course extends Model {
   }
 
   public function students() {
-    return $this->registrations()->groupBy('registrations.student_id');
+    return $this->registrations()->distinct();
   }
 
   public function teacher() {

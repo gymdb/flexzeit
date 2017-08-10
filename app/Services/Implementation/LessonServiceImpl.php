@@ -50,8 +50,8 @@ class LessonServiceImpl implements LessonService {
   public function getForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
     $lessons = $this->lessonRepository
         ->queryForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)
-        ->with('course', 'teacher')
-        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.cancelled', 'lessons.course_id', 'lessons.teacher_id']);
+        ->with('course', 'room', 'teacher')
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room_id', 'lessons.cancelled', 'lessons.course_id', 'lessons.teacher_id']);
     $lessons->each(function(Lesson $lesson) {
       $this->configService->setTime($lesson);
     });
@@ -65,20 +65,19 @@ class LessonServiceImpl implements LessonService {
           'id'        => $lesson->id,
           'date'      => $lesson->date->toDateString(),
           'time'      => $lesson->time,
-          'room'      => $lesson->room,
+          'room'      => $lesson->room->name,
           'cancelled' => $lesson->cancelled,
           'teacher'   => $lesson->teacher->name()
       ];
       if ($lesson->course) {
         $data['course'] = [
             'id'   => $lesson->course->id,
-            'name' => $lesson->course->name,
-            'room' => $lesson->course->room
+            'name' => $lesson->course->name
         ];
         $data['maxstudents'] = $lesson->course->maxstudents;
-        $data['students'] = $lesson->course->students()->count();
+        $data['students'] = $lesson->course->students()->count('student_id');
       } else {
-        $data['maxstudents'] = $this->configService->getMaxStudents();
+        $data['maxstudents'] = $lesson->room->capacity;
         $data['students'] = $lesson->students()->count();
       }
       return $data;
@@ -93,21 +92,21 @@ class LessonServiceImpl implements LessonService {
     $lessons = $course->lessons()
         ->orderBy('date')
         ->orderBy('number')
-        ->get(['id', 'date', 'number', 'cancelled']);
+        ->get(['id', 'date', 'number', 'cancelled', 'room_id', 'teacher_id']);
     $lessons->each(function(Lesson $lesson) {
       $this->configService->setTime($lesson);
     });
     return $lessons;
   }
 
-  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null) {
+  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
     $numbers = collect(range(1, $this->configService->getLessonCount($date)))
         ->diff($this->lessonRepository->queryForStudent($student, $date)->get(['number'])->pluck('number'))
         ->all();
 
     $lessons = $this->lessonRepository
-        ->queryAvailable($student, $date, $numbers, $teacher, $subject)
-        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room', 'lessons.teacher_id', 'lessons.course_id'])
+        ->queryAvailable($student, $date, $numbers, $teacher, $subject, $type)
+        ->get(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room_id', 'lessons.teacher_id', 'lessons.course_id'])
         ->map(function(Lesson $lesson) use ($student) {
           $error = $lesson->course
               ? $this->registrationService->validateStudentForCourse($lesson->course, $student, true)
@@ -122,7 +121,7 @@ class LessonServiceImpl implements LessonService {
               'id'      => $lesson->id,
               'date'    => $lesson->date->toDateString(),
               'time'    => $lesson->time,
-              'room'    => $lesson->room,
+              'room'    => $lesson->room->name,
               'teacher' => [
                   'name'     => $lesson->teacher->name(),
                   'image'    => $lesson->teacher->image,
@@ -139,7 +138,6 @@ class LessonServiceImpl implements LessonService {
                   return $l->date->toDateString();
                 })->unique();
 
-            $data['room'] = $lesson->course->room;
             $data['course'] = [
                 'id'          => $lesson->course->id,
                 'name'        => $lesson->course->name,

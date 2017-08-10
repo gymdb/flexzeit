@@ -82,10 +82,11 @@ class ApiController extends Controller {
    * @param Date $date
    * @param Teacher|null $teacher
    * @param Subject|null $subject
+   * @param string|null $type
    * @return JsonResponse
    */
-  public function getAvailableLessons(Date $date, Teacher $teacher = null, Subject $subject = null) {
-    $lessons = $this->lessonService->getAvailableLessons($this->getStudent(), $date, $teacher, $subject);
+  public function getAvailableLessons(Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
+    $lessons = $this->lessonService->getAvailableLessons($this->getStudent(), $date, $teacher, $subject, $type);
     return response()->json($lessons);
   }
 

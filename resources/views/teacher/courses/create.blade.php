@@ -6,14 +6,16 @@
     <div class="panel-body">
       <course-create inline-template
                      :lessons='@json($lessons)'
+                     :rooms='@json($rooms)'
                      :old-number='@json($oldNumber)'
                      old-name="{{old('name')}}"
-                     old-room="{{old('room')}}"
+                     :old-room='@json($oldRoom)'
                      @if($obligatory)
                      obligatory
                      :old-subject='@json($oldSubject)'
                      :old-groups='@json($oldGroups)'
                      @else
+                     :old-max-students='@json($oldMaxStudents)'
                      :min-year="{{$minYear}}"
                      :max-year="{{$maxYear}}"
                      :old-year-from='@json($oldYearFrom)'
@@ -65,7 +67,7 @@
                 <strong>@lang('courses.create.withCourse')</strong>
                 <ul>
                   <li v-for="lesson in withCourse">
-                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.course.name}}
+                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.course}}
                   </li>
                 </ul>
               </div>
@@ -75,18 +77,29 @@
                   <ul>
                     <li v-for="lesson in withObligatory">
                       <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}:
-                      @{{lesson.course.groups.join(', ')}} (@{{lesson.course.name}})
+                      @{{lesson.groups.join(', ')}} (@{{lesson.course}})
                     </li>
                   </ul>
                 </div>
               @endif
-              <div v-else-if="forNewCourse.length" class="alert alert-info">
-                <strong>@lang('courses.create.forNewCourse')</strong>
-                <ul>
-                  <li v-for="lesson in forNewCourse">
-                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
-                  </li>
-                </ul>
+              <div v-else-if="forNewCourse.length">
+                <div class="alert alert-info">
+                  <strong>@lang('courses.create.forNewCourse')</strong>
+                  <ul>
+                    <li v-for="lesson in forNewCourse">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                    </li>
+                  </ul>
+                </div>
+
+                <div v-if="occupied.length" class="alert alert-warning">
+                  <strong>@lang('courses.create.occupied')</strong>
+                  <ul>
+                    <li v-for="lesson in occupied">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}: @{{lesson.teacher}}
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
@@ -98,8 +111,8 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <input id="room" name="room" class="form-control" v-model.trim="room" maxlength="50" required
-                     placeholder="@lang('courses.data.room')"/>
+              <v-select v-model="room" name="room" class="select-container" placeholder="@lang('courses.data.selectRoom')" search
+                        :options="parsedRooms" options-value="id"></v-select>
             </div>
 
             <div class="form-group col-xs-12">
@@ -135,7 +148,7 @@
 
               <div class="form-group col-sm-3 col-xs-12 ">
                 <label for="maxStudents">@lang('courses.data.maxStudents')</label>
-                <input type="number" id="maxStudents" name="maxStudents" class="form-control" min="1" value="{{old('maxStudents')}}"
+                <input type="number" v-model.number="maxStudents" min="1" id="maxStudents" name="maxStudents" class="form-control"
                        placeholder="@lang('courses.data.maxStudents')"/>
               </div>
             @endif

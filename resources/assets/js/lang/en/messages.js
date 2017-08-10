@@ -4,6 +4,7 @@ module.exports = {
   student: 'Student',
   teacher: 'Teacher',
   subject: 'Subject',
+  type: 'Type',
   date: 'Date',
   time: 'Time',
   course: 'Course',

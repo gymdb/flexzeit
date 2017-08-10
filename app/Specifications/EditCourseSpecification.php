@@ -13,6 +13,11 @@ interface EditCourseSpecification {
   public function getLastDate();
 
   /**
+   * @return int
+   */
+  public function getRoom();
+
+  /**
    * Populate a course model with the specified data
    *
    * @param Course $course

@@ -184,40 +184,6 @@ class CourseServiceTest extends TestCase {
     return $spec;
   }
 
-
-  // **************************
-  // Tests for existing courses
-  // **************************
-
-  public function testCourseExists() {
-    $startDate = Date::today()->addWeek();
-    $endDate = $startDate->copy()->addMonth();
-    $teacher = $this->mockModel(Teacher::class);
-
-    $this->createService();
-    $this->mockLessons(['forTeacher' => $teacher], [['date' => $startDate->copy()->addWeeks(3), 'withCourse' => true]]);
-
-    $this->assertException(function() use ($teacher, $startDate, $endDate) {
-      $this->courseService->coursePossible($teacher, $startDate, $endDate, [1]);
-    }, CourseException::class, CourseException::EXISTS);
-  }
-
-  public function testObligatoryExists() {
-    $startDate = Date::today()->addWeek();
-    $endDate = $startDate->copy()->addMonth();
-
-    $this->createService();
-
-    /** @var Builder $groups */
-    $groups = Mockery::mock(Builder::class);
-
-    $this->mockLessons(['forGroups' => $groups], [['date' => $startDate->copy()->addWeeks(3)]]);
-
-    $this->assertException(function() use ($startDate, $endDate, $groups) {
-      $this->courseService->obligatoryPossible($groups, $startDate, $endDate, [1]);
-    }, CourseException::class, CourseException::OBLIGATORY_EXISTS);
-  }
-
   // ******************************
   // Failing tests for createCourse
   // ******************************

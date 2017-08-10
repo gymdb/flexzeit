@@ -5,6 +5,7 @@ use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Offday;
 use App\Models\Registration;
+use App\Models\Room;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Database\Seeder;
@@ -20,9 +21,8 @@ class LessonSeeder extends Seeder {
     $start = Date::today()->addMonth(-1)->setToDayOfWeek(Date::MONDAY);
     $end = Date::today()->addMonths(3)->setToDayOfWeek(Date::FRIDAY);
 
-    $groups = Group::all()->map(function(Group $group) {
-      return $group->id;
-    });
+    $groups = Group::pluck('id');
+    $rooms = Room::pluck('id');
 
     $students = Student::all();
     $teachers = Teacher::all();
@@ -48,7 +48,12 @@ class LessonSeeder extends Seeder {
           if ($teacher->admin || $date->dayOfWeek - 1 === $teacher->id % 5) {
             continue;
           }
-          $lessons[] = factory(Lesson::class)->create(['date' => $date, 'number' => $i, 'teacher_id' => $teacher->id]);
+          $lessons[] = factory(Lesson::class)->create([
+              'date' => $date,
+              'number' => $i,
+              'teacher_id' => $teacher->id,
+              'room_id' => $rooms->random()
+          ]);
         }
 
         if ($date <= Date::today()->addWeek()) {

@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Collection;
  * @property Date $date
  * @property int $number
  * @property Course $course
- * @property string $room
  * @property bool $cancelled
+ * @property Room $room
  * @property Collection $registrations
  * @property Collection $students
  */
@@ -23,7 +23,7 @@ class Lesson extends Model {
 
   public $timestamps = false;
   protected $casts = ['date' => 'date', 'cancelled' => 'boolean', 'number' => 'int'];
-  protected $fillable = ['teacher', 'date', 'number', 'room'];
+  protected $fillable = ['teacher', 'date', 'number', 'room_id'];
 
   public function teacher() {
     return $this->belongsTo(Teacher::class);
@@ -31,6 +31,10 @@ class Lesson extends Model {
 
   public function course() {
     return $this->belongsTo(Course::class);
+  }
+
+  public function room() {
+    return $this->belongsTo(Room::class);
   }
 
   public function registrations() {

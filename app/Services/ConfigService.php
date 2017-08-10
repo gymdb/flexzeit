@@ -57,13 +57,6 @@ interface ConfigService {
   public function getMaxYear();
 
   /**
-   * Return the default maximum number of students for a course
-   *
-   * @return int
-   */
-  public function getMaxStudents();
-
-  /**
    * Get the number of lessons on a given date
    *
    * @param Date $date
