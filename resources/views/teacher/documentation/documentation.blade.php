@@ -2,7 +2,10 @@
 
 @section('content')
   <section class="panel panel-default">
-    <h2 class="panel-heading">@lang('registrations.documentation.heading')</h2>
+    <h2 class="panel-heading">
+      @lang('registrations.documentation.heading')
+      <a href="javascript:print()" class="pull-right hidden-print"><span class="glyphicon glyphicon-print"></span></a>
+    </h2>
     <div class="panel-body">
       <filtered-list
           url="{{route('teacher.api.documentation')}}"
