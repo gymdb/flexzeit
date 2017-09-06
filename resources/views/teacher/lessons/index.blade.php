@@ -43,7 +43,7 @@
                   <a v-if="lesson.course" :href="'{{route('teacher.courses.show', '')}}/' + lesson.course.id">@{{lesson.course.name}}</a>
                 </td>
                 <td>@{{lesson.room}}</td>
-                <td>@{{lesson.students}}<span v-if="lesson.maxstudents">/@{{lesson.maxstudents}}</span></td>
+                <td>@{{lesson.participants}}<span v-if="lesson.maxstudents">/@{{lesson.maxstudents}}</span></td>
                 <td>
                   <a :href="'{{route('teacher.lessons.show', '')}}/' + lesson.id">@lang('lessons.index.details')</a>
                 </td>

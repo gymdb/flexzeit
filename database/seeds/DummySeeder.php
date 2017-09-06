@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DummySeeder extends Seeder {
@@ -37,6 +38,17 @@ class DummySeeder extends Seeder {
             'year'     => $year,
             'kv_id'    => $teacher->id
         ]);
+
+        $timetable = collect(range(1, 5))->flatMap(function($day) use ($group) {
+          return collect(range(1, ($group->id % 5 === $day - 1) ? 1 : 2))->map(function($n) use ($group, $day) {
+            return [
+                'form_id' => $group->id,
+                'day'     => $day,
+                'number'  => $n
+            ];
+          });
+        });
+        DB::table('timetable')->insert($timetable->all());
 
         $students = [];
         for ($i = 1; $i <= 10; $i++) {

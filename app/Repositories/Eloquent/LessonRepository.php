@@ -5,11 +5,13 @@ namespace App\Repositories\Eloquent;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Models\Room;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class LessonRepository implements \App\Repositories\LessonRepository {
@@ -47,23 +49,84 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $student->lessons());
   }
 
-  public function queryAvailable(Student $student, Date $date, array $numbers, Teacher $teacher = null, Subject $subject = null, $type = null) {
-    $query = $this->queryInRange($date, null, null, $numbers, false, false, $teacher ? $teacher->lessons() : null)
-        // Must no be part of an obligatory course
+  public function queryForOccupation(Collection $lessons, Teacher $teacher) {
+    return Lesson::where('cancelled', false)
+        ->where('teacher_id', '!=', $teacher->id)
+        ->where(function($query) use ($lessons) {
+          foreach ($lessons as $lesson) {
+            $query->orWhere([
+                'date'   => $lesson['date'],
+                'number' => $lesson['number']
+            ]);
+          }
+        });
+  }
+
+  public function queryAvailable(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
+    $query = $this->queryInRange($date, null, null, null, false, false, $teacher ? $teacher->lessons() : null)
+        // Must not be part of an obligatory course
         ->whereNotExists(function($exists) {
           $exists->select(DB::raw(1))
-              ->from('course_group')
-              ->whereColumn('course_group.course_id', 'lessons.course_id');
+              ->from('course_group as c')
+              ->whereColumn('c.course_id', 'lessons.course_id');
         })
         // Must be the first lesson of a course
         ->whereNotExists(function($exists) {
           $exists->select(DB::raw(1))
-              ->from('lessons AS sub')
+              ->from('lessons as sub')
               ->whereColumn('sub.course_id', 'lessons.course_id')
               ->whereColumn('sub.date', '<', 'lessons.date');
-        })
-        ->orderBy('lessons.number')
-        ->with('course', 'teacher', 'room');
+        });
+
+    // The student must not have registrations or offdays for the lesson (or all lessons for the course)
+    $query->whereNotExists(function($exists) use ($student) {
+      $exists->select(DB::raw(1))
+          ->from('lessons as d')
+          ->where('d.cancelled', false)
+          ->where(function($sub) {
+            $sub->whereColumn('d.id', 'lessons.id')
+                ->orWhereColumn('d.course_id', 'lessons.course_id');
+          })
+          ->where(function($sub) use ($student) {
+            $this->restrictToTimetable($sub, $student, true);
+            $this->excludeExistingRegistrations($sub, $student, true);
+            $this->excludeOffdays($sub, $student, true);
+          });
+    });
+
+    // Only show lessons with free spots
+    $query->where(function($or) {
+      $sub = $this->getParticipantsQuery();
+      $or->whereRaw("({$sub->toSql()}) < ({$this->getMaxStudentsQuery()})")
+          ->addBinding($sub->getBindings())
+          ->orWhereExists(function($exists) {
+            $exists->select(DB::raw(1))
+                ->from('courses')
+                ->whereColumn('courses.id', 'lessons.course_id')
+                ->whereNull('courses.maxstudents');
+          });
+    });
+
+    // Limit to allowed years for course
+    $year = $student->forms()->take(1)->pluck('year')->first();
+    $query->whereNotExists(function($query) use ($year) {
+      $query->select(DB::raw(1))
+          ->from('courses as c')
+          ->whereColumn('c.id', 'lessons.course_id')
+          ->where(function($or) use ($year) {
+            $or->where(function($sub) use ($year) {
+              $sub->whereNotNull('c.yearfrom');
+              if ($year) {
+                $sub->where('c.yearfrom', '>', $year);
+              }
+            })->orWhere(function($sub) use ($year) {
+              $sub->whereNotNull('c.yearto');
+              if ($year) {
+                $sub->where('c.yearto', '<', $year);
+              }
+            });
+          });
+    });
 
     if ($subject) {
       $query->whereIn('lessons.teacher_id', function($in) use ($subject) {
@@ -84,6 +147,16 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $query;
   }
 
+  public function addParticipants(Builder $query) {
+    return $query->selectSub($this->getParticipantsQuery(), 'participants');
+  }
+
+  private function getMaxStudentsQuery() {
+    $course = Course::select('courses.maxstudents')->whereColumn('courses.id', 'lessons.course_id');
+    $room = Room::select('rooms.capacity')->whereColumn('rooms.id', 'lessons.room_id');
+    return DB::raw("CASE WHEN lessons.course_id IS NOT NULL THEN ({$course->toSql()}) ELSE ({$room->toSql()}) END");
+  }
+
   public function queryForGroups(array $groups, Date $start, Date $end = null, $dayOfWeek = null, $number = null, Course $exclude = null) {
     $query = $this->queryInRange($start, $end, $dayOfWeek, $number)
         ->whereIn('lessons.course_id', function($exists) use ($groups) {
@@ -96,6 +169,24 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     }
 
     return $query;
+  }
+
+  public function assignCourse(Collection $lessons, Course $course) {
+    if ($lessons->isNotEmpty()) {
+      Lesson::whereIn('id', $lessons->pluck('id'))->update(['course_id' => $course->id]);
+    }
+  }
+
+  public function createWithCourse(Collection $lessons, Course $course) {
+    if ($lessons->isNotEmpty()) {
+      $lessons->each(function(Lesson $lesson) use ($course) {
+        $lesson->course_id = $course->id;
+      });
+
+      Lesson::insert(array_map(function(Lesson $lesson) {
+        return $lesson->getAttributes();
+      }, $lessons->all()));
+    }
   }
 
 }

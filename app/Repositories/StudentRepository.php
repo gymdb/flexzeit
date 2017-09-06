@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\Date;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -18,6 +19,14 @@ interface StudentRepository {
    * @return Builder
    */
   public function queryForGroups($groups);
+
+  /**
+   * @param Student $student
+   * @param int $day
+   * @param int $number
+   * @return Builder
+   */
+  public function queryTimetable(Student $student, $day, $number);
 
   /**
    * @param Collection $ids

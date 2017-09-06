@@ -16,6 +16,8 @@ module.exports = {
     heading: 'Add documentation for lesson with {student}',
     submit: 'Save documentation',
     label: 'Documentation',
+    add: 'Add documentation.',
+    edit: 'Edit documentation.',
     loadError: 'Error loading documentation.',
     saveError: 'Error saving documentation.'
   }

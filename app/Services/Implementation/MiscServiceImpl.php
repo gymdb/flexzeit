@@ -46,19 +46,6 @@ class MiscServiceImpl implements MiscService {
         ->get(['id', 'name']);
   }
 
-  public function getStudents(Group $group) {
-    return $group->students()
-        ->orderBy('lastname')
-        ->orderBy('firstname')
-        ->get(['id', 'lastname', 'firstname'])
-        ->map(function(Student $student) {
-          return [
-              'id'   => $student->id,
-              'name' => $student->name()
-          ];
-        });
-  }
-
   public function getTeachers() {
     return $this->teacherRepository->query()
         ->orderBy('lastname')

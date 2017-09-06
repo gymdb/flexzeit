@@ -29,11 +29,10 @@ class OffdayServiceImpl implements OffdayService {
 
   public function getInRange(Date $start, Date $end = null, $dayOfWeek = null) {
     return $this->offdayRepository->queryInRange($start, $end, $dayOfWeek)
-        ->get(['date'])
-        ->map(function(Offday $offday) {
-          return $offday->date->toDateString();
-        })
-        ->toArray();
+        ->pluck('date')
+        ->map(function(Date $date) {
+          return $date->toDateString();
+        });
   }
 
   public function loadOffdays() {

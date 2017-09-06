@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <section class="panel panel-default">
+  <section class="panel panel-default popover-panel">
     <h2 class="panel-heading">@lang('lessons.show.heading', ['date' => $lesson->date, 'number' => $lesson->number])</h2>
     <teacher-lesson :id="{{$lesson->id}}" :attendance-checked="{{json_encode($attendanceChecked)}}" inline-template>
       <div class="panel-body">

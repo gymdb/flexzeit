@@ -16,4 +16,12 @@ interface GroupRepository {
    */
   public function query();
 
+  /**
+   * @param int[] $groups
+   * @param int $day
+   * @param int $number
+   * @return Builder
+   */
+  public function queryTimetable(array $groups, $day, $number);
+
 }

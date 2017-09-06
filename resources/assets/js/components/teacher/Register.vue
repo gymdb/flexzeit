@@ -1,6 +1,6 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
-  <modal :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" large>
+  <modal v-if="shown" :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" large>
     <div class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
@@ -40,9 +40,11 @@
     data() {
       return {
         show: false,
+        shown: false,
         url: '/teacher/api/registrations/warnings/' + this.lesson,
         student: null,
         registeredLesson: null,
+        timetable: null,
         saving: false,
         error: null,
         reload: false
@@ -75,7 +77,7 @@
         return this.registeredLesson && this.registeredLesson === this.lesson;
       },
       saveDisabled() {
-        return this.saving || !this.student || (this.registeredLesson && (!this.admin || this.isSameLesson));
+        return this.saving || !this.student || (this.registeredLesson && (!this.admin || this.isSameLesson)) || (!this.admin && this.timetable);
       },
       submitLabel() {
         return (this.admin && this.registeredLesson && !this.isSameLesson)
@@ -86,6 +88,7 @@
     methods: {
       open() {
         this.show = true;
+        this.shown = true;
       },
       cancel() {
         this.show = false;
@@ -106,6 +109,8 @@
           } else {
             this.registeredLesson = null;
           }
+
+          this.timetable = data.timetable || null;
         } else {
           this.student = null;
         }

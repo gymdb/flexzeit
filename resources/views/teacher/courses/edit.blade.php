@@ -45,7 +45,7 @@
                        v-on:last="setLastDate">
             </daterange>
 
-            <div class="form-group col-sm-6 col-xs-12 required">
+            <div class="form-group col-sm-6 col-xs-12">
               <label>@lang('courses.data.lesson')</label>
               <div>
                 @foreach($lessons as $n=>$time)
@@ -75,6 +75,14 @@
                     <li v-for="lesson in withObligatory">
                       <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}:
                       @{{lesson.groups.join(', ')}} (@{{lesson.course}})
+                    </li>
+                  </ul>
+                </div>
+                <div v-else-if="timetable.length" class="alert alert-danger">
+                  <strong>@lang('courses.edit.obligatory.timetable')</strong>
+                  <ul>
+                    <li v-for="group in timetable">
+                      @{{group}}
                     </li>
                   </ul>
                 </div>
@@ -134,9 +142,17 @@
               </div>
 
               <div class="form-group col-sm-3 col-xs-12 required">
-                <label>@lang('courses.data.groups')</label>
-                <v-select name="groups[]" class="select-container" placeholder="@lang('courses.data.selectGroups')" multiple search
-                          v-model="groups" :options='@json($groups)' options-value="id" options-label="name"></v-select>
+                <label for="groups">@lang('courses.data.groups')</label>
+                @if($allowGroupsChange)
+                  <v-select name="groups[]" class="select-container" placeholder="@lang('courses.data.selectGroups')" multiple search
+                            v-model="groups" :options='@json($groups)' options-value="id" options-label="name"
+                            @if(!$allowGroupsChange) readonly @endif></v-select>
+                @else
+                  <input id="groups" class="form-control" value="{{$groupNames}}" readonly/>
+                  @foreach($courseData['groups'] as $group)
+                    <input name="groups[]" type="hidden" value="{{$group}}"/>
+                  @endforeach
+                @endif
               </div>
             @else
               <div class="form-group col-sm-3 col-xs-12 ">

@@ -269,7 +269,7 @@ class CourseController extends Controller {
         'lastDate'    => $lastDate->toDateString(),
         'number'      => $firstLesson->number,
         'name'        => $course->name,
-        'room'        => $firstLesson->room->id,
+        'room'        => $firstLesson->room_id,
         'description' => $course->description
     ];
 
@@ -280,7 +280,7 @@ class CourseController extends Controller {
         'description' => old('description') ?: $courseData['description']
     ];
 
-    $oldGroups = $course->groups->pluck('id');
+    $oldGroups = $course->groups()->pluck('id');
     $obligatory = $oldGroups->isNotEmpty();
     $type = $obligatory ? 'obligatory.' : '';
 
@@ -294,7 +294,11 @@ class CourseController extends Controller {
       $old['subject'] = $this->parseOldNumber('subject') ?: $courseData['subject'];
       $old['groups'] = $this->parseOldGroups() ?: $courseData['groups'];
 
-      $data = compact('groups', 'subjects');
+      $allowGroupsChange = $firstDate >= $minDate;
+
+      $groupNames = $allowGroupsChange ? null : $course->groups()->orderBy('name')->pluck('name')->implode(', ');
+
+      $data = compact('groups', 'subjects', 'allowGroupsChange', 'groupNames');
     } else {
       $minYear = $this->configService->getMinYear();
       $maxYear = $this->configService->getMaxYear();

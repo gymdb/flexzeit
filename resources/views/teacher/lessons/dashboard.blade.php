@@ -14,6 +14,7 @@
               <th>@lang('messages.time')</th>
               <th>@lang('messages.course')</th>
               <th>@lang('messages.room')</th>
+              <th>@lang('messages.participants')</th>
               <th></th>
             </tr>
             </thead>
@@ -26,6 +27,9 @@
                   @endif
                 </td>
                 <td>{{$lesson->room->name}}</td>
+                <td>
+                  {{$lesson->participants}}{{!$lesson->course ? "/{$lesson->room->capacity}" : ($lesson->course->maxstudents ? "/{$lesson->course->maxstudents}" : '')}}
+                </td>
                 <td>
                   @if($lesson->cancelled)
                     @lang('lessons.dashboard.cancelled')

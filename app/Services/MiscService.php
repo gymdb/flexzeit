@@ -24,14 +24,6 @@ interface MiscService {
   public function getGroups(Teacher $teacher = null);
 
   /**
-   * Get a list of all students in the given group, sorted by name
-   *
-   * @param Group $group
-   * @return Collection
-   */
-  public function getStudents(Group $group);
-
-  /**
    * Get a list of all subjects, sorted by name
    *
    * @return Collection

@@ -17,6 +17,8 @@ module.exports = {
     heading: 'Dokumentation für die Einheit mit {teacher} hinzufügen',
     submit: 'Dokumentation speichern',
     label: 'Dokumentation',
+    add: 'Dokumentation hinzufügen',
+    edit: 'Dokumentation bearbeiten',
     loadError: 'Fehler beim Laden der Dokumentation.',
     saveError: 'Fehler beim Speichern der Dokumentation.'
   }

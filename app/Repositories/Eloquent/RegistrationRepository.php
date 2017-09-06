@@ -18,9 +18,8 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   use RepositoryTrait;
 
   public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
-    $query = $student->registrations()
+    $query = $this->inRange($student->registrations()->getQuery(), $start, $end, null, $number, 'l.')
         ->join('lessons as l', 'l.id', 'lesson_id');
-    $query = $this->inRange($query, $start, $end, null, $number, 'l.');
 
     if (!$showCancelled) {
       $query->where('l.cancelled', false);
@@ -43,48 +42,25 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
       });
     }
 
-    return $query->with('lesson', 'lesson.teacher');
+    return $query;
   }
 
   public function queryDocumentation($student, Date $start, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
-    $query = $this->queryForStudent($student, $start, $end, null, false, $teacher, $subject)
+    return $this->queryForStudent($student, $start, $end, null, false, $teacher, $subject)
         ->where(function($q1) {
           $q1->where('attendance', true)->orWhereNull('attendance');
         });
-    if (!$student) {
-      $query->join('students', 'students.id', 'registrations.student_id')
-          ->orderBy('students.lastname')
-          ->orderBy('students.firstname');
-    }
-
-    return $query->with('student');
   }
 
   public function queryMissing(Group $group, Student $student = null, Date $start, Date $end) {
-    return ($student ? Student::whereKey($student->id) : $group->students())
-        ->crossJoin(DB::raw('(SELECT DISTINCT date, number FROM lessons) as d'))
-        ->whereBetween('d.date', [$start, $end])
-        ->whereNotExists(function($query) {
-          $query->select(DB::raw(1))
-              ->from('registrations as r')
-              ->join('lessons as l', 'l.id', 'r.lesson_id')
-              ->whereColumn('r.student_id', 'students.id')
-              ->whereColumn('l.date', 'd.date')
-              ->whereColumn('l.number', 'd.number')
-              ->where('l.cancelled', false);
-        })
-        ->whereNotExists(function($query) {
-          $query->select(DB::raw(1))
-              ->from('offdays as o')
-              ->join('group_student as g', function($join) {
-                $join->on('g.group_id', 'o.group_id')->orWhereNull('o.group_id');
-              })
-              ->whereColumn('g.student_id', 'students.id')
-              ->whereColumn('o.date', 'd.date')
-              ->whereColumn('o.number', 'd.number');
-        })
-        ->whereNotExists(function($query) {
-          $query->select(DB::raw(1))
+    $slotQuery = $this->getSlotQuery($start, $end);
+
+    $query = ($student ? Student::whereKey($student->id) : $group->students())
+        ->crossJoin(DB::raw("({$slotQuery->toSql()}) as d"))
+        ->addBinding($slotQuery->getBindings(), 'join')
+        // Don't show slots where the student is known to be absent
+        ->whereNotExists(function($exists) {
+          $exists->select(DB::raw(1))
               ->from('absences as a')
               ->whereColumn('a.student_id', 'students.id')
               ->whereColumn('a.date', 'd.date')
@@ -94,6 +70,12 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         ->orderBy('lastname')
         ->orderBy('firstname')
         ->orderBy('number');
+
+    $this->restrictToTimetable($query);
+    $this->excludeExistingRegistrations($query);
+    $this->excludeOffdays($query);
+
+    return $query;
   }
 
   public function querySlots(Student $student, Date $start, Date $end = null) {
@@ -106,25 +88,23 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
 
     $query = Lesson::query()
         ->from(DB::raw("({$slotQuery->toSql()}) as d"))
+        ->addBinding($slotQuery->getBindings(), 'join')
         ->leftJoin(DB::raw("({$joinSql})"), function($join) use ($student) {
           $join->on('d.date', 'l.date')->on('d.number', 'l.number');
         })
-        ->whereNotExists(function($query) use ($student) {
-          $query->select(DB::raw(1))
-              ->from('offdays as o')
-              ->join('group_student as g', function($join) {
-                $join->on('g.group_id', 'o.group_id')->orWhereNull('o.group_id');
-              })
-              ->where('g.student_id', $student->id)
-              ->whereColumn('o.date', 'd.date')
-              ->whereColumn('o.number', 'd.number');
-        })
+        ->addBinding($joinQuery->getBindings(), 'join')
         ->orderBy('d.date')
         ->orderBy('d.number');
-    $query->addBinding($slotQuery->getBindings(), 'join');
-    $query->addBinding($joinQuery->getBindings(), 'join');
 
-    return $query->with('teacher', 'course', 'room');
+    $query->where(function($sub) use ($student) {
+      $sub->whereNotNull('l.id')
+          ->orWhere(function($or) use ($student) {
+            $this->restrictToTimetable($or, $student);
+            $this->excludeOffdays($or, $student);
+          });
+    });
+
+    return $query;
   }
 
   public function queryWithExcused(Student $student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
@@ -140,8 +120,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
           })->orWhere(function($q3) {
             $q3->where('attendance', true)->whereNotNull('a.student_id');
           });
-        })
-        ->with('student');
+        });
 
     return $this->addExcused($query);
   }
@@ -166,8 +145,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         ->join('students', 'students.id', 'registrations.student_id')
         ->orderBy('students.lastname')
         ->orderBy('students.firstname')
-        ->orderBy('students.id')
-        ->with('student', 'student.forms', 'student.forms.group');
+        ->orderBy('students.id');
   }
 
   public function deleteForCourse(Course $course, Date $firstDate = null, array $students = null) {

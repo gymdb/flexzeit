@@ -32,10 +32,10 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
   }
 
   /**
-   * @return int[]|null
+   * @return int|null
    */
   public function getLessonNumber() {
-    return $this->input('lessonNumber');
+    return (int)$this->input('lessonNumber');
   }
 
   /**

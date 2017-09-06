@@ -23,11 +23,4 @@ interface RoomRepository {
    */
   public function queryTypes();
 
-  /**
-   * @param Collection $lessons
-   * @param Teacher $teacher Teacher to ignore for occupation
-   * @return Builder
-   */
-  public function queryOccupation(Collection $lessons, Teacher $teacher);
-
 }

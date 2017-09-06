@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -21,10 +22,11 @@ class StudentPolicy {
     if (!$user->isTeacher()) {
       return false;
     }
+    /** @var Teacher $user */
     if ($user->admin) {
       return true;
     }
-    return $user->form && (!$student || $student->groups()->wherePivot('group_id', $user->form->group_id)->exists());
+    return $this->checkForTeacher($user, $student);
   }
 
   /**
@@ -38,10 +40,11 @@ class StudentPolicy {
     if (!$user->isTeacher()) {
       return false;
     }
+    /** @var Teacher $user */
     if ($user->admin) {
       return true;
     }
-    return $user->form && (!$student || $student->groups()->wherePivot('group_id', $user->form->group_id)->exists());
+    return $this->checkForTeacher($user, $student);
   }
 
   /**
@@ -55,7 +58,12 @@ class StudentPolicy {
     if (!$user->isTeacher()) {
       return false;
     }
-    return $user->form && (!$student || $student->groups()->wherePivot('group_id', $user->form->group_id)->exists());
+    /** @var Teacher $user */
+    return $this->checkForTeacher($user, $student);
+  }
+
+  private function checkForTeacher(Teacher $teacher, Student $student = null) {
+    return $teacher->form && (!$student || $teacher->form->students()->wherePivot('student_id', $student->id)->exists());
   }
 
 }

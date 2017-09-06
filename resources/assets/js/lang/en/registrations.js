@@ -33,7 +33,8 @@ module.exports = {
     yearto: 'This course is intended for students of grade {yearto} and lower.',
     offday: 'The student has no lessons planned for the given time.',
     lesson: 'A registration already exists with {teacher}.',
-    course: 'A registration for the course {course} with {teacher} already exists.'
+    course: 'A registration for the course {course} with {teacher} already exists.',
+    timetable: 'The student does not have lessons for this time.'
   },
   unregister: {
     submit: 'Unregister'

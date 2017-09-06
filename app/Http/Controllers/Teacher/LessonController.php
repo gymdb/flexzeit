@@ -100,7 +100,7 @@ class LessonController extends Controller {
 
     $attendanceChecked = $this->lessonService->isAttendanceChecked($lesson);
 
-    $isOwnLesson = ($lesson->teacher->id == $this->getTeacher()->id);
+    $isOwnLesson = ($lesson->teacher_id == $this->getTeacher()->id);
     $isAdmin = $this->getTeacher()->admin;
 
     $attendanceChangeable = $isOwnLesson && $lesson->date->isToday() && !$lesson->cancelled;

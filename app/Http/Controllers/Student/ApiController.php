@@ -100,7 +100,6 @@ class ApiController extends Controller {
     $this->authorize('readDocumentation', $registration);
 
     $response = [
-        'teacher'       => $registration->lesson->teacher->name(),
         'documentation' => $registration->documentation
     ];
     return response()->json($response);

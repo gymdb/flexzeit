@@ -67,7 +67,7 @@
   </student-registrations>
 
   @if($hasMissing)
-    <section class="panel panel-default">
+    <section class="panel panel-default popover-panel">
       <h2 class="panel-heading">@lang('student.available.heading')</h2>
       <div class="panel-body">
         <filtered-list

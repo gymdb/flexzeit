@@ -16,18 +16,4 @@ class RoomRepository implements \App\Repositories\RoomRepository {
     return Room::whereNotNull('type')->distinct()->orderBy('type');
   }
 
-  public function queryOccupation(Collection $lessons, Teacher $teacher) {
-    return Room::with(['lessons.teacher', 'lessons' => function($with) use ($lessons, $teacher) {
-      $with->where('cancelled', false)->where('teacher_id', '!=', $teacher->id);
-      $with->where(function($query) use ($lessons) {
-        foreach ($lessons as $lesson) {
-          $query->orWhere([
-              'date'   => $lesson['date'],
-              'number' => $lesson['number']
-          ]);
-        }
-      });
-    }]);
-  }
-
 }

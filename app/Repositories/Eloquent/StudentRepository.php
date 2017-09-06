@@ -17,6 +17,13 @@ class StudentRepository implements \App\Repositories\StudentRepository {
     });
   }
 
+  public function queryTimetable(Student $student, $day, $number) {
+    return $student->forms()->getQuery()
+        ->join('timetable as t', 't.form_id', 'forms.group_id')
+        ->where('t.day', $day)
+        ->where('t.number', $number);
+  }
+
   public function queryForUntisId(Collection $ids) {
     return Student::whereIn('untis_id', $ids)->with('absences');
   }

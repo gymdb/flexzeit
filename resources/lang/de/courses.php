@@ -56,7 +56,8 @@ return [
         'loadError'    => 'Informationen zu den gewählten Einheiten konnten nicht geladen werden.',
         'obligatory'   => [
             'heading'        => 'Klassen-/Gruppenbindung erstellen',
-            'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:'
+            'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:',
+            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:'
         ]
     ],
     'destroy'       => [
@@ -75,7 +76,8 @@ return [
         'loadError'      => 'Informationen zu den Einheiten konnten nicht geladen werden.',
         'obligatory'     => [
             'heading'        => 'Klassen-/Gruppenbindung bearbeiten',
-            'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:'
+            'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:',
+            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:'
         ]
 
     ]

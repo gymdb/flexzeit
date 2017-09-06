@@ -81,6 +81,14 @@
                     </li>
                   </ul>
                 </div>
+                <div v-else-if="timetable.length" class="alert alert-danger">
+                  <strong>@lang('courses.create.obligatory.timetable')</strong>
+                  <ul>
+                    <li v-for="group in timetable">
+                      @{{group}}
+                    </li>
+                  </ul>
+                </div>
               @endif
               <div v-else-if="forNewCourse.length">
                 <div class="alert alert-info">

@@ -162,8 +162,11 @@ table .popover-container {
   }
 }
 
-.popover-container {
+.popover-panel {
+  margin-bottom: 180px;
+}
 
+.popover-container {
   .popover-image {
     display: none;
   }

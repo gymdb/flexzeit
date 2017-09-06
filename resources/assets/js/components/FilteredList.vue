@@ -227,10 +227,10 @@
       group(newGroup) {
         this.loadStudents(newGroup);
       },
-      filter: _.debounce(function (filter) {
+      filter(filter) {
         this.loadData(filter);
         this.$emit('filter', filter);
-      }, 50),
+      },
       data(data) {
         this.$emit('data', data);
       },
@@ -345,7 +345,7 @@
           });
         }
       },
-      loadData(filter) {
+      loadData: _.debounce(function (filter) {
         if (!filter) {
           this.dataError = null;
           this.data = null;
@@ -362,7 +362,7 @@
             self.loading = false;
           });
         }
-      },
+      }, 50),
       setStart(date) {
         this.start = date;
       },

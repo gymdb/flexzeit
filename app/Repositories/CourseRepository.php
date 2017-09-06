@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 interface CourseRepository {
 
@@ -31,5 +32,11 @@ interface CourseRepository {
    * @return Builder
    */
   public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null);
+
+  /**
+   * @param Builder|Relation $query
+   * @return Builder
+   */
+  public function addParticipants($query);
 
 }

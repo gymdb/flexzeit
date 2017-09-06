@@ -1,6 +1,6 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction, CommaExpressionJS -->
 <template>
-  <modal :value="show" effect="fade" :title="title" @cancel="cancel" large>
+  <modal v-if="shown" :value="show" effect="fade" :title="title" @cancel="cancel" large>
     <div v-if="!lesson" class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" :disabled="true">{{$t('registrations.register.submit')}}</button>
@@ -45,7 +45,7 @@
                 <td v-if="!number">{{$t('messages.range', lesson.time)}}</td>
                 <td>{{lesson.teacher}}</td>
                 <td>{{lesson.course ? lesson.course.name : ''}}</td>
-                <td>{{lesson.students}}<span v-if="lesson.maxstudents">/{{lesson.maxstudents}}</span></td>
+                <td>{{lesson.participants}}<span v-if="lesson.maxstudents">/{{lesson.maxstudents}}</span></td>
                 <td>
                   <a v-if="!lesson.cancelled" href="#" class="btn btn-xs btn-default" @click.prevent="selectLesson(lesson)">
                     {{$t('registrations.student.select')}}
@@ -87,6 +87,7 @@
     data() {
       return {
         show: false,
+        shown: false,
         student: null,
         lesson: null,
         date: null,
@@ -193,6 +194,7 @@
         this.number = number || null;
         this.lesson = null;
         this.show = true;
+        this.shown = true;
       },
       selectLesson(lesson) {
         this.lesson = lesson;

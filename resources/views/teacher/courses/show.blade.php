@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <section class="panel panel-default">
+  <section class="panel panel-default popover-panel">
     <h2 class="panel-heading">@lang('courses.show.heading', ['name' => $course->name])</h2>
     <div class="panel-body">
       <dl class="dl-horizontal">
@@ -69,7 +69,7 @@
       @else
         <ul>
           @foreach($registrations as $reg)
-            <li>
+            <li class="popover-container">
               <popover trigger="hover" placement="right">
                 <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
                 <span>{{$reg->student->name()}}{{$reg->student->formsString()}}</span>

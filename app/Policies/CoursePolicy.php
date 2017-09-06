@@ -76,7 +76,7 @@ class CoursePolicy {
       return false;
     }
     $lesson = $course->lessons->first();
-    return $lesson && $lesson->teacher->id === $user->id;
+    return $lesson && $lesson->teacher_id === $user->id;
   }
 
 }

@@ -8,6 +8,7 @@ module.exports = {
   '5': 'Die Kurstage dieses Kurses können nicht mehr bearbeitet werden.',
   '6': 'Die Klassen/Gruppen dieser Bindung können nicht mehr bearbeitet werden.',
   '7': 'Dieser Kurs kann nicht mehr gelöscht werden.',
+  '8': 'Es gibt SchülerInnen, die für die gewählten Einheiten keine Flexzeit haben.',
   '10': 'Zur gewählten Zeit gibt es keine Einheiten.',
   '11': 'Die maximale Teilnehmerzahl ist bereits erreicht.',
   '12': 'In dieser Einheit findet ein Kurs statt, die Anmeldung kann nur für den gesamten Kurs erfolgen.',

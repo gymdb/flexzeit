@@ -54,6 +54,7 @@ class BugReportServiceImpl implements BugReportService {
 
     return $this->bugReportRepository
         ->queryReports($start, $end->addDay())
+        ->with('teacher:id,lastname,firstname', 'student:id,lastname,firstname', 'student.forms:forms.group_id', 'student.forms.group:id,name')
         ->get()
         ->map(function(BugReport $report) {
           $author = null;

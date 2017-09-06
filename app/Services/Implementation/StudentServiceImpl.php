@@ -3,6 +3,8 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
+use App\Models\Group;
+use App\Models\Student;
 use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\StudentService;
@@ -33,13 +35,26 @@ class StudentServiceImpl implements StudentService {
     $this->untisService = $untisService;
   }
 
+  public function getStudents(Group $group) {
+    return $group->students()
+        ->orderBy('lastname')
+        ->orderBy('firstname')
+        ->get(['id', 'lastname', 'firstname'])
+        ->map(function(Student $student) {
+          return [
+              'id'   => $student->id,
+              'name' => $student->name()
+          ];
+        });
+  }
+
   public function loadAbsences(Date $date) {
     $absences = $this->untisService->getAbsences($date);
     $times = $this->configService->getLessonTimes();
-    $students = $this->studentRepository->queryForUntisId($absences->pluck('id'))->get(['id', 'untis_id']);
 
     $this->studentRepository->deleteAbsences($date);
 
+    $students = $this->studentRepository->queryForUntisId($absences->pluck('id'))->get(['id', 'untis_id']);
     $create = $absences->flatMap(function($absence) use ($times, $students) {
       $student = $students->first(function($item) use ($absence) {
         return $item->untis_id === $absence['id'];

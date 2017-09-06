@@ -62,8 +62,8 @@ class DocumentationServiceImpl implements DocumentationService {
 
     $registrations = $this->registrationRepository
         ->queryDocumentation($student, $start, $end, $teacher, $subject)
-        ->with('lesson.course')
-        ->get(['registrations.id', 'registrations.lesson_id', 'documentation']);
+        ->with('lesson:id,date,number,teacher_id,course_id', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name')
+        ->get(['registrations.id', 'lesson_id', 'documentation']);
     $registrations->each(function(Registration $registration) {
       $this->configService->setTime($registration->lesson);
     });
@@ -77,7 +77,8 @@ class DocumentationServiceImpl implements DocumentationService {
 
     return $this->registrationRepository
         ->queryDocumentation($student, $start, $end, $teacher, $subject)
-        ->get(['registrations.documentation', 'registrations.lesson_id'])
+        ->with('lesson:id,date,teacher_id', 'lesson.teacher:id,lastname,firstname')
+        ->get(['documentation', 'lesson_id'])
         ->map(function(Registration $reg) {
           return [
               'documentation' => $reg->documentation,
@@ -94,7 +95,8 @@ class DocumentationServiceImpl implements DocumentationService {
     return $this->registrationRepository
         ->queryDocumentation($student ?: $group, $start, $end, $teacher)
         ->whereNull('documentation')
-        ->get(['registrations.lesson_id', 'registrations.student_id'])
+        ->with('lesson:id,date,number,teacher_id', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
+        ->get(['lesson_id', 'registrations.student_id'])
         ->map(function(Registration $reg) {
           $lesson = $reg->lesson;
           $this->configService->setTime($lesson);
@@ -115,6 +117,7 @@ class DocumentationServiceImpl implements DocumentationService {
     return $this->registrationRepository
         ->queryForStudent($student, $start, $end, null, false, $teacher, $subject)
         ->whereNotNull('feedback')
+        ->with('lesson:id,date,teacher_id', 'lesson.teacher:id,lastname,firstname')
         ->get(['feedback', 'lesson_id'])
         ->map(function(Registration $reg) {
           return [

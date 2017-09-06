@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Database\Schema\Grammars\MySqlGrammar;
+use Illuminate\Database\Schema\Grammars\PostgresGrammar;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -42,6 +45,8 @@ class Initial extends Migration {
       $table->string('password');
       $table->string('image')->nullable();
       $table->unsignedBigInteger('untis_id')->unique();
+
+      $table->index(['lastname', 'firstname']);
     });
 
     Schema::create('subjects', function(Blueprint $table) {
@@ -58,6 +63,8 @@ class Initial extends Migration {
       $table->boolean('admin')->default(false);
       $table->string('info', 32)->nullable();
       $table->string('image')->nullable();
+
+      $table->index(['lastname', 'firstname']);
     });
 
     // Now create tables with foreign key relations to the previously created ones
@@ -82,6 +89,7 @@ class Initial extends Migration {
       $table->unsignedTinyInteger('yearto')->nullable();
 
       $table->foreign('subject_id')->references('id')->on('subjects');
+      $table->index('subject_id');
     });
 
     Schema::create('forms', function(Blueprint $table) {
@@ -93,6 +101,15 @@ class Initial extends Migration {
       $table->foreign('group_id')->references('id')->on('groups');
       $table->foreign('kv_id')->references('id')->on('teachers');
       $table->index('kv_id');
+    });
+
+    Schema::create('timetable', function(Blueprint $table) {
+      $table->unsignedTinyInteger('day');
+      $table->unsignedTinyInteger('number');
+      $table->unsignedInteger('form_id');
+
+      $table->primary(['form_id', 'day', 'number']);
+      $table->foreign('form_id')->references('group_id')->on('forms');
     });
 
     Schema::create('lessons', function(Blueprint $table) {
@@ -108,10 +125,12 @@ class Initial extends Migration {
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('course_id')->references('id')->on('courses');
       $table->unique(['teacher_id', 'date', 'number']);
-      $table->index(['teacher_id', 'date', 'number', 'cancelled']);
+      $table->index(['teacher_id', 'date', 'number', 'cancelled', 'course_id']);
       $table->index(['date', 'number', 'cancelled']);
-      $table->index(['number', 'cancelled']);
-      $table->index(['cancelled']);
+      $table->index(['date', 'number', 'room_id']);
+      $table->index(['course_id', 'date', 'number']);
+      $table->index(['cancelled', 'course_id']);
+      $table->index(['course_id', 'teacher_id']);
     });
 
     Schema::create('offdays', function(Blueprint $table) {
@@ -123,7 +142,6 @@ class Initial extends Migration {
       $table->foreign('group_id')->references('id')->on('groups');
       $table->unique(['group_id', 'date', 'number']);
       $table->index(['date', 'number']);
-      $table->index(['number']);
     });
 
     Schema::create('registrations', function(Blueprint $table) {
@@ -138,7 +156,8 @@ class Initial extends Migration {
       $table->foreign('lesson_id')->references('id')->on('lessons');
       $table->foreign('student_id')->references('id')->on('students');
       $table->unique(['lesson_id', 'student_id']);
-      $table->index('student_id');
+      $table->index(['student_id', 'attendance']);
+      $table->index(['lesson_id', 'attendance']);
     });
 
     Schema::create('bugreports', function(Blueprint $table) {
@@ -161,6 +180,7 @@ class Initial extends Migration {
       $table->primary(['course_id', 'group_id']);
       $table->foreign('course_id')->references('id')->on('courses');
       $table->foreign('group_id')->references('id')->on('groups');
+      $table->index('group_id');
     });
 
     Schema::create('group_student', function(Blueprint $table) {
@@ -170,6 +190,7 @@ class Initial extends Migration {
       $table->primary(['group_id', 'student_id']);
       $table->foreign('group_id')->references('id')->on('groups');
       $table->foreign('student_id')->references('id')->on('students');
+      $table->index('student_id');
     });
 
     Schema::create('group_teacher', function(Blueprint $table) {
@@ -179,6 +200,7 @@ class Initial extends Migration {
       $table->primary(['group_id', 'teacher_id']);
       $table->foreign('group_id')->references('id')->on('groups');
       $table->foreign('teacher_id')->references('id')->on('teachers');
+      $table->index('teacher_id');
     });
 
     Schema::create('subject_teacher', function(Blueprint $table) {
@@ -202,6 +224,16 @@ class Initial extends Migration {
 
       $table->index(['queue', 'reserved_at']);
     });
+
+    // Create day of week function to allow consistent handling on MySQL and Postgres
+    $this->runForGrammar([
+        PostgresGrammar::class => function() {
+          DB::unprepared('CREATE FUNCTION DOW(date DATE) RETURNS SMALLINT IMMUTABLE AS $$ BEGIN RETURN EXTRACT(DOW FROM date); END $$ LANGUAGE plpgsql;');
+        },
+        MySqlGrammar::class    => function() {
+          DB::unprepared('CREATE FUNCTION DOW(date DATE) RETURNS INTEGER DETERMINISTIC RETURN DAYOFWEEK(date)-1;');
+        }
+    ]);
   }
 
   /**
@@ -218,6 +250,7 @@ class Initial extends Migration {
 
     // drop tables with foreign keys (order is relevant)
     Schema::dropIfExists('absences');
+    Schema::dropIfExists('timetable');
     Schema::dropIfExists('forms');
     Schema::dropIfExists('offdays');
     Schema::dropIfExists('registrations');
@@ -235,5 +268,24 @@ class Initial extends Migration {
 
     // Drop queue table
     Schema::dropIfExists('jobs');
+
+    // Drop day of week function
+    $this->runForGrammar([
+        PostgresGrammar::class => function() {
+          DB::unprepared('DROP FUNCTION IF EXISTS DOW(DATE);');
+        },
+        MySqlGrammar::class    => function() {
+          DB::unprepared('DROP FUNCTION IF EXISTS DOW;');
+        }
+    ]);
+  }
+
+  private function runForGrammar(array $closures) {
+    $grammar = get_class(DB::getSchemaGrammar());
+    if (isset($closures[$grammar])) {
+      $closures[$grammar]();
+    } else {
+      echo 'Warning: No closure for grammar ' . $grammar;
+    }
   }
 }

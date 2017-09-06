@@ -18,7 +18,7 @@ class RegistrationPolicy {
    * @return bool
    */
   public function readFeedback(User $user, Registration $registration) {
-    return $user->isTeacher() && $registration->lesson->teacher->id === $user->id;
+    return $user->isTeacher() && $registration->lesson->teacher_id === $user->id;
   }
 
   /**
@@ -29,7 +29,7 @@ class RegistrationPolicy {
    * @return bool
    */
   public function writeFeedback(User $user, Registration $registration) {
-    return $user->isTeacher() && $registration->lesson->teacher->id === $user->id;
+    return $user->isTeacher() && $registration->lesson->teacher_id === $user->id;
   }
 
   /**
@@ -40,7 +40,7 @@ class RegistrationPolicy {
    * @return bool
    */
   public function readDocumentation(User $user, Registration $registration) {
-    return $user->isStudent() && $registration->student->id === $user->id;
+    return $user->isStudent() && $registration->student_id === $user->id;
   }
 
   /**
@@ -51,7 +51,7 @@ class RegistrationPolicy {
    * @return bool
    */
   public function writeDocumentation(User $user, Registration $registration) {
-    return $user->isStudent() && $registration->student->id === $user->id;
+    return $user->isStudent() && $registration->student_id === $user->id;
   }
 
   /**
@@ -69,8 +69,8 @@ class RegistrationPolicy {
       return true;
     }
 
-    return $registration->lesson->teacher->id === $user->id
-        || $registration->student->groups()->wherePivot('group_id', $user->form->group_id)->exists();
+    return $registration->lesson->teacher_id === $user->id
+        || ($user->form && $user->form->students()->wherePivot('student_id', $registration->student_id)->exists());
   }
 
   /**
@@ -82,9 +82,9 @@ class RegistrationPolicy {
    */
   public function unregister(User $user, Registration $registration) {
     if ($user->isStudent()) {
-      return $registration->student->id === $user->id;
+      return $registration->student_id === $user->id;
     }
-    return $user->isTeacher() && ($user->admin || $registration->lesson->teacher->id === $user->id);
+    return $user->isTeacher() && ($user->admin || $registration->lesson->teacher_id === $user->id);
   }
 
 }

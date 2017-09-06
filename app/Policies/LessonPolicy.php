@@ -18,7 +18,7 @@ class LessonPolicy {
    * @return bool
    */
   public function view(User $user, Lesson $lesson) {
-    return $user->isTeacher() && ($user->admin || $lesson->teacher->id === $user->id);
+    return $user->isTeacher() && ($user->admin || $lesson->teacher_id === $user->id);
   }
 
   /**
@@ -29,11 +29,11 @@ class LessonPolicy {
    * @return bool
    */
   public function setAttendanceChecked(User $user, Lesson $lesson) {
-    return $user->isTeacher() && $lesson->teacher->id === $user->id;
+    return $user->isTeacher() && $lesson->teacher_id === $user->id;
   }
 
   public function register(User $user, Lesson $lesson) {
-    return $user->isTeacher() && ($user->admin || $lesson->teacher->id === $user->id);
+    return $user->isTeacher() && ($user->admin || $lesson->teacher_id === $user->id);
   }
 
   public function cancel(User $user) {

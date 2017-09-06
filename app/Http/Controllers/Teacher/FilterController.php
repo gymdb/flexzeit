@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
-use App\Services\MiscService;
+use App\Services\StudentService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -14,16 +14,16 @@ use Illuminate\Http\JsonResponse;
  */
 class FilterController extends Controller {
 
-  /** @var MiscService */
-  private $miscService;
+  /** @var StudentService */
+  private $studentService;
 
   /**
    * Create a new controller instance.
    *
-   * @param MiscService $miscService
+   * @param StudentService $studentService
    */
-  public function __construct(MiscService $miscService) {
-    $this->miscService = $miscService;
+  public function __construct(StudentService $studentService) {
+    $this->studentService = $studentService;
   }
 
   /**
@@ -33,7 +33,7 @@ class FilterController extends Controller {
    * @return JsonResponse
    */
   public function getStudents(Group $group) {
-    $students = $this->miscService->getStudents($group);
+    $students = $this->studentService->getStudents($group);
     return response()->json($students);
   }
 

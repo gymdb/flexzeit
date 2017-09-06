@@ -15,6 +15,7 @@ use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
 use App\Repositories\RegistrationRepository;
+use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\RegistrationService;
 use Illuminate\Support\Collection;
@@ -34,6 +35,9 @@ class RegistrationServiceImpl implements RegistrationService {
   /** @var OffdayRepository */
   private $offdayRepository;
 
+  /** @var StudentRepository */
+  private $studentRepository;
+
   /**
    * LessonService constructor for injecting dependencies.
    *
@@ -41,13 +45,15 @@ class RegistrationServiceImpl implements RegistrationService {
    * @param RegistrationRepository $registrationRepository
    * @param LessonRepository $lessonRepository
    * @param OffdayRepository $offdayRepository
+   * @param StudentRepository $studentRepository
    */
   public function __construct(ConfigService $configService, RegistrationRepository $registrationRepository,
-      LessonRepository $lessonRepository, OffdayRepository $offdayRepository) {
+      LessonRepository $lessonRepository, OffdayRepository $offdayRepository, StudentRepository $studentRepository) {
     $this->configService = $configService;
     $this->registrationRepository = $registrationRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
+    $this->studentRepository = $studentRepository;
   }
 
   public function registerStudentsForCourse(Course $course, Collection $students, Date $firstDate = null) {
@@ -60,20 +66,18 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function registerStudentForCourse(Course $course, Student $student, $force = false, $admin = false) {
-    if (!$admin && ($code = $this->validateStudentForCourse($course, $student, false, $force)) !== 0) {
+    if (!$admin && ($code = $this->validateStudentForCourse($course, $student, $force)) !== 0) {
       throw new RegistrationException($code);
     }
     $this->doRegister($course->lessons->pluck('id'), collect([$student->id]), $force, $admin);
   }
 
-  public function validateStudentForCourse(Course $course, Student $student, $ignoreDate = false, $force = false) {
-    $firstLesson = $course->firstLesson();
-
+  public function validateStudentForCourse(Course $course, Student $student, $force = false) {
     if (!$force) {
       if ($course->groups()->exists()) {
         return RegistrationException::OBLIGATORY;
       }
-      if (!$ignoreDate && !$this->isRegistrationPossible($firstLesson->date)) {
+      if (!$this->isRegistrationPossible($course->firstLesson()->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
       if ($course->maxstudents && $course->students()->count('student_id') >= $course->maxstudents) {
@@ -90,7 +94,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($course->yearto && (!$form || $form->year > $course->yearto)) {
         return RegistrationException::YEAR;
       }
-    } else if (!$ignoreDate && $firstLesson->isPast()) {
+    } else if ($course->firstLesson()->isPast()) {
       return RegistrationException::REGISTRATION_PERIOD;
     }
 
@@ -102,18 +106,18 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function registerStudentForLesson(Lesson $lesson, Student $student, $force = false, $admin = false) {
-    if (!$admin && ($code = $this->validateStudentForLesson($lesson, $student, false, $force)) !== 0) {
+    if (!$admin && ($code = $this->validateStudentForLesson($lesson, $student, $force)) !== 0) {
       throw new RegistrationException($code);
     }
     $this->doRegister(collect([$lesson->id]), collect([$student->id]), $force, $admin);
   }
 
-  public function validateStudentForLesson(Lesson $lesson, Student $student, $ignoreDate = false, $force = false) {
+  public function validateStudentForLesson(Lesson $lesson, Student $student, $force = false) {
     if (!$force) {
       if ($lesson->course()->exists()) {
         return RegistrationException::HAS_COURSE;
       }
-      if (!$ignoreDate && !$this->isRegistrationPossible($lesson->date)) {
+      if (!$this->isRegistrationPossible($lesson->date)) {
         return RegistrationException::REGISTRATION_PERIOD;
       }
       if ($lesson->students()->count() >= $lesson->room->capacity) {
@@ -122,7 +126,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
         return RegistrationException::OFFDAY;
       }
-    } else if (!$ignoreDate && $lesson->date->isPast()) {
+    } else if ($lesson->date->isPast()) {
       return RegistrationException::REGISTRATION_PERIOD;
     }
 
@@ -229,16 +233,19 @@ class RegistrationServiceImpl implements RegistrationService {
         ->with(['student.absences' => function($query) use ($lesson) {
           $query->where('date', $lesson->date)->where('number', $lesson->number);
         }])
-        ->get(['registrations.id', 'registrations.attendance', 'registrations.lesson_id', 'registrations.student_id']);
+        ->with('student:id,lastname,firstname,image', 'student.forms:forms.group_id', 'student.forms.group:id,name')
+        ->get(['registrations.id', 'attendance', 'lesson_id', 'student_id']);
   }
 
   public function getForCourse(Course $course) {
     return $this->registrationRepository->queryOrdered($course->students())
+        ->with('student:id,lastname,firstname,image', 'student.forms:forms.group_id', 'student.forms.group:id,name')
         ->get(['registrations.student_id', 'students.lastname', 'students.firstname', 'students.id']);
   }
 
   public function getSlots(Student $student, Date $date = null, Date $end = null) {
     $lessons = $this->registrationRepository->querySlots($student, $date ?: Date::today(), $end)
+        ->with('teacher:id,lastname,firstname', 'course:id,name', 'room:id,name')
         ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room_id', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
 
     $lessons->each(function(Lesson $lesson) use ($student) {
@@ -247,7 +254,7 @@ class RegistrationServiceImpl implements RegistrationService {
       $lesson->unregisterPossible = !$lesson->obligatory
           && $this->isRegistrationPossible($lesson->course ? $lesson->course->firstLesson()->date : $lesson->date);
       if ($lesson->course && $lesson->unregisterPossible) {
-        $lesson->unregisterPossible = $this->isObligatoryFor($lesson->course, $student);
+        $lesson->unregisterPossible = !$this->isObligatoryFor($lesson->course, $student);
       }
     });
 
@@ -257,7 +264,7 @@ class RegistrationServiceImpl implements RegistrationService {
   public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
     return $this->registrationRepository
         ->queryWithExcused($student, $start, $end, null, true, $teacher, $subject)
-        ->with('lesson.course', 'lesson.room')
+        ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name')
         ->addSelect(['registrations.id', 'lesson_id', 'attendance'])
         ->get()
         ->map(function(Registration $registration) {
@@ -308,6 +315,7 @@ class RegistrationServiceImpl implements RegistrationService {
 
     return $this->registrationRepository->queryAbsent($student ?: $group, $start, $end)
         ->addSelect(['registrations.id', 'lesson_id', 'attendance', 'registrations.student_id'])
+        ->with('lesson:id,date,number,teacher_id', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
         ->get()
         ->map(function(Registration $registration) {
           $lesson = $registration->lesson;
@@ -364,6 +372,10 @@ class RegistrationServiceImpl implements RegistrationService {
 
     if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
       $warnings['offday'] = true;
+    }
+
+    if (!$this->studentRepository->queryTimetable($student, $lesson->date->dayOfWeek, $lesson->number)->exists()) {
+      $warnings['timetable'] = true;
     }
 
     $registeredLesson = $this->lessonRepository

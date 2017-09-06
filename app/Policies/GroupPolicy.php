@@ -14,7 +14,7 @@ class GroupPolicy {
    * Determine whether the user can view registrations for this group
    *
    * @param User $user
-   * @param Group|null $group
+   * @param Group $group
    * @return bool
    */
   public function showRegistrations(User $user, Group $group) {

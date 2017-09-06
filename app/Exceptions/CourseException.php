@@ -11,6 +11,7 @@ class CourseException extends ApiException {
   const EDIT_PERIOD = 5;
   const EDIT_GROUPS = 6;
   const DELETE_PERIOD = 7;
+  const NOT_IN_TIMETABLE = 8;
 
   /**
    * CourseException constructor.

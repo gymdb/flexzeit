@@ -36,11 +36,10 @@ interface RegistrationService {
   /**
    * @param Course $course Course loaded from the database
    * @param Student $student Student loaded from the database
-   * @param bool $ignoreDate Don't check if date is within registration period
    * @param bool $force Ignores course restrictions (year, max participants, assigned groups)
    * @return int 0 if validation succeeds, error code otherwise
    */
-  public function validateStudentForCourse(Course $course, Student $student, $ignoreDate = false, $force = false);
+  public function validateStudentForCourse(Course $course, Student $student, $force = false);
 
   /**
    * Registers a student for a single lesson
@@ -55,11 +54,10 @@ interface RegistrationService {
   /**
    * @param Lesson $lesson
    * @param Student $student
-   * @param bool $ignoreDate
    * @param bool $force
    * @return int
    */
-  public function validateStudentForLesson(Lesson $lesson, Student $student, $ignoreDate = false, $force = false);
+  public function validateStudentForLesson(Lesson $lesson, Student $student, $force = false);
 
   /**
    * Unregisters a student from a complete course

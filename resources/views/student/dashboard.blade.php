@@ -138,7 +138,7 @@
                     @endif
                     <td>
                       <a href="#" class="btn btn-xs {{$reg->documentation ? 'btn-default' : 'btn-danger'}}"
-                         @click.prevent="openDocumentation({{$reg->id}})">
+                         @click.prevent='openDocumentation({{$reg->id}}, @json($reg->lesson->teacher->name()), $event.target)'>
                         @lang($reg->documentation ? 'student.documentation.edit' : 'student.documentation.add')
                       </a>
                     </td>

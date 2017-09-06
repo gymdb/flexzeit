@@ -55,7 +55,8 @@ return [
         'loadError'    => 'Error loading the lesson information.',
         'obligatory'   => [
             'heading'        => 'Create obligatory course',
-            'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:'
+            'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:',
+            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:'
         ]
     ],
     'destroy'       => [
@@ -74,8 +75,8 @@ return [
         'loadError'      => 'Error loading the lesson information.',
         'obligatory'     => [
             'heading'        => 'Edit obligatory course',
-            'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:'
+            'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:',
+            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:'
         ]
-
     ]
 ];

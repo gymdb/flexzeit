@@ -34,7 +34,8 @@ module.exports = {
     yearto: 'Der Kurs ist nur bis zur {yearto}. Klasse vorgesehen.',
     offday: 'SchülerIn hat für die gewählte Zeit keine Flexzeit.',
     lesson: 'Zur gewählten Zeit gibt es bereits eine Anmeldung bei {teacher}.',
-    course: 'Zur gewählten Zeit gibt es bereits eine Anmeldung zum Kurs {course} bei {teacher}.'
+    course: 'Zur gewählten Zeit gibt es bereits eine Anmeldung zum Kurs {course} bei {teacher}.',
+    timetable: 'SchülerIn hat für die gewählte Einheit keine Flexzeit.'
   },
   unregister: {
     submit: 'Abmelden'

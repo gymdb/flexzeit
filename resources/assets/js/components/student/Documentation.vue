@@ -25,6 +25,7 @@
         show: false,
         loading: true,
         id: null,
+        el: null,
         original: null,
         text: null,
         teacher: null,
@@ -38,7 +39,6 @@
         this.loading = true;
         this.original = null;
         this.text = null;
-        this.teacher = null;
         this.loadError = null;
         this.saveError = null;
 
@@ -46,7 +46,6 @@
           let self = this;
 
           this.$http.get('/student/api/documentation/' + id).then(function (response) {
-            self.teacher = response.data.teacher;
             self.original = self.text = response.data.documentation;
             self.loading = false;
             self.loadError = null;
@@ -65,12 +64,19 @@
       }
     },
     methods: {
-      open(id) {
+      open(id, teacher, el) {
         this.id = id;
+        this.teacher = teacher || null;
+        this.el = el || null;
         this.show = !!this.id;
       },
       cancel() {
         this.show = false;
+        if (this.el) {
+          this.el.classList.remove(this.text ? 'btn-danger' : 'btn-default');
+          this.el.classList.add(this.text ? 'btn-default' : 'btn-danger');
+          this.el.text = this.$t(this.text ? 'student.documentation.edit' : 'student.documentation.add')
+        }
       },
       save() {
         if (!this.saveDisabled) {

@@ -14,18 +14,21 @@ class CourseRepository implements \App\Repositories\CourseRepository {
   use RepositoryTrait;
 
   public function query(Teacher $teacher = null, Date $start, Date $end = null) {
-    return ($teacher ? $teacher->courses()->groupBy('pivot_teacher_id', 'pivot_course_id') : Course::query())
-        ->whereIn('courses.id', function($in) use ($start, $end) {
+    return Course::query()
+        ->whereIn('id', function($in) use ($start, $end, $teacher) {
           $in->select('l.course_id')
+              ->whereNotNull('l.course_id')
               ->from('lessons as l');
           $this->inRange($in, $start, $end, null, null, 'l.');
+          if ($teacher) {
+            $in->where('l.teacher_id', $teacher->id);
+          }
         })
-        ->with('teacher')
         ->orderBy('first')
         ->orderBy('last')
         ->orderBy('number')
-        ->groupBy('courses.id', 'courses.name', 'courses.maxstudents')
-        ->select(['courses.id', 'courses.name', 'courses.maxstudents'])
+        ->orderBy('name')
+        ->select(['id', 'name', 'maxstudents'])
         ->addSelect(DB::raw('(SELECT MIN(date) FROM lessons WHERE course_id = courses.id) as first'))
         ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'))
         ->addSelect(DB::raw('(SELECT MIN(number) FROM lessons WHERE course_id = courses.id) as number'));
@@ -46,7 +49,11 @@ class CourseRepository implements \App\Repositories\CourseRepository {
       $query->where('subject_id', $subject->id);
     }
 
-    return $query->with('groups');
+    return $query;
+  }
+
+  public function addParticipants($query) {
+    return $query->selectSub($this->getParticipantsQuery(true), 'participants');
   }
 
 }

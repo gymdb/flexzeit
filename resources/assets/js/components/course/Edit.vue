@@ -1,15 +1,13 @@
 <!--suppress JSUnresolvedVariable -->
 <script>
-  import moment from 'moment';
   import _ from 'lodash';
 
   // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {
-        firstDate: null,
-        lastDate: null,
-        number: this.oldNumber,
+        courseId: this.data.id,
+        lastDate: this.old.lastDate || null,
         name: this.old.name,
         room: this.old.room,
         description: this.old.description,
@@ -24,6 +22,7 @@
         removed: [],
         roomOccupation: [],
         withObligatory: [],
+        timetable: [],
         error: null
       };
     },
@@ -57,8 +56,8 @@
       }
     },
     watch: {
-      loadLessonsOptions(options) {
-        this.loadLessonsForCourse(options);
+      loadDataOptions(options) {
+        this.loadData(options);
       },
       room(room) {
         if (room) {
@@ -90,24 +89,26 @@
         //noinspection JSCheckFunctionSignatures
         return this.yearFrom ? Math.max(this.minYear, this.yearFrom) : this.minYear;
       },
-      loadLessonsOptions() {
-        return {
-          course: this.data.id,
-          lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
-          number: this.number,
-          groups: this.groups.length ? this.groups : null
+      loadDataOptions() {
+        let options = {
+          course: this.courseId,
+          lastDate: this.lastDate
         };
+        if (this.obligatory && this.groups.length) {
+          options.groups = this.groups;
+        }
+        return options;
       },
       buttonDisabled() {
         if (!this.changed) {
           return true;
         }
         return this.obligatory
-            ? !this.name || !this.room || !this.subject || !this.groups.length || this.withCourse.length > 0 || this.withObligatory.length > 0
+            ? !this.name || !this.room || !this.subject || !this.groups.length || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0
             : !this.name || !this.room || this.withCourse.length > 0;
       },
       changed() {
-        if (!this.lastDate || this.lastDate.format('YYYY-MM-DD') !== this.data.lastDate ||
+        if (this.lastDate !== this.data.lastDate ||
             this.name !== this.data.name || this.room !== this.data.room || this.description !== this.data.description) {
           return true;
         }
@@ -116,15 +117,18 @@
             : (this.yearFrom !== this.data.yearFrom || this.yearTo !== this.data.yearTo || this.maxStudents !== this.data.maxStudents);
       }
     },
+    created() {
+      this.loadData(this.loadDataOptions);
+    },
     methods: {
       setLastDate(date) {
-        this.lastDate = date;
+        this.lastDate = date ? date.format('YYYY-MM-DD') : null;
       },
       getRoomCapacity(room) {
         const data = _.find(this.rooms, {id: room});
         return (data && data.capacity) ? data.capacity : null;
       },
-      loadLessonsForCourse: _.debounce(function (params) {
+      loadData: _.debounce(function (params) {
         let self = this;
         this.$http.get('/teacher/api/course/dataForEdit', {
           params: params
@@ -136,6 +140,7 @@
           self.roomOccupation = response.data.roomOccupation || [];
           if (self.obligatory) {
             self.withObligatory = response.data.withObligatory || [];
+            self.timetable = response.data.timetable || [];
           }
         }).catch(function (error) {
           self.error = error;
