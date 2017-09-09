@@ -7,6 +7,7 @@ module.exports = {
   type: 'Type',
   date: 'Date',
   time: 'Time',
+  room: 'Room',
   course: 'Course',
   participants: 'Participants',
   from: 'From (Date)',

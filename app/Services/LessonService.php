@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\LessonException;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Lesson;
@@ -12,7 +13,17 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface LessonService {
 
+  /**
+   * @param Lesson $lesson
+   * @throws LessonException
+   */
   public function cancelLesson(Lesson $lesson);
+
+  /**
+   * @param Lesson $lesson
+   * @throws LessonException
+   */
+  public function reinstateLesson(Lesson $lesson);
 
   /**
    * @param Teacher $teacher
@@ -60,5 +71,26 @@ interface LessonService {
    * @return boolean
    */
   public function isAttendanceChecked(Lesson $lesson);
+
+  /**
+   * @param Lesson $lesson
+   * @return bool
+   */
+  public function hasRegistrationsWithoutDuplicates(Lesson $lesson);
+
+  /**
+   * @param Lesson $lesson
+   * @param Teacher $teacher
+   * @throws LessonException
+   * @return array
+   */
+  public function getSubstituteInformation(Lesson $lesson, Teacher $teacher);
+
+  /**
+   * @param Lesson $lesson
+   * @param Teacher $teacher
+   * @throws LessonException
+   */
+  public function substituteLesson(Lesson $lesson, Teacher $teacher);
 
 }

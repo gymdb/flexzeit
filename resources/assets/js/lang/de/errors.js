@@ -23,6 +23,8 @@ module.exports = {
   '24': 'Ungültiger Wert für die Dokumentation.',
   '25': 'Zu dieser Einheit kann derzeit keine Dokumentation verfasst werden.',
   '30': 'Vergangene Einheiten können nicht abgesagt werden.',
+  '31': 'Die Einheit wird bereits von der gewählten Lehrkraft gehalten.',
+  '32': 'Die entsprechende Einheit der gewählten Lehrkraft ist abgesagt.',
   '40': 'Die Rückmeldung darf nicht leer sein.',
   '41': 'Zur Erstellung von Rückmeldungen ist ein gültiger User-Account erforderlich.',
   '99': 'Ein unbekannter Fehler ist aufgetreten. Bitte den Systemadministrator kontaktieren.',

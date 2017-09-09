@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * Representation of a course
@@ -52,6 +53,9 @@ class Course extends Model {
     return $this->hasManyThrough(Registration::class, Lesson::class);
   }
 
+  /**
+   * @return HasManyThrough
+   */
   public function students() {
     return $this->registrations()->distinct();
   }

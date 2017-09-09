@@ -19,6 +19,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   // Lesson related pages
   Route::get('/', 'LessonController@dashboard')->name('teacher.dashboard');
   Route::post('/lessons/cancel/{lesson}', 'LessonController@cancel')->name('teacher.lessons.cancel');
+  Route::post('/lessons/reinstate/{lesson}', 'LessonController@reinstate')->name('teacher.lessons.reinstate');
   Route::resource('/lessons', 'LessonController', ['as' => 'teacher', 'only' => ['index', 'show']]);
 
   // Course related pages
@@ -59,6 +60,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/lessons', 'LessonController@getForTeacher')
         ->middleware('params:teacher?;i|start?;d|end?;d|number?;i')
         ->name('teacher.api.lessons');
+    Route::get('/lessons/substitute/{lesson}', 'LessonController@getSubstituteInformation')
+        ->middleware('params:teacher;i');
+    Route::post('/lessons/substitute/{lesson}/{teacher}', 'LessonController@substitute');
 
     // Documentation/Feedback related API methods
     Route::get('/documentation', 'DocumentationController@getDocumentation')

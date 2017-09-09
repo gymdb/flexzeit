@@ -42,6 +42,14 @@ interface RegistrationService {
   public function validateStudentForCourse(Course $course, Student $student, $force = false);
 
   /**
+   * Registers multiple students for a single lesson
+   *
+   * @param Lesson $lesson
+   * @param Collection $students
+   */
+  public function registerStudentsForLesson(Lesson $lesson, Collection $students);
+
+  /**
    * Registers a student for a single lesson
    *
    * @param Lesson $lesson Lesson loaded from the database

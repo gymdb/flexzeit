@@ -17,7 +17,7 @@ Vue.use(VueI18n);
 const messages = {};
 ['en', 'de'].forEach(lang => {
   messages[lang] = {};
-  ['messages', 'errors', 'registrations', 'student', 'bugreports'].forEach(file => {
+  ['messages', 'errors', 'lessons', 'registrations', 'student', 'bugreports'].forEach(file => {
     messages[lang][file] = require('./lang/' + lang + '/' + file);
   });
 });
@@ -68,6 +68,7 @@ Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
 Vue.component('teacher-register', require('./components/teacher/Register.vue'));
 Vue.component('teacher-register-student', require('./components/teacher/RegisterStudent.vue'));
+Vue.component('teacher-substitute', require('./components/teacher/Substitute.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
 Vue.component('course-edit', require('./components/course/Edit.vue'));
 

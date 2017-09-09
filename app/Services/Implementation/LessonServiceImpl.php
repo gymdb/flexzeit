@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
+use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
@@ -25,17 +26,22 @@ class LessonServiceImpl implements LessonService {
   /** @var LessonRepository */
   private $lessonRepository;
 
+  /** @var RegistrationRepository */
+  private $registrationRepository;
+
   /**
    * LessonService constructor for injecting dependencies.
    *
    * @param ConfigService $configService
    * @param RegistrationService $registrationService
    * @param LessonRepository $lessonRepository
+   * @param RegistrationRepository $registrationRepository
    */
-  public function __construct(ConfigService $configService, RegistrationService $registrationService, LessonRepository $lessonRepository) {
+  public function __construct(ConfigService $configService, RegistrationService $registrationService, LessonRepository $lessonRepository, RegistrationRepository $registrationRepository) {
     $this->configService = $configService;
     $this->registrationService = $registrationService;
     $this->lessonRepository = $lessonRepository;
+    $this->registrationRepository = $registrationRepository;
   }
 
   public function cancelLesson(Lesson $lesson) {
@@ -44,6 +50,16 @@ class LessonServiceImpl implements LessonService {
     }
 
     $lesson->cancelled = true;
+    $lesson->save();
+  }
+
+  public function reinstateLesson(Lesson $lesson) {
+    if ($lesson->date->isPast()) {
+      throw new LessonException(LessonException::CANCEL_PERIOD);
+    }
+
+    $this->registrationRepository->deleteDuplicate($lesson);
+    $lesson->cancelled = false;
     $lesson->save();
   }
 
@@ -150,6 +166,77 @@ class LessonServiceImpl implements LessonService {
 
   public function isAttendanceChecked(Lesson $lesson) {
     return !$lesson->registrations()->whereNull('attendance')->exists();
+  }
+
+  public function hasRegistrationsWithoutDuplicates(Lesson $lesson) {
+    return $this->registrationRepository->queryNoneDuplicateRegistrations($lesson)->exists();
+  }
+
+  public function getSubstituteInformation(Lesson $lesson, Teacher $teacher) {
+    if ($lesson->date->isPast()) {
+      throw new LessonException(LessonException::CANCEL_PERIOD);
+    }
+
+    if ($lesson->teacher_id === $teacher->id) {
+      return ['sameTeacher' => true];
+    }
+
+    $query = $this->lessonRepository
+        ->queryForTeacher($teacher, $lesson->date, null, null, $lesson->number, true)
+        ->with('course:id,name,maxstudents', 'room:id,name,capacity')
+        ->select('id', 'cancelled', 'course_id', 'room_id');
+    $teacherLesson = $this->lessonRepository
+        ->addParticipants($query)
+        ->get()
+        ->first();
+    if (!$teacherLesson) {
+      return ['new' => true];
+    }
+
+    return [
+        'lesson' => [
+            'cancelled'    => $teacherLesson->cancelled,
+            'course'       => $teacherLesson->course ? $teacherLesson->course->name : null,
+            'room'         => $teacherLesson->room->name,
+            'participants' => $teacherLesson->participants,
+            'maxstudents'  => $teacherLesson->course ? $teacherLesson->course->maxstudents : $teacherLesson->room->capacity
+        ]
+    ];
+  }
+
+  public function substituteLesson(Lesson $lesson, Teacher $teacher) {
+    if ($lesson->date->isPast()) {
+      throw new LessonException(LessonException::CANCEL_PERIOD);
+    }
+
+    if ($lesson->teacher_id === $teacher->id) {
+      throw new LessonException(LessonException::SAME_TEACHER);
+    }
+
+    $query = $this->lessonRepository
+        ->queryForTeacher($teacher, $lesson->date, null, null, $lesson->number, true)
+        ->select('id', 'cancelled');
+    $teacherLesson = $this->lessonRepository
+        ->addParticipants($query)
+        ->get()
+        ->first();
+
+    if (!$teacherLesson) {
+      /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+      $teacherLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
+    } else if ($teacherLesson->cancelled) {
+      throw new LessonException(LessonException::CANCELLED);
+    }
+
+    if (!$lesson->cancelled) {
+      $lesson->cancelled = true;
+      $lesson->save();
+    }
+
+    $students = $this->registrationRepository->queryNoneDuplicateRegistrations($lesson)->pluck('student_id');
+    if ($students->isNotEmpty()) {
+      $this->registrationService->registerStudentsForLesson($teacherLesson, $students);
+    }
   }
 
 }

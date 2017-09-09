@@ -23,7 +23,7 @@ class Lesson extends Model {
 
   public $timestamps = false;
   protected $casts = ['date' => 'date', 'cancelled' => 'boolean', 'number' => 'int'];
-  protected $fillable = ['teacher', 'date', 'number', 'room_id'];
+  protected $fillable = ['teacher_id', 'date', 'number', 'room_id'];
 
   public function teacher() {
     return $this->belongsTo(Teacher::class);

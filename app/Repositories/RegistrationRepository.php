@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Group;
+use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -90,9 +91,10 @@ interface RegistrationRepository {
    *
    * @param int[] $lessons IDs of lessons whose times should be checked
    * @param array $students IDs of students to check
+   * @param bool $includeSame Also include registrations for the lesson queried for
    * @return
    */
-  public function queryForLessons(array $lessons, array $students);
+  public function queryForLessons(array $lessons, array $students, $includeSame = false);
 
   /**
    * Unregisters all students from a course
@@ -108,5 +110,21 @@ interface RegistrationRepository {
    * @param int[] $students IDs of students for which registrations should be deleted
    */
   public function deleteForLessons(array $lessons, array $students);
+
+  /**
+   * Delete registrations for the given lesson where there is another registration at the same time
+   *
+   * @param Lesson $lesson
+   */
+  public function deleteDuplicate(Lesson $lesson);
+
+  /**
+   * Get all registrations for which there is no other registration at the same time
+   *
+   * @param Lesson $lesson
+   * @param bool $invert
+   * @return Builder
+   */
+  public function queryNoneDuplicateRegistrations(Lesson $lesson, $invert = false);
 
 }

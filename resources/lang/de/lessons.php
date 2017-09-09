@@ -43,5 +43,12 @@ return [
     'cancel'        => [
         'submit'  => 'Einheit absagen',
         'confirm' => 'Soll diese Einheit wirklich abgesagt werden?'
+    ],
+    'reinstate'     => [
+        'submit'  => 'Absage zurücknehmen',
+        'confirm' => 'Soll diese Einheit doch gehalten werden? SchülerInnen ohne Anmeldungen zu parallelen Einheiten werden wieder angemeldet.'
+    ],
+    'substitute'    => [
+        'button' => 'Einheit supplieren'
     ]
 ];

@@ -54,7 +54,7 @@ class LessonController extends Controller {
     $this->offdayService = $offdayService;
     $this->registrationService = $registrationService;
 
-    $this->middleware('transaction', ['only' => ['cancel']]);
+    $this->middleware('transaction', ['only' => ['cancel', 'reinstate', 'substitute']]);
   }
 
   /**
@@ -107,16 +107,18 @@ class LessonController extends Controller {
     $showAttendance = !$lesson->date->isFuture() && !$lesson->cancelled;
     $showFeedback = $isOwnLesson && !$lesson->date->isFuture() && !$lesson->cancelled;
     $showRegister = ($isAdmin || !$lesson->date->isPast()) && !$lesson->cancelled;
-    $allowCancel = $isAdmin && !$lesson->cancelled && !$lesson->date->isPast();
+    $allowCancel = $isAdmin && !$lesson->date->isPast();
+    $showSubstitute = $allowCancel && $this->lessonService->hasRegistrationsWithoutDuplicates($lesson);
 
     $groups = $showRegister ? $this->miscService->getGroups() : null;
+    $teachers = $showSubstitute ? $this->miscService->getTeachers() : null;
 
-    return view('teacher.lessons.show', compact(
-        'lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance', 'showFeedback', 'showRegister', 'groups', 'isAdmin', 'allowCancel'));
+    return view('teacher.lessons.show', compact('lesson', 'registrations', 'attendanceChecked', 'attendanceChangeable', 'showAttendance',
+        'showFeedback', 'showRegister', 'groups', 'teachers', 'isAdmin', 'allowCancel', 'showSubstitute'));
   }
 
   /**
-   * Remove the specified course
+   * Cancel the specified lesson
    *
    * @param  Lesson $lesson
    * @return RedirectResponse
@@ -124,6 +126,18 @@ class LessonController extends Controller {
   public function cancel(Lesson $lesson) {
     $this->authorize('cancel', $lesson);
     $this->lessonService->cancelLesson($lesson);
+    return redirect(route('teacher.lessons.show', [$lesson->id]));
+  }
+
+  /**
+   * Reinstate the specified lesson
+   *
+   * @param  Lesson $lesson
+   * @return RedirectResponse
+   */
+  public function reinstate(Lesson $lesson) {
+    $this->authorize('cancel', $lesson);
+    $this->lessonService->reinstateLesson($lesson);
     return redirect(route('teacher.lessons.show', [$lesson->id]));
   }
 
@@ -148,6 +162,32 @@ class LessonController extends Controller {
 
     $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end, null, $number, true);
     return response()->json($lessons);
+  }
+
+  /**
+   * Get information for substituting a lesson
+   *
+   * @param Lesson $lesson
+   * @param Teacher $teacher
+   * @return JsonResponse
+   */
+  public function getSubstituteInformation(Lesson $lesson, Teacher $teacher) {
+    $this->authorize('cancel', $lesson);
+    $data = $this->lessonService->getSubstituteInformation($lesson, $teacher);
+    return response()->json($data);
+  }
+
+  /**
+   * Save a substitution
+   *
+   * @param Lesson $lesson
+   * @param Teacher $teacher
+   * @return JsonResponse
+   */
+  public function substitute(Lesson $lesson, Teacher $teacher) {
+    $this->authorize('cancel', $lesson);
+    $this->lessonService->substituteLesson($lesson, $teacher);
+    return response()->json(['success' => true]);
   }
 
 }

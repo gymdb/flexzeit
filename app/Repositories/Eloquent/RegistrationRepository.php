@@ -55,6 +55,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   public function queryMissing(Group $group, Student $student = null, Date $start, Date $end) {
     $slotQuery = $this->getSlotQuery($start, $end);
 
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = ($student ? Student::whereKey($student->id) : $group->students())
         ->crossJoin(DB::raw("({$slotQuery->toSql()}) as d"))
         ->addBinding($slotQuery->getBindings(), 'join')
@@ -125,17 +126,22 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $this->addExcused($query);
   }
 
-  public function queryForLessons(array $lessons, array $students) {
+  public function queryForLessons(array $lessons, array $students, $includeSame = false) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     return Registration::whereIn('student_id', $students)
-        ->whereIn('lesson_id', function($query) use ($lessons) {
+        ->whereIn('lesson_id', function($query) use ($lessons, $includeSame) {
           $query->select('l.id')
               ->from('lessons as l')
-              ->whereExists(function($exists) use ($lessons) {
+              ->where('l.cancelled', false)
+              ->whereExists(function($exists) use ($lessons, $includeSame) {
                 $exists->select(DB::raw(1))
                     ->from('lessons as l1')
                     ->whereColumn('l1.date', 'l.date')
                     ->whereColumn('l1.number', 'l.number')
                     ->whereIn('l1.id', $lessons);
+                if (!$includeSame) {
+                  $exists->whereColumn('l1.id', '!=', 'l.id');
+                }
               });
         });
   }
@@ -149,6 +155,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function deleteForCourse(Course $course, Date $firstDate = null, array $students = null) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Registration::whereIn('lesson_id', function($in) use ($course, $firstDate) {
       $in->select('l.id')
           ->from('lessons as l')
@@ -164,7 +171,26 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function deleteForLessons(array $lessons, array $students) {
-    $this->queryForLessons($lessons, $students)->delete();
+    $this->queryForLessons($lessons, $students, true)->delete();
+  }
+
+  public function deleteDuplicate(Lesson $lesson) {
+    $this->queryNoneDuplicateRegistrations($lesson, true)->delete();
+  }
+
+  public function queryNoneDuplicateRegistrations(Lesson $lesson, $invert = false) {
+    return $lesson->registrations()
+        ->join('lessons as l', 'l.id', 'registrations.lesson_id')
+        ->whereExists(function($exists) {
+          $exists->select(DB::raw(1))
+              ->from('lessons as l1')
+              ->join('registrations as r', 'r.lesson_id', 'l1.id')
+              ->whereColumn('l1.id', '!=', 'l.id')
+              ->whereColumn('l1.date', 'l.date')
+              ->whereColumn('l1.number', 'l.number')
+              ->where('l1.cancelled', false)
+              ->whereColumn('r.student_id', 'registrations.student_id');
+        }, 'and', !$invert);
   }
 
   private function getSlotQuery(Date $start, Date $end = null) {

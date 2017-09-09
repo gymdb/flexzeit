@@ -42,5 +42,12 @@ return [
     'cancel'       => [
         'submit'  => 'Cancel lesson',
         'confirm' => 'Do you really want to cancel this lesson?'
+    ],
+    'reinstate'     => [
+        'submit'  => 'Reinstate lesson',
+        'confirm' => 'Should this lesson be reinstated? Students with no parallel registrations will be registered to this lesson again.'
+    ],
+    'substitute'    => [
+        'button' => 'Choose substitute teacher'
     ]
 ];

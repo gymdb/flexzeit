@@ -23,14 +23,31 @@
         </dl>
 
         @if($allowCancel)
-          <confirm confirm-text="@lang('lessons.cancel.confirm')" inline-template>
-            <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)">
-              {{csrf_field()}}
-              <p>
-                <button class="btn btn-default">@lang('lessons.cancel.submit')</button>
-              </p>
-            </form>
-          </confirm>
+          @if($lesson->cancelled)
+            <confirm confirm-text="@lang('lessons.reinstate.confirm')" inline-template>
+              <form action="{{route('teacher.lessons.reinstate', [$lesson->id])}}" method="post" @submit="destroy($event)">
+                {{csrf_field()}}
+                <p>
+                  <button class="btn btn-default">@lang('lessons.reinstate.submit')</button>
+                </p>
+              </form>
+            </confirm>
+          @else
+            <confirm confirm-text="@lang('lessons.cancel.confirm')" inline-template>
+              <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)">
+                {{csrf_field()}}
+                <p>
+                  <button class="btn btn-default">@lang('lessons.cancel.submit')</button>
+                </p>
+              </form>
+            </confirm>
+          @endif
+        @endif
+
+        @if($showSubstitute)
+          <p>
+            <a href="#" class="btn btn-default" @click.prevent="openSubstitute">@lang('lessons.substitute.button')</a>
+          </p>
         @endif
 
         <h3>@lang('lessons.registrations.heading')</h3>
@@ -143,6 +160,13 @@
                             :admin="@json($isAdmin)"
                             :lesson="{{$lesson->id}}">
           </teacher-register>
+        @endif
+
+        @if($showSubstitute)
+          <teacher-substitute ref="substituteModal"
+                              :teachers='@json($teachers)'
+                              :lesson="{{$lesson->id}}">
+          </teacher-substitute>
         @endif
       </div>
     </teacher-lesson>

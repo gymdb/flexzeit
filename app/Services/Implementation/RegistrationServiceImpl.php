@@ -105,6 +105,10 @@ class RegistrationServiceImpl implements RegistrationService {
     return 0;
   }
 
+  public function registerStudentsForLesson(Lesson $lesson, Collection $students) {
+    $this->doRegister(collect([$lesson->id]), $students, true, false);
+  }
+
   public function registerStudentForLesson(Lesson $lesson, Student $student, $force = false, $admin = false) {
     if (!$admin && ($code = $this->validateStudentForLesson($lesson, $student, $force)) !== 0) {
       throw new RegistrationException($code);
@@ -147,6 +151,7 @@ class RegistrationServiceImpl implements RegistrationService {
         return ['lesson_id' => $lesson, 'student_id' => $student, 'obligatory' => $obligatory];
       });
     });
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     Registration::insert($registrations->all());
   }
 

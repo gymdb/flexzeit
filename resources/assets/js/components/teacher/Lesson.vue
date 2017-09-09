@@ -56,6 +56,9 @@
       },
       openChangeRegistration(student, date, number) {
         this.$refs.changeRegistrationModal.open(student, date, number);
+      },
+      openSubstitute() {
+        this.$refs.substituteModal.open();
       }
     }
   }

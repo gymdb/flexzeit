@@ -210,6 +210,10 @@
         'type': Boolean,
         'default': true
       },
+      requireTeacher: {
+        'type': Boolean,
+        'default': false
+      },
       requireGroup: {
         'type': Boolean,
         'default': true
@@ -237,7 +241,7 @@
       query(query) {
         if (this.keepFilter) {
           // noinspection JSCheckFunctionSignatures
-          window.history.replaceState(null, null, '?' + query);
+          window.history.replaceState(null, null, window.location.pathname + '?' + query);
         }
       }
     },
@@ -253,6 +257,9 @@
       },
       filter() {
         if (this.groupsList && this.requireGroup && (!this.group || (this.requireStudent && !this.student))) {
+          return null;
+        }
+        if (this.requireTeacher && !this.teacher) {
           return null;
         }
 

@@ -23,6 +23,8 @@ return [
     '24'      => 'Invalid value for the documentation',
     '25'      => 'Creating documentation is currently not possible for this lesson.',
     '30'      => 'Past lessons cannot be cancelled.',
+    '31'      => 'The lesson is already held by the selected teacher.',
+    '32'      => 'The selected teacher has a cancelled lesson at the given time.',
     '40'      => 'The bug report must contain text.',
     '41'      => 'Creating bug reports is only possible with a valid user account.',
     '401'     => 'You are not authenticated. This might have happened because the session timed out.',
