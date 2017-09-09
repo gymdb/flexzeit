@@ -21,7 +21,7 @@ return [
         'missing' => 'Fehlende Dokumentation anzeigen'
     ],
     'feedback'      => [
-        'list' => 'Feedback anzeigen'
+        'list' => 'Rückmeldungen anzeigen'
     ],
     'registrations' => [
         'list'    => 'Anmeldungen anzeigen',
