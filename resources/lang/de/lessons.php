@@ -29,8 +29,9 @@ return [
         'button'  => 'Anwesenheiten kontrolliert'
     ],
     'register'      => [
-        'button' => 'SchülerIn nachmelden',
-        'change' => 'Ummelden'
+        'button'     => 'SchülerIn anmelden',
+        'buttonPast' => 'SchülerIn nachmelden',
+        'change'     => 'Ummelden'
     ],
     'unregister'    => [
         'heading' => 'SchülerIn abmelden',

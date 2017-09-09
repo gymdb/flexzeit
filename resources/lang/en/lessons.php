@@ -28,8 +28,9 @@ return [
         'button'  => 'Attendance checked'
     ],
     'register'      => [
-        'button' => 'Register student',
-        'change' => 'Change registration'
+        'button'     => 'Register student',
+        'buttonPast' => 'Register student',
+        'change'     => 'Change registration'
     ],
     'unregister'    => [
         'heading' => 'Unregister student',
@@ -39,7 +40,7 @@ return [
     'feedback'      => [
         'button' => 'Feedback'
     ],
-    'cancel'       => [
+    'cancel'        => [
         'submit'  => 'Cancel lesson',
         'confirm' => 'Do you really want to cancel this lesson?'
     ],

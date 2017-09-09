@@ -14,7 +14,9 @@
                    v-on:filter="setFilter"
                    v-on:data="setData">
       <template slot="chooseStudent"></template>
-      <template slot="empty"></template>
+      <template slot="empty">
+        <p v-if="!saveDisabled" class="text-center"><strong>{{$t('registrations.register.confirm')}}</strong></p>
+      </template>
       <template scope="props">
         <div v-if="isSameLesson" class="alert alert-danger">
           <strong>{{$t('registrations.warnings.sameLesson')}}</strong>
@@ -27,6 +29,8 @@
             </li>
           </ul>
         </div>
+
+        <p v-if="!saveDisabled" class="text-center"><strong>{{$t('registrations.register.confirm')}}</strong></p>
       </template>
     </filtered-list>
 
@@ -53,14 +57,6 @@
     props: {
       groups: {
         'type': Array,
-        'required': true
-      },
-      date: {
-        'type': String,
-        'required': true
-      },
-      number: {
-        'type': Number,
         'required': true
       },
       admin: {

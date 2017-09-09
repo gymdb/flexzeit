@@ -10,6 +10,7 @@ module.exports = {
     registered: 'For this time the student is already registered at',
     submit: 'Register',
     change: 'Change registration',
+    confirm: 'Register the selected student for the lesson?',
     loadError: 'Error loading registrations for student.',
     saveError: 'Error registering the student for this lesson.'
   },

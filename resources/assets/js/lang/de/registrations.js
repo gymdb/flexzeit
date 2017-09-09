@@ -7,10 +7,11 @@ module.exports = {
     absent: 'Abwesend'
   },
   register: {
-    heading: 'SchülerIn für diese Einheit nachmelden',
+    heading: 'SchülerIn für diese Einheit anmelden',
     registered: 'SchülerIn ist für diese Zeit bereits woanders angemeldet',
     submit: 'Anmelden',
     change: 'Ummelden',
+    confirm: 'SchülerIn für die Einheit anmelden?',
     loadError: 'Fehler beim Laden der Anmeldungen für SchülerIn.',
     saveError: 'Fehler beim Anmelden der Schülerin/des Schülers.'
   },
