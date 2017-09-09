@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Carbon\Carbon;
+use IntlDateFormatter;
 use InvalidArgumentException;
 
 /**
@@ -11,6 +12,9 @@ use InvalidArgumentException;
  * @package App\Helpers
  */
 class Date extends Carbon {
+
+  /** @var IntlDateFormatter */
+  public static $formatter;
 
   public function __construct($time = null, $tz = null) {
     parent::__construct($time, $tz);
@@ -61,6 +65,10 @@ class Date extends Carbon {
     return Carbon::create($this->year, $this->month, $this->day, $hour, $minute, 0, $this->timezone);
   }
 
+  public function __toString() {
+    return static::$formatter->format($this);
+  }
+
 }
 
-Date::setToStringFormat(__('messages.format.date'));
+Date::$formatter = new IntlDateFormatter(config('app.locale'), null, null, null, null, __('messages.format.date'));

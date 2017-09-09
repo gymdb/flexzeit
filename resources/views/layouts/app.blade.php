@@ -4,34 +4,27 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- CSRF Token -->
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <base href="{{url('/')}}"/>
 
   <title>{{ config('app.name', 'Flexzeit') }}</title>
   <link rel="icon" href="data:,">
 
   <!-- Styles -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-  <!-- Scripts -->
-  <!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
-  <script>
-    window.Laravel = @json($global);
-  </script>
 </head>
 <body>
 <div id="app">
   <nav class="navbar navbar-default navbar-static-top">
     <div class="container">
-      @if(Illuminate\Support\Facades\Auth::guest())
+      @guest
         <div class="navbar-header">
           <a class="navbar-brand" href="{{url('/')}}">
             <img src="{{asset('images/logo.jpg')}}"/>
             {{ config('app.name', 'Flexzeit') }}
           </a>
         </div>
-      @else
+      @endguest
+      @auth
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse" title="@lang('nav.toggle')">
             <span class="sr-only">@lang('nav.toggle')</span>
@@ -126,7 +119,7 @@
 
           <bug-report ref="bugReportModal"></bug-report>
         </div>
-      @endif
+      @endauth
     </div>
   </nav>
 

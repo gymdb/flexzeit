@@ -11,16 +11,6 @@ use Illuminate\Support\Facades\Log;
 class Kernel extends ConsoleKernel {
 
   /**
-   * The Artisan commands provided by your application.
-   *
-   * @var array
-   */
-  protected $commands = [
-      Commands\AbsencesCommand::class,
-      Commands\OffdaysCommand::class
-  ];
-
-  /**
    * Define the application's command schedule.
    *
    * @param  \Illuminate\Console\Scheduling\Schedule $schedule
@@ -48,11 +38,13 @@ class Kernel extends ConsoleKernel {
   }
 
   /**
-   * Register the Closure based commands for the application.
+   * Register the commands for the application.
    *
    * @return void
    */
   protected function commands() {
+    $this->load(__DIR__ . '/Commands');
+
     /** @noinspection PhpIncludeInspection */
     require base_path('routes/console.php');
   }

@@ -28,6 +28,7 @@ module.exports = {
   '401': 'You are not authenticated. This might have happened because the session timed out.',
   '403': 'You are not authorized to use the requested resource. This might have happened because the session timed out.',
   '404': 'The requested resource could not be found on the server.',
+  '419': 'The session has expired. Please login again.',
   '5xx': 'A server error occurred ({code}). Try again later or contact the system administrator.',
   'http': 'A HTTP error occurred ({code}). Try again later or contact the system administrator.',
   'unknown': 'An unknown error occurred ({code}). Please contact the system administrator.',

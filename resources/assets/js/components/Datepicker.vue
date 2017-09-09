@@ -16,8 +16,8 @@
   import moment from 'moment';
   //noinspection SpellCheckingInspection
   import datetimepicker from 'eonasdan-bootstrap-datetimepicker';
-  const lang = window.Laravel.lang;
 
+  const lang = document.documentElement.lang;
   moment.locale(lang);
   datetimepicker.defaults.locale = lang;
   datetimepicker.defaults.tooltips = require('../lang/' + lang + '/datetimepicker').tooltips;

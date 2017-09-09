@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\BelongsToManyKey;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -46,9 +45,7 @@ class Group extends Model {
   }
 
   public function registrations() {
-    return new BelongsToManyKey(
-        (new Registration())->newQuery(), $this, 'group_student', 'group_id', 'student_id', $this->guessBelongsToManyRelation()
-    );
+    return $this->belongsToMany(Registration::class, 'group_student', null, 'student_id', null, 'student_id');
   }
 
 }

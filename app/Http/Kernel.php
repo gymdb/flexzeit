@@ -8,7 +8,6 @@ use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\StripTags;
 use App\Http\Middleware\TransactionMiddleware;
 use App\Http\Middleware\TrimStrings;
-use App\Http\Middleware\ViewGlobalsMiddleware;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -67,8 +66,7 @@ class Kernel extends HttpKernel {
           ShareErrorsFromSession::class,
           VerifyCsrfToken::class,
           SubstituteBindings::class,
-          DateMiddleware::class,
-          ViewGlobalsMiddleware::class
+          DateMiddleware::class
       ],
 
       'api' => [

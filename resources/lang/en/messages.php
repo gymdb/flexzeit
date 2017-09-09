@@ -2,7 +2,7 @@
 
 return [
     'format'        => [
-        'date'  => 'Y-m-d',
+        'date'  => 'eee, MM/dd/y',
         'range' => 'Flex :number' //':start &ndash; :end'
     ],
     'date'          => 'Date',

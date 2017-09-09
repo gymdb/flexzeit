@@ -3,7 +3,7 @@
 /** @noinspection SpellCheckingInspection */
 return [
     'format'        => [
-        'date'  => 'd.m.Y',
+        'date'  => 'eee, dd.MM.y',
         'range' => 'Flex :number' //':start &ndash; :end'
     ],
     'date'          => 'Datum',

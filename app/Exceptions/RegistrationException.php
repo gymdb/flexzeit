@@ -18,13 +18,4 @@ class RegistrationException extends ApiException {
   const INVALID_DOCUMENTATION = 24;
   const DOCUMENTATION_PERIOD = 25;
 
-  /**
-   * LessonException constructor.
-   *
-   * @param int $code One of the defined constants
-   */
-  public function __construct($code) {
-    parent::__construct("", $code);
-  }
-
 }

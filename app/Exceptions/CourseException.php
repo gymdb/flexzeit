@@ -13,13 +13,4 @@ class CourseException extends ApiException {
   const DELETE_PERIOD = 7;
   const NOT_IN_TIMETABLE = 8;
 
-  /**
-   * CourseException constructor.
-   *
-   * @param int $code One of the defined constants
-   */
-  public function __construct($code) {
-    parent::__construct("", $code);
-  }
-
 }

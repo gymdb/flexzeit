@@ -29,6 +29,7 @@ module.exports = {
   '401': 'Nicht angemeldet. Möglicherweise ist die Sitzung abgelaufen.',
   '403': 'Keine Berechtigung für die angeforderten Daten. Möglicherweise ist die Sitzung abgelaufen.',
   '404': 'Die angeforderten Daten konnten nicht am Server gefunden werden.',
+  '419': 'Die Sitzung ist abgelaufen, bitte neu anmelden.',
   '5xx': 'Ein Serverfehler ist aufgetreten ({code}). Bitte später erneut versuchen oder den Systemadministrator kontaktieren.',
   'http': 'Ein Verbindungsfehler ist aufgetreten ({code}).  Bitte später erneut versuchen oder den Systemadministrator kontaktieren.',
   'unknown': 'Ein unbekannter Fehler ist aufgetreten ({code}). Bitte den Systemadministrator kontaktieren.',

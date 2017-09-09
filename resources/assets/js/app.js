@@ -25,7 +25,7 @@ const messages = {};
 const dateTimeFormats = {
   'en': {
     short: {
-      year: 'numeric', month: '2-digit', day: '2-digit'
+      year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
     },
     datetime: {
       year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: true
@@ -33,7 +33,7 @@ const dateTimeFormats = {
   },
   'de': {
     short: {
-      year: 'numeric', month: '2-digit', day: '2-digit'
+      year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
     },
     datetime: {
       year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: false
@@ -43,7 +43,7 @@ const dateTimeFormats = {
 
 //noinspection JSUnresolvedVariable
 const i18n = new VueI18n({
-  locale: window.Laravel.lang,
+  locale: document.documentElement.lang,
   fallbackLocale: 'en',
   messages,
   dateTimeFormats

@@ -37,9 +37,7 @@ class Student extends User {
   }
 
   public function forms() {
-    return new BelongsToManyKey(
-        (new Form())->newQuery(), $this, 'group_student', 'student_id', 'group_id', $this->guessBelongsToManyRelation()
-    );
+    return $this->belongsToMany(Form::class, 'group_student', null, 'group_id');
   }
 
   public function formsString() {
@@ -55,9 +53,7 @@ class Student extends User {
   }
 
   public function offdays() {
-    return new BelongsToManyKey(
-        (new Offday())->newQuery(), $this, 'group_student', 'student_id', 'group_id', $this->guessBelongsToManyRelation()
-    );
+    return $this->belongsToMany(Offday::class, 'group_student', null, 'group_id', null, 'group_id');
   }
 
 }

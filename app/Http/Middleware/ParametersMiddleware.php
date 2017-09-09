@@ -33,7 +33,7 @@ class ParametersMiddleware {
         $key = substr($key, 0, -1);
       }
 
-      if ($request->has($key)) {
+      if ($request->filled($key)) {
         $data = $request->input($key);
 
         if (!$array) {

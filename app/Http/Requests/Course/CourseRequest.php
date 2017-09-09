@@ -80,7 +80,7 @@ abstract class CourseRequest extends FormRequest {
     if (!$this->parsed) {
       $this->parsed = true;
       foreach ($this->dateFields as $field) {
-        if ($source->has($field) && ($value = $source->get($field)) && ($date = Date::checkedCreate($value))) {
+        if ($source->filled($field) && ($date = Date::checkedCreate($source->get($field)))) {
           $source->set($field, $date);
         }
       }
