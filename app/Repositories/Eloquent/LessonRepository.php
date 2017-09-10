@@ -50,14 +50,17 @@ class LessonRepository implements \App\Repositories\LessonRepository {
   }
 
   public function queryForOccupation(Collection $lessons, Teacher $teacher) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     return Lesson::where('cancelled', false)
         ->where('teacher_id', '!=', $teacher->id)
-        ->where(function($query) use ($lessons) {
+        ->where(function($or) use ($lessons) {
           foreach ($lessons as $lesson) {
-            $query->orWhere([
-                'date'   => $lesson['date'],
-                'number' => $lesson['number']
-            ]);
+            $or->orWhere(function($sub) use ($lesson) {
+              $sub->where([
+                  'date'   => $lesson['date'],
+                  'number' => $lesson['number']
+              ]);
+            });
           }
         });
   }
@@ -89,7 +92,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
           })
           ->where(function($sub) use ($student) {
             $this->restrictToTimetable($sub, $student, true);
-            $this->excludeExistingRegistrations($sub, $student, true);
+            $this->excludeExistingRegistrations($sub, $student, true, true);
             $this->excludeOffdays($sub, $student, true);
           });
     });
@@ -109,23 +112,21 @@ class LessonRepository implements \App\Repositories\LessonRepository {
 
     // Limit to allowed years for course
     $year = $student->forms()->take(1)->pluck('year')->first();
-    $query->whereNotExists(function($query) use ($year) {
-      $query->select(DB::raw(1))
+    $query->whereNotExists(function($sub) use ($year) {
+      $sub->select(DB::raw(1))
           ->from('courses as c')
-          ->whereColumn('c.id', 'lessons.course_id')
-          ->where(function($or) use ($year) {
-            $or->where(function($sub) use ($year) {
-              $sub->whereNotNull('c.yearfrom');
-              if ($year) {
-                $sub->where('c.yearfrom', '>', $year);
-              }
-            })->orWhere(function($sub) use ($year) {
-              $sub->whereNotNull('c.yearto');
-              if ($year) {
-                $sub->where('c.yearto', '<', $year);
-              }
-            });
-          });
+          ->whereColumn('c.id', 'lessons.course_id');
+      $this->excludeForYear($sub, $year);
+    });
+
+    // Limit to allowed years for room
+    $query->where(function($or) use ($year) {
+      $or->whereNotExists(function($sub) use ($year) {
+        $sub->select(DB::raw(1))
+            ->from('rooms as c')
+            ->whereColumn('c.id', 'lessons.room_id');
+        $this->excludeForYear($sub, $year);
+      })->orWhereNull('lessons.room_id');
     });
 
     if ($subject) {
@@ -144,6 +145,12 @@ class LessonRepository implements \App\Repositories\LessonRepository {
       });
     }
 
+    if (!$teacher) {
+      $query->join('teachers as t', 't.id', 'lessons.teacher_id')
+          ->orderBy('t.lastname')
+          ->orderBy('t.firstname');
+    }
+
     return $query;
   }
 
@@ -152,7 +159,9 @@ class LessonRepository implements \App\Repositories\LessonRepository {
   }
 
   private function getMaxStudentsQuery() {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $course = Course::select('courses.maxstudents')->whereColumn('courses.id', 'lessons.course_id');
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $room = Room::select('rooms.capacity')->whereColumn('rooms.id', 'lessons.room_id');
     return DB::raw("CASE WHEN lessons.course_id IS NOT NULL THEN ({$course->toSql()}) ELSE ({$room->toSql()}) END");
   }
@@ -173,6 +182,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
 
   public function assignCourse(Collection $lessons, Course $course) {
     if ($lessons->isNotEmpty()) {
+      /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       Lesson::whereIn('id', $lessons->pluck('id'))->update(['course_id' => $course->id]);
     }
   }
@@ -183,6 +193,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
         $lesson->course_id = $course->id;
       });
 
+      /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       Lesson::insert(array_map(function(Lesson $lesson) {
         return $lesson->getAttributes();
       }, $lessons->all()));

@@ -33,6 +33,8 @@ class Initial extends Migration {
       $table->string('name', 32)->unique();
       $table->string('type', 32)->nullable();
       $table->unsignedSmallInteger('capacity');
+      $table->unsignedTinyInteger('yearfrom')->nullable();
+      $table->unsignedTinyInteger('yearto')->nullable();
 
       $table->index('type');
     });

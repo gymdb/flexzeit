@@ -7,10 +7,12 @@ module.exports = {
   },
   register: {
     heading: 'Register student for this lesson',
+    headingCourse: 'Register student for this course',
     registered: 'For this time the student is already registered at',
     submit: 'Register',
     change: 'Change registration',
     confirm: 'Register the selected student for the lesson?',
+    confirmCourse: 'Register the selected student for the course?',
     loadError: 'Error loading registrations for student.',
     saveError: 'Error registering the student for this lesson.'
   },
@@ -34,6 +36,7 @@ module.exports = {
     yearto: 'This course is intended for students of grade {yearto} and lower.',
     offday: 'The student has no lessons planned for the given time.',
     lesson: 'A registration already exists with {teacher}.',
+    lessons: 'Registrations already exist for the time of the course:',
     course: 'A registration for the course {course} with {teacher} already exists.',
     timetable: 'The student does not have lessons for this time.'
   },

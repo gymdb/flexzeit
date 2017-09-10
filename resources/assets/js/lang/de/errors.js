@@ -16,6 +16,7 @@ module.exports = {
   '14': 'Der Anmeldezeitraum für diese Einheit ist bereits abgelaufen.',
   '15': 'Das ist ein verpflichtender Kurs, eine manuelle Anmeldung ist nicht möglich.',
   '16': 'Dieser Kurs ist nur für andere Jahrgänge verfügbar.',
+  '17': 'Zur gewählten Zeit gibt es keine Flexzeit.',
   '20': 'Ungültiger Wert für die Anwesenheit.',
   '21': 'Die Anwesenheit kann nur am selben Tag eingetragen werden.',
   '22': 'Ungültiger Wert für die Rückmeldung.',

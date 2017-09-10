@@ -76,16 +76,26 @@ trait RepositoryTrait {
    * @param Builder $query
    * @param Student|null $student
    * @param bool $invert
+   * @param bool $allowSameRegistration Allow later registrations for the same course
    */
-  private function excludeExistingRegistrations($query, Student $student = null, $invert = false) {
+  private function excludeExistingRegistrations($query, Student $student = null, $invert = false, $allowSameRegistration = false) {
     // Don't show slots where the student has a non-cancelled registration
-    $query->whereExists(function($exists) use ($student) {
+    $query->whereExists(function($exists) use ($student, $allowSameRegistration) {
       $exists->select(DB::raw(1))
           ->from('registrations as r')
           ->join('lessons as l', 'l.id', 'r.lesson_id')
           ->whereColumn('l.date', 'd.date')
           ->whereColumn('l.number', 'd.number')
           ->where('l.cancelled', false);
+
+      if ($allowSameRegistration) {
+        $exists->where(function($or) {
+          $or->whereColumn('l.id', 'lessons.id')
+              ->orWhereNull('l.course_id')
+              ->orWhereNull('lessons.course_id')
+              ->orWhereColumn('l.course_id', '!=', 'lessons.course_id');
+        });
+      }
 
       if ($student) {
         $exists->where('r.student_id', $student->id);
@@ -110,7 +120,9 @@ trait RepositoryTrait {
             $join->on('g.group_id', 'o.group_id')->orWhereNull('o.group_id');
           })
           ->whereColumn('o.date', 'd.date')
-          ->whereColumn('o.number', 'd.number');
+          ->where(function($or) {
+            $or->whereColumn('o.number', 'd.number')->orWhereNull('o.number');
+          });
 
       if ($student) {
         $exists->where('g.student_id', $student->id);
@@ -121,6 +133,7 @@ trait RepositoryTrait {
   }
 
   private function getParticipantsQuery($forCourseList = false) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Registration::whereIn('registrations.lesson_id', function($in) use ($forCourseList) {
       $in->select('l.id')
           ->from('lessons as l')
@@ -136,6 +149,22 @@ trait RepositoryTrait {
     })->distinct()->getQuery();
     $query->aggregate = ['function' => 'count', 'columns' => ['student_id']];
     return $query;
+  }
+
+  private function excludeForYear($query, $year) {
+    $query->where(function($or) use ($year) {
+      $or->where(function($sub) use ($year) {
+        $sub->whereNotNull('c.yearfrom');
+        if ($year) {
+          $sub->where('c.yearfrom', '>', $year);
+        }
+      })->orWhere(function($sub) use ($year) {
+        $sub->whereNotNull('c.yearto');
+        if ($year) {
+          $sub->where('c.yearto', '<', $year);
+        }
+      });
+    });
   }
 
 }

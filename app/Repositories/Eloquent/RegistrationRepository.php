@@ -126,24 +126,27 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $this->addExcused($query);
   }
 
-  public function queryForLessons(array $lessons, array $students, $includeSame = false) {
+  public function queryForLessons(array $lessons, array $students) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     return Registration::whereIn('student_id', $students)
-        ->whereIn('lesson_id', function($query) use ($lessons, $includeSame) {
+        ->whereIn('lesson_id', function($query) use ($lessons) {
           $query->select('l.id')
               ->from('lessons as l')
               ->where('l.cancelled', false)
-              ->whereExists(function($exists) use ($lessons, $includeSame) {
+              ->whereExists(function($exists) use ($lessons) {
                 $exists->select(DB::raw(1))
                     ->from('lessons as l1')
+                    ->whereColumn('l1.id', '!=', 'l.id')
                     ->whereColumn('l1.date', 'l.date')
                     ->whereColumn('l1.number', 'l.number')
                     ->whereIn('l1.id', $lessons);
-                if (!$includeSame) {
-                  $exists->whereColumn('l1.id', '!=', 'l.id');
-                }
               });
         });
+  }
+
+  public function queryExisting(array $lessons, array $students) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    return Registration::whereIn('lesson_id', $lessons)->whereIn('student_id', $students);
   }
 
   public function queryOrdered(Relation $registrations) {
@@ -171,7 +174,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function deleteForLessons(array $lessons, array $students) {
-    $this->queryForLessons($lessons, $students, true)->delete();
+    $this->queryForLessons($lessons, $students)->delete();
   }
 
   public function deleteDuplicate(Lesson $lesson) {

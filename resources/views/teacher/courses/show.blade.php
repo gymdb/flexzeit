@@ -44,15 +44,22 @@
             </p>
           </form>
         </confirm>
-      @else
+      @elseif($isOwner)
         <p><a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a></p>
+      @endif
+
+      @if($showRegister)
+        <p>
+          <a href="#" class="btn btn-default"
+             @click.prevent="$refs.registerModal.open()">@lang($firstLesson->date->isPast() ? 'lessons.register.buttonPast' : 'lessons.register.button')</a>
+        </p>
       @endif
 
       <h3>@lang('courses.show.lessons')</h3>
       <ul>
         @foreach($lessons as $lesson)
           <li @if($lesson->cancelled)class="text-muted"@endif>
-            @if($showLessonLink)
+            @if($isOwner)
               <a href="{{route('teacher.lessons.show', $lesson->id)}}">
                 <strong>{{$lesson->date}}</strong>, @lang('messages.format.range', $lesson->time)
               </a>
@@ -77,6 +84,14 @@
             </li>
           @endforeach
         </ul>
+      @endif
+
+      @if($showRegister)
+        <teacher-register ref="registerModal" course
+                          :groups='@json($groups)'
+                          :admin="@json($isAdmin)"
+                          :id="{{$course->id}}">
+        </teacher-register>
       @endif
     </div>
   </section>

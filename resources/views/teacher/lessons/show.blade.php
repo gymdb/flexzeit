@@ -54,7 +54,8 @@
         @if($registrations->isEmpty())
           @if($showRegister)
             <p>
-              <a href="#" class="btn btn-default" @click.prevent="openRegister">@lang($lesson->date->isPast() ? 'lessons.register.buttonPast' : 'lessons.register.button')</a>
+              <a href="#" class="btn btn-default"
+                 @click.prevent="openRegister">@lang($lesson->date->isFuture() ? 'lessons.register.button' : 'lessons.register.buttonPast')</a>
             </p>
           @endif
           <p>@lang('lessons.registrations.none')</p>
@@ -65,7 +66,8 @@
           @if($showAttendance || $showRegister)
             <p>
               @if($showRegister)
-                <a href="#" class="btn btn-default" @click.prevent="openRegister">@lang($lesson->date->isPast() ? 'lessons.register.buttonPast' : 'lessons.register.button')</a>
+                <a href="#" class="btn btn-default"
+                   @click.prevent="openRegister">@lang($lesson->date->isFuture() ? 'lessons.register.button' : 'lessons.register.buttonPast')</a>
               @endif
 
               @if($attendanceChecked)
@@ -156,7 +158,7 @@
           <teacher-register ref="registerModal"
                             :groups='@json($groups)'
                             :admin="@json($isAdmin)"
-                            :lesson="{{$lesson->id}}">
+                            :id="{{$lesson->id}}">
           </teacher-register>
         @endif
 

@@ -15,6 +15,7 @@ module.exports = {
   '14': 'The registration period for this lesson or course has already ended.',
   '15': 'This is an obligatory course, you cannot manually register for it.',
   '16': 'This course is not available for your form.',
+  '17': 'There are no lessons for the chosen time.',
   '20': 'Invalid value for the attendance.',
   '21': 'The attendance can only be checked on the day of the lesson.',
   '22': 'Invalid value for the feedback.',

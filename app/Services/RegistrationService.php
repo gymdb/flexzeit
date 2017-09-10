@@ -176,10 +176,17 @@ interface RegistrationService {
   public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
 
   /**
+   * @param Course $course
    * @param Student $student
-   * @param Lesson $lesson
    * @return array
    */
-  public function getWarnings(Lesson $lesson, Student $student);
+  public function getWarningsForCourse(Course $course, Student $student);
+
+  /**
+   * @param Lesson $lesson
+   * @param Student $student
+   * @return array
+   */
+  public function getWarningsForLesson(Lesson $lesson, Student $student);
 
 }

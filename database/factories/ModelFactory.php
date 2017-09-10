@@ -54,9 +54,12 @@ $factory->define(Teacher::class, function(Generator $faker) {
 
 $factory->define(Room::class, function(Generator $faker) {
   $number = $faker->unique()->numberBetween(1, 100);
+  $year = $faker->randomElement([[1, 2], [3, 4], [5, 8], [null, null]]);
   return [
       'name'     => floor($number / 25) * 100 + ($number % 25) + 1,
       'type'     => $faker->randomElement(['Sport', 'Listening', null, null, null, null, null]),
-      'capacity' => $faker->numberBetween(3, 6) * 5
+      'capacity' => $faker->numberBetween(3, 6) * 5,
+      'yearfrom' => $year[0],
+      'yearto'   => $year[1]
   ];
 });

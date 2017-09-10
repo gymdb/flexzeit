@@ -91,10 +91,17 @@ interface RegistrationRepository {
    *
    * @param int[] $lessons IDs of lessons whose times should be checked
    * @param array $students IDs of students to check
-   * @param bool $includeSame Also include registrations for the lesson queried for
    * @return
    */
-  public function queryForLessons(array $lessons, array $students, $includeSame = false);
+  public function queryForLessons(array $lessons, array $students);
+
+  /**
+   * Find already existing registrations for the given combination of lessons and students
+   *
+   * @param array $lessons
+   * @param array $students
+   */
+  public function queryExisting(array $lessons, array $students);
 
   /**
    * Unregisters all students from a course

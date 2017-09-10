@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Helpers\Date;
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Registration;
@@ -165,6 +166,21 @@ class RegistrationController extends Controller {
   /**
    * Unregister a given registration
    *
+   * @param Course $course
+   * @param Student $student
+   * @return JsonResponse
+   * @internal param Registration $registration
+   */
+  public function registerCourse(Course $course, Student $student) {
+    $this->authorize('register', $course);
+
+    $this->registrationService->registerStudentForCourse($course, $student, true, $this->getTeacher()->admin);
+    return response()->json(['success' => true]);
+  }
+
+  /**
+   * Unregister a given registration
+   *
    * @param Registration $registration
    * @return JsonResponse
    */
@@ -209,12 +225,24 @@ class RegistrationController extends Controller {
   /**
    * Get all warnings when registering a student
    *
+   * @param Course $course
+   * @param Student $student
+   * @return JsonResponse
+   */
+  public function getWarningsForCourse(Course $course, Student $student) {
+    $warnings = $this->registrationService->getWarningsForCourse($course, $student);
+    return response()->json($warnings);
+  }
+
+  /**
+   * Get all warnings when registering a student
+   *
    * @param Lesson $lesson
    * @param Student $student
    * @return JsonResponse
    */
-  public function getWarnings(Lesson $lesson, Student $student) {
-    $warnings = $this->registrationService->getWarnings($lesson, $student);
+  public function getWarningsForLesson(Lesson $lesson, Student $student) {
+    $warnings = $this->registrationService->getWarningsForLesson($lesson, $student);
     return response()->json($warnings);
   }
 

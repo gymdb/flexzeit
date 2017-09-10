@@ -228,14 +228,18 @@ class CourseController extends Controller {
   public function show(Course $course) {
     $lessons = $this->lessonService->getForCourse($course);
     $registrations = $this->registrationService->getForCourse($course);
-
     $firstLesson = $lessons->first();
-    $allowDestroy = $firstLesson && $firstLesson->date->isFuture();
 
     $teacher = $this->getTeacher();
-    $showLessonLink = $teacher->admin || $teacher->id === $firstLesson->teacher_id;
+    $isAdmin = $teacher->admin;
+    $isOwner = $isAdmin || $teacher->id === $firstLesson->teacher_id;
 
-    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'firstLesson', 'allowDestroy', 'showLessonLink'));
+    $allowDestroy = $isOwner && $firstLesson && $firstLesson->date->isFuture();
+    $showRegister = $isOwner && ($isAdmin || !$firstLesson->date->isPast());
+
+    $groups = $showRegister ? $this->miscService->getGroups() : null;
+
+    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'firstLesson', 'allowDestroy', 'showRegister', 'groups', 'isOwner', 'isAdmin'));
   }
 
   /**

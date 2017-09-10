@@ -11,6 +11,7 @@ class RegistrationException extends ApiException {
   const REGISTRATION_PERIOD = 14;
   const OBLIGATORY = 15;
   const YEAR = 16;
+  const TIMETABLE = 17;
   const INVALID_ATTENDANCE = 20;
   const ATTENDANCE_PERIOD = 21;
   const INVALID_FEEDBACK = 22;

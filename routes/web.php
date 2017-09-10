@@ -82,7 +82,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/registrations', 'RegistrationController@getForStudent')
         ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
         ->name('teacher.api.registrations');
-    Route::get('/registrations/warnings/{lesson}', 'RegistrationController@getWarnings')
+    Route::get('/registrations/warnings/course/{course}', 'RegistrationController@getWarningsForCourse')
+        ->middleware('params:student;i');
+    Route::get('/registrations/warnings/lesson/{lesson}', 'RegistrationController@getWarningsForLesson')
         ->middleware('params:student;i');
     Route::get('/registrations/missing', 'RegistrationController@getMissing')
         ->middleware('params:group;i|student?;i|start?;d|end?;d')
@@ -94,6 +96,8 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
         ->middleware('params:attendance;b');
     Route::post('/attendanceChecked/{lesson}', 'RegistrationController@setAttendanceChecked');
     Route::post('/register/{lesson}/{student}', 'RegistrationController@registerLesson');
+    Route::post('/register/lesson/{lesson}/{student}', 'RegistrationController@registerLesson');
+    Route::post('/register/course/{course}/{student}', 'RegistrationController@registerCourse');
     Route::post('/unregister/lesson/{registration}', 'RegistrationController@unregisterLesson');
 
     Route::post('/absences/refresh/{date}', 'RegistrationController@refreshAbsences');

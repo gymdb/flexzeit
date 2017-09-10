@@ -106,6 +106,10 @@ h2.panel-heading {
       }
     }
   }
+
+  .modal-body {
+    min-height: 300px;
+  }
 }
 
 dt:after {

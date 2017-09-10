@@ -1,6 +1,7 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
-  <modal v-if="shown" :value="show" effect="fade" :title="$t('registrations.register.heading')" @cancel="cancel" large>
+  <modal v-if="shown" :value="show" effect="fade" @cancel="cancel" large
+         :title="$t(course ? 'registrations.register.headingCourse' : 'registrations.register.heading')">
     <div class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
@@ -26,11 +27,18 @@
           <ul>
             <li v-for="(data, key) in props.data">
               {{$t('registrations.warnings.' + key, data)}}
+              <ul v-if="key === 'lessons'">
+                <li v-for="lesson in data">
+                  {{$d(moment(lesson.date), 'short')}}: {{lesson.teacher}}<span v-if="lesson.course"> ({{lesson.course}})</span>
+                </li>
+              </ul>
             </li>
           </ul>
         </div>
 
-        <p v-if="!saveDisabled" class="text-center"><strong>{{$t('registrations.register.confirm')}}</strong></p>
+        <p v-if="!saveDisabled" class="text-center">
+          <strong>{{$t(course ? 'registrations.register.confirmCourse' : 'registrations.register.confirm')}}</strong>
+        </p>
       </template>
     </filtered-list>
 
@@ -45,9 +53,10 @@
       return {
         show: false,
         shown: false,
-        url: '/teacher/api/registrations/warnings/' + this.lesson,
+        url: '/teacher/api/registrations/warnings/' + (this.course ? 'course' : 'lesson') + '/' + this.id,
         student: null,
         registeredLesson: null,
+        registeredLessons: null,
         timetable: null,
         saving: false,
         error: null,
@@ -63,17 +72,22 @@
         'type': Boolean,
         'default': false
       },
-      lesson: {
+      id: {
         'type': Number,
         'required': true
+      },
+      course: {
+        'type': Boolean,
+        'default': false
       }
     },
     computed: {
       isSameLesson() {
-        return this.registeredLesson && this.registeredLesson === this.lesson;
+        return !this.course && this.registeredLesson && this.registeredLesson === this.id;
       },
       saveDisabled() {
-        return this.saving || !this.student || (this.registeredLesson && (!this.admin || this.isSameLesson)) || (!this.admin && this.timetable);
+        return this.saving || !this.student || this.isSameLesson
+            || (!this.admin && (this.registeredLesson || this.registeredLessons || this.timetable));
       },
       submitLabel() {
         return (this.admin && this.registeredLesson && !this.isSameLesson)
@@ -106,7 +120,8 @@
             this.registeredLesson = null;
           }
 
-          this.timetable = data.timetable || null;
+          this.registeredLessons = !!data.lessons;
+          this.timetable = !!data.timetable;
         } else {
           this.student = null;
         }
@@ -115,7 +130,7 @@
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/teacher/api/register/' + this.lesson + '/' + this.student, {}).then(function (response) {
+          this.$http.post('/teacher/api/register/' + (this.course ? 'course' : 'lesson') + '/' + this.id + '/' + this.student, {}).then(function (response) {
             if (response.data.success) {
               self.error = null;
               self.reload = true;

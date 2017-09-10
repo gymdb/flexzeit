@@ -8,10 +8,12 @@ module.exports = {
   },
   register: {
     heading: 'SchülerIn für diese Einheit anmelden',
+    headingCourse: 'SchülerIn für diesen Kurs anmelden',
     registered: 'SchülerIn ist für diese Zeit bereits woanders angemeldet',
     submit: 'Anmelden',
     change: 'Ummelden',
     confirm: 'SchülerIn für die Einheit anmelden?',
+    confirmCourse: 'SchülerIn für den Kurs anmelden?',
     loadError: 'Fehler beim Laden der Anmeldungen für SchülerIn.',
     saveError: 'Fehler beim Anmelden der Schülerin/des Schülers.'
   },
@@ -36,6 +38,7 @@ module.exports = {
     offday: 'SchülerIn hat für die gewählte Zeit keine Flexzeit.',
     lesson: 'Zur gewählten Zeit gibt es bereits eine Anmeldung bei {teacher}.',
     course: 'Zur gewählten Zeit gibt es bereits eine Anmeldung zum Kurs {course} bei {teacher}.',
+    lessons: 'Es gibt zu Kurszeiten bereits Anmeldungen:',
     timetable: 'SchülerIn hat für die gewählte Einheit keine Flexzeit.'
   },
   unregister: {

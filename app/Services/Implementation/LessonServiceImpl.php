@@ -67,7 +67,13 @@ class LessonServiceImpl implements LessonService {
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)
         ->with('course:id,name,maxstudents', 'room:id,name,capacity', 'teacher:id,lastname,firstname')
-        ->select('id', 'date', 'number', 'cancelled', 'course_id', 'room_id', 'teacher_id');
+        ->select('lessons.id', 'date', 'number', 'cancelled', 'course_id', 'room_id', 'teacher_id');
+
+    if (!$teacher) {
+      $query->join('teachers as t', 't.id', 'lessons.teacher_id')
+          ->orderBy('t.lastname')
+          ->orderBy('t.firstname');
+    }
 
     return $this->lessonRepository
         ->addParticipants($query)
