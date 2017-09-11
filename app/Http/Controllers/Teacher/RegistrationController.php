@@ -130,7 +130,7 @@ class RegistrationController extends Controller {
     $this->authorize('setAttendance', $registration);
 
     $teacher = $this->getTeacher();
-    $force = $teacher->admin || $registration->student->groups()->wherePivot('group_id', $teacher->form->group_id)->exists();
+    $force = $teacher->admin || ($teacher->form && $registration->student->groups()->wherePivot('group_id', $teacher->form->group_id)->exists());
     $this->registrationService->setAttendance($registration, $attendance, $force);
     return response()->json(['success' => true]);
   }
