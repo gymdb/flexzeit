@@ -1,8 +1,6 @@
 # generic files to ignore
 # backup files (*~) and vim swap file (.swp), MacOS dir file (.DS_Store)
 *~
-*.lock
-*-lock.json
 *.DS_Store
 *.swp
 *.out
@@ -22,11 +20,9 @@ build.xml
 
 # Laravel
 /node_modules
-/public/storage
 /public/hot
 /storage/*.key
 /vendor
-/.idea
 Homestead.json
 Homestead.yaml
 .env
