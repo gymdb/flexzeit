@@ -147,7 +147,7 @@ class LessonServiceImpl implements LessonService {
               'room'    => $lesson->room->name,
               'teacher' => [
                   'name'     => $lesson->teacher->name(),
-                  'image'    => $lesson->teacher->image,
+                  'image'    => $lesson->teacher->image ? url($lesson->teacher->image) : null,
                   'info'     => $lesson->teacher->info,
                   'subjects' => $lesson->teacher->subjects->implode('name', ', ')
               ]
