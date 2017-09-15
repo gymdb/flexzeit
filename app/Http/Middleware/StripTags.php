@@ -7,11 +7,14 @@ use Illuminate\Foundation\Http\Middleware\TransformsRequest;
 class StripTags extends TransformsRequest {
 
   /**
-   * The attributes that should not be stripped.
+   * The names of the attributes that should not be trimmed.
    *
    * @var array
    */
-  protected $except = [];
+  protected $except = [
+      'password',
+      'password_confirmation',
+  ];
 
   /**
    * Transform the given value.
