@@ -56,7 +56,8 @@ return [
         'obligatory'   => [
             'heading'        => 'Create obligatory course',
             'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:',
-            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:'
+            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:',
+            'offdays'        => 'Some students are absent with a group at some of the selected dates:'
         ]
     ],
     'destroy'       => [
@@ -76,7 +77,8 @@ return [
         'obligatory'     => [
             'heading'        => 'Edit obligatory course',
             'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:',
-            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:'
+            'timetable'      => 'Some students of the chosen groups do not have lessons in the chosen timeframe:',
+            'offdays'        => 'Some students are absent with a group at some of the selected dates:'
         ]
     ]
 ];

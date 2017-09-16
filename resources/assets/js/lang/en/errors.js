@@ -8,6 +8,7 @@ module.exports = {
   '6': 'Changing the groups is not possible anymore.',
   '7': 'This course can no longer be deleted.',
   '8': 'There are students which do not have lessons in the chosen timeframe.',
+  '9': 'There are students which are absent with a group.',
   '10': 'You don\'t have lessons at the given time.',
   '11': 'The maximum number of students has been reached.',
   '12': 'There is a course in this lesson, you can only take the whole course.',

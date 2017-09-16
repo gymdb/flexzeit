@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Helpers\Date;
 use App\Models\Offday;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
@@ -17,6 +18,20 @@ class OffdayRepository implements \App\Repositories\OffdayRepository {
     if (is_null($number)) {
       $query->whereNull('number');
     }
+    return $query;
+  }
+
+  public function queryForLessonsWithStudent(Collection $lessons, Student $student) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    $query = Offday::whereIn('group_id', $student->groups()->select('id')->getQuery());
+    $this->restrictToLessons($query, $lessons);
+    return $query;
+  }
+
+  public function queryForLessonsWithGroups(Collection $lessons, array $groups) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    $query = Offday::whereIn('group_id', $this->relatedGroups($groups));
+    $this->restrictToLessons($query, $lessons);
     return $query;
   }
 

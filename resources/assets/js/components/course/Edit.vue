@@ -23,6 +23,7 @@
         roomOccupation: [],
         withObligatory: [],
         timetable: [],
+        offdays: [],
         error: null
       };
     },
@@ -104,7 +105,7 @@
           return true;
         }
         return this.obligatory
-            ? !this.name || !this.room || !this.subject || !this.groups.length || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0
+            ? !this.name || !this.room || !this.subject || !this.groups.length || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0
             : !this.name || !this.room || this.withCourse.length > 0;
       },
       changed() {
@@ -141,6 +142,7 @@
           if (self.obligatory) {
             self.withObligatory = response.data.withObligatory || [];
             self.timetable = response.data.timetable || [];
+            self.offdays = response.data.offdays || [];
           }
         }).catch(function (error) {
           self.error = error;

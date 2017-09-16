@@ -66,14 +66,11 @@ interface LessonRepository {
 
   /**
    * @param array $groups
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $number Only show lessons with these numbers
+   * @param Collection $lessons Collection of lesson objects during which to query
    * @param Course|null $exclude Exclude lessons from this course
    * @return Builder
    */
-  public function queryForGroups(array $groups, Date $start, Date $end = null, $dayOfWeek = null, $number = null, Course $exclude = null);
+  public function queryForGroups(array $groups, Collection $lessons, Course $exclude = null);
 
   /**
    * @param Collection $lessons

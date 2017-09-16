@@ -7,6 +7,7 @@ use App\Helpers\DateRange;
 use App\Models\Registration;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 trait RepositoryTrait {
@@ -165,6 +166,31 @@ trait RepositoryTrait {
         }
       });
     });
+  }
+
+  private function restrictToLessons($query, Collection $lessons) {
+    $query->where(function($or) use ($lessons) {
+      foreach ($lessons as $lesson) {
+        $or->orWhere(function($sub) use ($lesson) {
+          $sub->where([
+              'date'   => $lesson['date'],
+              'number' => $lesson['number']
+          ]);
+        });
+      }
+    });
+  }
+
+  private function relatedGroups(array $groups) {
+    return function($in) use ($groups) {
+      $in->select('g1.group_id')
+          ->from('group_student as g1')
+          ->whereIn('g1.student_id', function($sub) use ($groups) {
+            $sub->select('g2.student_id')
+                ->from('group_student as g2')
+                ->whereIn('g2.group_id', $groups);
+          });
+    };
   }
 
 }

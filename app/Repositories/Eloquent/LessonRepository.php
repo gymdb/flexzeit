@@ -51,18 +51,10 @@ class LessonRepository implements \App\Repositories\LessonRepository {
 
   public function queryForOccupation(Collection $lessons, Teacher $teacher) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-    return Lesson::where('cancelled', false)
-        ->where('teacher_id', '!=', $teacher->id)
-        ->where(function($or) use ($lessons) {
-          foreach ($lessons as $lesson) {
-            $or->orWhere(function($sub) use ($lesson) {
-              $sub->where([
-                  'date'   => $lesson['date'],
-                  'number' => $lesson['number']
-              ]);
-            });
-          }
-        });
+    $query = Lesson::where('cancelled', false)
+        ->where('teacher_id', '!=', $teacher->id);
+    $this->restrictToLessons($query, $lessons);
+    return $query;
   }
 
   public function queryAvailable(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
@@ -166,16 +158,18 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return DB::raw("CASE WHEN lessons.course_id IS NOT NULL THEN ({$course->toSql()}) ELSE ({$room->toSql()}) END");
   }
 
-  public function queryForGroups(array $groups, Date $start, Date $end = null, $dayOfWeek = null, $number = null, Course $exclude = null) {
-    $query = $this->queryInRange($start, $end, $dayOfWeek, $number)
+  public function queryForGroups(array $groups, Collection $lessons, Course $exclude = null) {
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    $query = Lesson::where('cancelled', false)
         ->whereIn('lessons.course_id', function($exists) use ($groups) {
           $exists->select('g.course_id')
               ->from('course_group as g')
-              ->whereIn('g.group_id', $groups);
+              ->whereIn('g.group_id', $this->relatedGroups($groups));
         });
     if ($exclude) {
       $query->where('lessons.course_id', '!=', $exclude->id);
     }
+    $this->restrictToLessons($query, $lessons);
 
     return $query;
   }

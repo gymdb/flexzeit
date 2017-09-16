@@ -89,6 +89,14 @@
                     </li>
                   </ul>
                 </div>
+                <div v-else-if="offdays.length" class="alert alert-danger">
+                  <strong>@lang('courses.create.obligatory.offdays')</strong>
+                  <ul>
+                    <li v-for="offday in offdays">
+                      <strong>@{{$d(moment(offday.date), 'short')}}</strong>: @{{offday.group}}
+                    </li>
+                  </ul>
+                </div>
               @endif
               <div v-else-if="forNewCourse.length">
                 <div class="alert alert-info">

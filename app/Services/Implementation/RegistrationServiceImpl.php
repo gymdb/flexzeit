@@ -84,8 +84,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($course->maxstudents && $course->students()->count('student_id') >= $course->maxstudents) {
         return RegistrationException::MAXSTUDENTS;
       }
-      // TODO Fix this!
-      if ($student->offdays()->whereIn('date', $course->lessons->pluck('date'))->exists()) {
+      if ($this->offdayRepository->queryForLessonsWithStudent($course->lessons, $student)->exists()) {
         return RegistrationException::OFFDAY;
       }
       if ($this->validateYear($course, $student)) {
@@ -392,7 +391,19 @@ class RegistrationServiceImpl implements RegistrationService {
 
     $warnings += $this->validateYear($course, $student);
 
-    // TODO Include offdays
+    $offdays = $this->offdayRepository->queryForLessonsWithStudent($course->lessons, $student)
+        ->with('group')
+        ->orderBy('date')
+        ->get()
+        ->map(function($offday) {
+          return [
+              'date'  => $offday->date->toDateString(),
+              'group' => $offday->group->name
+          ];
+        });
+    if ($offdays->isNotEmpty()) {
+      $warnings['offdays'] = $offdays;
+    }
 
     if (!$this->studentRepository->queryTimetable($student, $lesson->date->dayOfWeek, $lesson->number)->exists()) {
       $warnings['timetable'] = true;

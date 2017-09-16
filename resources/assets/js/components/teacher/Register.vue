@@ -32,6 +32,11 @@
                   {{$d(moment(lesson.date), 'short')}}: {{lesson.teacher}}<span v-if="lesson.course"> ({{lesson.course}})</span>
                 </li>
               </ul>
+              <ul v-if="key === 'offdays'">
+                <li v-for="offday in data">
+                  {{$d(moment(offday.date), 'short')}}: {{offday.group}}
+                </li>
+              </ul>
             </li>
           </ul>
         </div>

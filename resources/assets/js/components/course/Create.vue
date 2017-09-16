@@ -24,6 +24,7 @@
         roomOccupation: [],
         withObligatory: [],
         timetable: [],
+        offdays: [],
         error: null
       };
     },
@@ -134,11 +135,11 @@
       buttonDisabled() {
         if (this.obligatory) {
           return !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
-              || this.withCourse.length || this.withObligatory.length || this.timetable.length || !this.forNewCourse.length;
+              || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0 || !this.forNewCourse.length;
         }
 
         return !this.firstDate || !this.number || !this.name || !this.room
-            || this.withCourse.length || !this.forNewCourse.length;
+            || this.withCourse.length > 0 || !this.forNewCourse.length;
       }
     },
     methods: {
@@ -160,6 +161,7 @@
           this.roomOccupation = [];
           this.withObligatory = [];
           this.timetable = [];
+          this.offdays = [];
         } else {
           let self = this;
           this.$http.get('/teacher/api/course/dataForCreate', {
@@ -172,6 +174,7 @@
             if (self.obligatory) {
               self.withObligatory = response.data.withObligatory || [];
               self.timetable = response.data.timetable || [];
+              self.offdays = response.data.offdays || [];
             }
 
             if (!self.room || self.room === self.roomOriginal) {

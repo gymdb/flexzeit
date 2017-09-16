@@ -57,7 +57,8 @@ return [
         'obligatory'   => [
             'heading'        => 'Klassen-/Gruppenbindung erstellen',
             'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:',
-            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:'
+            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:',
+            'offdays'        => 'Manche SchülerInnen sind an manchen Terminen mit einer Klasse/Gruppe abwesend:'
         ]
     ],
     'destroy'       => [
@@ -77,7 +78,8 @@ return [
         'obligatory'     => [
             'heading'        => 'Klassen-/Gruppenbindung bearbeiten',
             'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:',
-            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:'
+            'timetable'      => 'Für manche Klassen/Gruppen haben nicht alle SchülerInnen im gewählten Zeitraum Flexzeit:',
+            'offdays'        => 'Manche SchülerInnen sind an manchen Terminen mit einer Klasse/Gruppe abwesend:'
         ]
 
     ]

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\Date;
+use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -25,6 +26,24 @@ interface OffdayRepository {
    * @return Builder
    */
   public function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null);
+
+  /**
+   * Build a query for all offdays for the student's groups during the given lessons
+   *
+   * @param Collection $lessons Collection of Lesson objects
+   * @param Student $student
+   * @return Builder
+   */
+  public function queryForLessonsWithStudent(Collection $lessons, Student $student);
+
+  /**
+   * Build a query for all offdays for all students in the given groups during the given lessons
+   *
+   * @param Collection $lessons Collection of Lesson objects
+   * @param int[] $groups
+   * @return Builder
+   */
+  public function queryForLessonsWithGroups(Collection $lessons, array $groups);
 
   /**
    * Build a query for all lessons without an assigned group
