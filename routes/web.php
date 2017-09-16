@@ -136,15 +136,3 @@ Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => [
     Route::post('/unregister/lesson/{registration}', 'ApiController@unregisterLesson');
   });
 });
-
-if (config('app.debug')) {
-  // TODO For testing purposes only, remove in production system!
-  Route::get('/refresh', function($key) {
-    if ($key === 'NRil5oTeb5_4t') {
-      set_time_limit(1200);
-      echo \Illuminate\Support\Facades\Artisan::call('migrate:refresh', ['--seed' => true]);
-    } else {
-      echo 'Wrong key!';
-    }
-  })->middleware('params:key');
-}
