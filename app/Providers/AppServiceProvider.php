@@ -37,6 +37,7 @@ use App\Services\RegistrationService;
 use App\Services\StudentService;
 use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
@@ -49,6 +50,8 @@ class AppServiceProvider extends ServiceProvider {
    * @return void
    */
   public function boot() {
+    umask(0002);
+
     Validator::extend('create_allowed', CourseValidator::class . '@validateCreateAllowed');
     Validator::extend('edit_allowed', CourseValidator::class . '@validateEditAllowed');
     Validator::extend('school_day', CourseValidator::class . '@validateSchoolDay');
@@ -59,6 +62,36 @@ class AppServiceProvider extends ServiceProvider {
     Blade::directive('json', function($expression) {
       /** @noinspection SpellCheckingInspection */
       return "<?php echo htmlspecialchars(json_encode($expression, JSON_HEX_APOS | JSON_HEX_QUOT), ENT_NOQUOTES, 'UTF-8', false); ?>";
+    });
+
+    Collection::macro('buildDictionary', function(array $keys, $pluck = true) {
+      if (empty($keys)) {
+        if ($pluck) {
+          return is_bool($pluck) ? $this->isNotEmpty() : $this->pluck($pluck)->first();
+        }
+        return $this->first();
+      }
+
+      $key = array_shift($keys);
+      if ($key === 'date') {
+        $key = function($item) {
+          return $item->date->toDateString();
+        };
+      }
+      return $this
+          ->groupBy($key)
+          ->map(function($list) use ($keys, $pluck) {
+            return $list->buildDictionary($keys, $pluck);
+          });
+    });
+
+    Collection::macro('dictionaryDiff', function(Collection $other) {
+      return $this->flatMap(function($list, $key) use ($other) {
+        if ($list instanceof Collection) {
+          return $other->has($key) ? $list->dictionaryDiff($other[$key]) : $list->flatten();
+        }
+        return $other->has($key) ? [] : [$list];
+      });
     });
   }
 

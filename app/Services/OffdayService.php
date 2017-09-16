@@ -19,4 +19,9 @@ interface OffdayService {
    */
   public function loadOffdays();
 
+  /**
+   * Replace school-wide days without lessons with the ones loaded from Untis
+   */
+  public function loadGroupOffdays();
+
 }

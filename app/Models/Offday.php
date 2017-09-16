@@ -16,7 +16,7 @@ class Offday extends Model {
 
   public $timestamps = false;
   protected $casts = ['date' => 'date'];
-  protected $fillable = ['date'];
+  protected $fillable = ['group_id', 'date', 'number'];
 
   public function group() {
     return $this->belongsTo(Group::class);

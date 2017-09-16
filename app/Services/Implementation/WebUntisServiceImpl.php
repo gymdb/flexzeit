@@ -6,6 +6,7 @@ use App\Helpers\Date;
 use App\Helpers\DateRange;
 use App\Services\WebUntisService;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use JsonRPC\Client;
 
 class WebUntisServiceImpl implements WebUntisService {
@@ -62,6 +63,34 @@ class WebUntisServiceImpl implements WebUntisService {
 
     return collect($result)->flatMap(function($item) {
       return DateRange::getCollection($this->getDate($item['startDate']), $this->getDate($item['endDate']));
+    });
+  }
+
+  public function getGroupTimetable($name, Date $start, Date $end) {
+    $result = $this->authenticatedConnection()->getTimetable([
+        'options' => [
+            'element'          => ['id' => $name, 'type' => 1, 'keyType' => 'name'],
+            'startDate'        => $start->format('Ymd'),
+            'endDate'          => $end->format('Ymd'),
+            'klasseFields'     => [],
+            'roomFields'       => [],
+            'subjectFields'    => ['name'],
+            'teacherFields'    => [],
+            'showStudentgroup' => true,
+        ]
+    ]);
+    $this->logout();
+
+    return collect($result)->map(function($item) {
+      return [
+          'start'     => $this->getDateTime($item['date'], $item['startTime']),
+          'end'       => $this->getDateTime($item['date'], $item['endTime']),
+          'cancelled' => !empty($item['cancelled']) && $item['code'] === 'cancelled',
+          'group'     => empty($item['sg']) ? null : $item['sg'],
+          'flex'      => !is_null(Arr::first($item['su'], function($subject) {
+            return $subject['name'] === 'Flex';
+          }))
+      ];
     });
   }
 

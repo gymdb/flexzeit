@@ -36,7 +36,8 @@ class OffdaysCommand extends Command {
   public function handle() {
     try {
       $this->offdayService->loadOffdays();
-      $this->line('Loaded holidays from WebUntis.');
+      $this->offdayService->loadGroupOffdays();
+      $this->line('Loaded holidays and group offdays from WebUntis.');
     } catch (Exception $e) {
       $this->error('Error loading holidays: ' . $e->getMessage());
     }

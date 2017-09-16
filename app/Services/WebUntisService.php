@@ -27,4 +27,14 @@ interface WebUntisService {
    */
   public function getOffdays();
 
+  /**
+   * Get timetable for the specified form
+   *
+   * @param string $name
+   * @param Date $start
+   * @param Date $end
+   * @return array List of lessons
+   */
+  public function getGroupTimetable($name, Date $start, Date $end);
+
 }
