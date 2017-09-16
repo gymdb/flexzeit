@@ -21,18 +21,31 @@ class DummySeeder extends Seeder {
 
     $teacherCount = 0;
 
-    for ($year = 1; $year <= 8; $year++) {
+    $formList = [
+        1 => ['1A', '1B', '1C', '1D', '1E'],
+        2 => ['2A', '2B', '2C', '2D', '2E'],
+        3 => ['3A', '3B', '3C', '3D', '3E'],
+        4 => ['4A', '4B', '4C', '4D', '4E', '4F'],
+        5 => ['5A', '5B', '5N'],
+        6 => ['6A', '6N1', '6N2'],
+        7 => ['7A', '7B', '7N'],
+        8 => ['8A', '8B', '8N']
+    ];
+
+    foreach ($formList as $year => $forms) {
       $students1 = [];
       $students2 = [];
 
-      foreach (['A', 'B'] as $form) {
+      foreach ($forms as $form) {
         $teacher = factory(Teacher::class)->create([
             'username' => 't' . ++$teacherCount,
             'password' => Hash::make('t' . $teacherCount)
         ]);
 
-        $group = Group::create(['name' => $year . $form]);
+        /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+        $group = Group::create(['name' => $form]);
 
+        /** @noinspection PhpDynamicAsStaticMethodCallInspection */
         Form::create([
             'group_id' => $group->id,
             'year'     => $year,
@@ -67,7 +80,9 @@ class DummySeeder extends Seeder {
         $group->students()->attach($students);
       }
 
+      /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       Group::create(['name' => 'F' . $year])->students()->attach($students1);
+      /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       Group::create(['name' => 'L' . $year])->students()->attach($students2);
     }
 

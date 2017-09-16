@@ -13,8 +13,8 @@ class ConfigSeeder extends Seeder {
    */
   public function run() {
     $times = [
-        1 => ['start' => '09:00', 'end' => '09:30'],
-        2 => ['start' => '10:00', 'end' => '10:30']
+        1 => ['start' => '08:50', 'end' => '09:33'],
+        2 => ['start' => '11:10', 'end' => '11:53']
     ];
     $lessons = [];
 

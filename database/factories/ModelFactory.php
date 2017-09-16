@@ -32,14 +32,14 @@ $factory->state(Registration::class, 'past', function(Generator $faker) {
 });
 
 $factory->define(Student::class, function(Generator $faker) {
-  $number = $faker->unique()->numberBetween(0, 140 * 4 - 1);
-  $year = [12, 13, 14, 16][intdiv($number, 140)];
+  $number = $faker->unique()->numberBetween(0, 200 * 4 - 1);
+  $year = [12, 13, 14, 16][intdiv($number, 200)];
 
   return [
       'firstname' => $faker->firstName,
       'lastname'  => $faker->lastName,
       'image'     => 'https://api.adorable.io/avatars/200/' . $faker->word . '.png',
-      'untis_id'  => (40501620 * 100 + $year) * 10000 + ($number % 140) + 1
+      'untis_id'  => (40501620 * 100 + $year) * 10000 + ($number % 200) + 1
   ];
 });
 
