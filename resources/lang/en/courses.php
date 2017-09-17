@@ -44,6 +44,11 @@ return [
         'heading' => 'Registered students',
         'none'    => 'No students are registered for this course.'
     ],
+    'unregister'    => [
+        'heading' => 'Unregister student',
+        'error'   => 'Error unregistering student.',
+        'confirm' => 'Really unregister :student from complete course?'
+    ],
     'create'        => [
         'heading'      => 'Create course',
         'impossible'   => 'Creating courses is currently not possible.',

@@ -71,6 +71,7 @@ Vue.component('teacher-register-student', require('./components/teacher/Register
 Vue.component('teacher-substitute', require('./components/teacher/Substitute.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
 Vue.component('course-edit', require('./components/course/Edit.vue'));
+Vue.component('course-show', require('./components/course/Show.vue'));
 
 // Register components for student pages
 Vue.component('student-documentation', require('./components/student/Documentation.vue'));
@@ -96,6 +97,7 @@ Vue.options.components.popover.options.methods.position = function () {
     if (!popover) {
       return;
     }
+    // noinspection JSUnresolvedVariable
     const trigger = this.$refs.trigger.children[0];
     this.left = trigger.offsetLeft + trigger.offsetWidth;
     this.top = trigger.offsetTop + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
@@ -104,6 +106,7 @@ Vue.options.components.popover.options.methods.position = function () {
   });
 };
 
+// noinspection JSUnusedLocalSymbols
 const app = new Vue({
   i18n,
   el: '#app'

@@ -45,6 +45,11 @@ return [
         'heading' => 'Angemeldete SchülerInnen',
         'none'    => 'Für diesen Kurs haben sich keine SchülerInnen angemeldet.'
     ],
+    'unregister'    => [
+        'heading' => 'SchülerIn abmelden',
+        'error'   => 'Fehler beim Abmelden der Schülerin/des Schülers.',
+        'confirm' => 'Soll :student wirklich vom gesamten Kurs abgemeldet werden?'
+    ],
     'create'        => [
         'heading'      => 'Kurs erstellen',
         'impossible'   => 'Derzeit können keine Kurse erstellt werden.',

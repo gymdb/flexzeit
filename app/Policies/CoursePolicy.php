@@ -72,6 +72,17 @@ class CoursePolicy {
   }
 
   /**
+   * Determine whether the user can register students to the course.
+   *
+   * @param  User $user
+   * @param  Course $course
+   * @return bool
+   */
+  public function unregister(User $user, Course $course) {
+    return $this->checkUser($user, $course);
+  }
+
+  /**
    * Determine whether the user can list obligatory courses
    *
    * @param User $user

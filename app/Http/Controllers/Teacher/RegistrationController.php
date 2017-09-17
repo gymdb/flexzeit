@@ -192,6 +192,20 @@ class RegistrationController extends Controller {
   }
 
   /**
+   * Unregister a student from a whole course
+   *
+   * @param Course $course
+   * @param Student $student
+   * @return JsonResponse
+   */
+  public function unregisterCourse(Course $course, Student $student) {
+    $this->authorize('unregister', $course);
+
+    $this->registrationService->unregisterStudentFromCourse($course, $student, true);
+    return response()->json(['success' => true]);
+  }
+
+  /**
    * Refresh absences data from WebUntis
    *
    * @param Date $date

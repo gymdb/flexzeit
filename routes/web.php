@@ -99,6 +99,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::post('/register/lesson/{lesson}/{student}', 'RegistrationController@registerLesson');
     Route::post('/register/course/{course}/{student}', 'RegistrationController@registerCourse');
     Route::post('/unregister/lesson/{registration}', 'RegistrationController@unregisterLesson');
+    Route::post('/unregister/course/{course}/{student}', 'RegistrationController@unregisterCourse');
 
     Route::post('/absences/refresh/{date}', 'RegistrationController@refreshAbsences');
 

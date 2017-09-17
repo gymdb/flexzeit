@@ -31,6 +31,9 @@
         'type': Boolean,
         'default': false
       },
+      courseId: {
+        'type': Number
+      },
       button: {
         'type': Boolean,
         'default': true
@@ -47,7 +50,7 @@
       save(url) {
         let self = this;
         this.saving = true;
-        this.$http.post(url + this.id).then(function (response) {
+        this.$http.post(url + (this.courseId ? this.courseId + '/' : '') + this.id).then(function (response) {
           if (response.data.success) {
             self.$emit('success');
           } else {
