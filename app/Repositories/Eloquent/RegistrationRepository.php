@@ -178,7 +178,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function deleteDuplicate(Lesson $lesson) {
-    $delete = $this->queryNoneDuplicateRegistrations($lesson, true)->pluck('id');
+    $delete = $this->queryNoneDuplicateRegistrations($lesson, true)->pluck('registrations.id');
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     Registration::whereIn('id', $delete)->delete();
   }
