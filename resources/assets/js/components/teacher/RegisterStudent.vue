@@ -130,7 +130,7 @@
           this.warningsLoading = true;
           this.warningsLoaded = false;
           this.warnings = null;
-          this.$http.get('/teacher/api/registrations/warnings/' + lesson.id, {
+          this.$http.get('/teacher/api/registrations/warnings/lesson/' + lesson.id, {
             params: {
               student: this.student.id
             }
