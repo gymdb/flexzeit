@@ -247,7 +247,6 @@ ALTER TABLE `teachers`
 ALTER TABLE `timetable`
   ADD PRIMARY KEY (`form_id`,`day`,`number`);
 
-
 ALTER TABLE `bugreports`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `courses`
@@ -272,5 +271,50 @@ ALTER TABLE `subjects`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `teachers`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-  
+
+ALTER TABLE `absences`
+  ADD CONSTRAINT `absences_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`);
+
+ALTER TABLE `bugreports`
+  ADD CONSTRAINT `bugreports_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `bugreports_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`);
+
+ALTER TABLE `courses`
+  ADD CONSTRAINT `courses_subject_id_foreign` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`);
+
+ALTER TABLE `course_group`
+  ADD CONSTRAINT `course_group_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`),
+  ADD CONSTRAINT `course_group_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
+
+ALTER TABLE `forms`
+  ADD CONSTRAINT `forms_kv_id_foreign` FOREIGN KEY (`kv_id`) REFERENCES `teachers` (`id`),
+  ADD CONSTRAINT `forms_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`);
+
+ALTER TABLE `group_student`
+  ADD CONSTRAINT `group_student_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `group_student_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`);
+
+ALTER TABLE `group_teacher`
+  ADD CONSTRAINT `group_teacher_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`),
+  ADD CONSTRAINT `group_teacher_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`);
+
+ALTER TABLE `lessons`
+  ADD CONSTRAINT `lessons_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
+  ADD CONSTRAINT `lessons_room_id_foreign` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`),
+  ADD CONSTRAINT `lessons_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`);
+
+ALTER TABLE `offdays`
+  ADD CONSTRAINT `offdays_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`);
+
+ALTER TABLE `registrations`
+  ADD CONSTRAINT `registrations_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `registrations_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`);
+
+ALTER TABLE `subject_teacher`
+  ADD CONSTRAINT `subject_teacher_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`),
+  ADD CONSTRAINT `subject_teacher_subject_id_foreign` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`);
+
+ALTER TABLE `timetable`
+  ADD CONSTRAINT `timetable_form_id_foreign` FOREIGN KEY (`form_id`) REFERENCES `forms` (`group_id`);
+
 COMMIT;
