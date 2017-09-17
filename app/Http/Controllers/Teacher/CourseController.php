@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Exceptions\CourseException;
 use App\Helpers\Date;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Course\CreateCourseRequest;
 use App\Http\Requests\Course\CreateNormalCourseRequest;
 use App\Http\Requests\Course\CreateObligatoryCourseRequest;
 use App\Http\Requests\Course\EditNormalCourseRequest;
@@ -160,15 +161,17 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
+    $teachers = $this->getTeacher()->admin ? $this->miscService->getTeachers() : null;
     $rooms = $this->miscService->getRooms();
 
     $oldFirstDate = $this->parseOldDate('firstDate');
     $oldLastDate = $this->parseOldDate('lastDate');
     $oldNumber = $this->parseOldNumber('lessonNumber');
     $oldRoom = $this->parseOldNumber('room');
+    $oldTeacher = $this->parseOldNumber('teacher');
 
     return view('teacher.courses.create', array_merge($data, compact('minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek',
-        'offdays', 'rooms', 'type', 'obligatory', 'oldFirstDate', 'oldLastDate', 'oldNumber', 'oldRoom')));
+        'offdays', 'rooms', 'type', 'obligatory', 'teachers', 'oldFirstDate', 'oldLastDate', 'oldNumber', 'oldRoom', 'oldTeacher')));
   }
 
   private function parseOldDate($key) {
@@ -202,7 +205,7 @@ class CourseController extends Controller {
   public function store(CreateNormalCourseRequest $request) {
     $this->authorize('create', Course::class);
 
-    $course = $this->courseService->createCourse($request, $this->getTeacher());
+    $course = $this->courseService->createCourse($request, $this->getTeacherForCreate($request));
     return redirect(route('teacher.courses.show', [$course->id]));
   }
 
@@ -215,8 +218,17 @@ class CourseController extends Controller {
   public function storeObligatory(CreateObligatoryCourseRequest $request) {
     $this->authorize('create', Course::class);
 
-    $course = $this->courseService->createCourse($request, $this->getTeacher());
+    $course = $this->courseService->createCourse($request, $this->getTeacherForCreate($request));
     return redirect(route('teacher.courses.show', [$course->id]));
+  }
+
+  private function getTeacherForCreate(CreateCourseRequest $request) {
+    $user = $this->getTeacher();
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    if ($user->admin && ($id = $request->getTeacher()) && ($teacher = Teacher::find($id))) {
+      return $teacher;
+    }
+    return $user;
   }
 
   /**
@@ -371,8 +383,13 @@ class CourseController extends Controller {
    * @param array|null $groups
    * @return JsonResponse
    */
-  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null) {
-    $data = $this->courseService->getDataForCreate($this->getTeacher(), $firstDate, $lastDate, $number, $groups);
+  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null, Teacher $teacher = null) {
+    $user = $this->getTeacher();
+    if (!$user->admin || !$teacher) {
+      $teacher = $user;
+    }
+
+    $data = $this->courseService->getDataForCreate($teacher, $firstDate, $lastDate, $number, $groups);
     return response()->json($data);
   }
 

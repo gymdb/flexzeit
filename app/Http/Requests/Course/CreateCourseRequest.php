@@ -19,7 +19,8 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
     return array_merge(parent::rules(), [
         'firstDate'    => 'required|bail|date|create_allowed|school_day',
         'lastDate'     => 'nullable|bail|date|after_or_equal:firstDate|create_allowed',
-        'lessonNumber' => 'required|bail|integer|min:1|lesson_number:firstDate'
+        'lessonNumber' => 'required|bail|integer|min:1|lesson_number:firstDate',
+        'teacher'      => 'nullable|integer|exists:teachers,id'
     ]);
   }
 
@@ -36,6 +37,14 @@ abstract class CreateCourseRequest extends CourseRequest implements CreateCourse
    */
   public function getLessonNumber() {
     return (int)$this->input('lessonNumber');
+  }
+
+  /**
+   * @return int|null
+   */
+  public function getTeacher() {
+    $id = $this->input('teacher');
+    return $id ? (int)$id : null;
   }
 
   /**

@@ -19,6 +19,7 @@
         yearTo: this.oldYearFrom,
         subject: this.oldSubject,
         groups: this.oldGroups,
+        teacher: this.oldTeacher,
         withCourse: [],
         forNewCourse: [],
         roomOccupation: [],
@@ -81,6 +82,10 @@
         'default': function () {
           return [];
         }
+      },
+      oldTeacher: {
+        'type': Number,
+        'default': null
       }
     },
     watch: {
@@ -128,7 +133,8 @@
             firstDate: this.firstDate.format('YYYY-MM-DD'),
             lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
             number: this.number,
-            groups: this.groups.length ? this.groups : null
+            groups: this.groups.length ? this.groups : null,
+            teacher: this.teacher || null
           };
         }
       },

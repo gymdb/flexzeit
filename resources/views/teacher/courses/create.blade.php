@@ -10,6 +10,7 @@
                      :old-number='@json($oldNumber)'
                      old-name="{{old('name')}}"
                      :old-room='@json($oldRoom)'
+                     :old-teacher='@json($oldTeacher)'
                      @if($obligatory)
                      obligatory
                      :old-subject='@json($oldSubject)'
@@ -37,6 +38,19 @@
                 </div>
               @endif
             </div>
+
+            @if($teachers)
+              <div class="form-group col-sm-3 col-xs-12">
+                <label for="teacher">@lang('messages.teacher')</label>
+                <select id="teacher" name="teacher" v-model="teacher" class="form-control">
+                  <option :value="null">@lang('messages.teacher')</option>
+                  @foreach($teachers as $teacher)
+                    <option :value="{{$teacher['id']}}">{{$teacher['name']}}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="clearfix"></div>
+            @endif
 
             <daterange min-date="{{$minDate->toDateString()}}"
                        max-date="{{$maxDate->toDateString()}}"
