@@ -381,6 +381,7 @@ class CourseController extends Controller {
    * @param Date|null $lastDate
    * @param int $number
    * @param array|null $groups
+   * @param Teacher|null $teacher
    * @return JsonResponse
    */
   public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null, Teacher $teacher = null) {
@@ -415,8 +416,8 @@ class CourseController extends Controller {
    * @return JsonResponse
    */
   public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
-    $start = $start ?: $this->configService->getDefaultListStartDate();
-    $end = $end ?: $this->configService->getDefaultListEndDate();
+    $start = $start ?: $this->configService->getDefaultListStartDate($end);
+    $end = $end ?: $this->configService->getDefaultListEndDate($start);
 
     $lessons = $this->courseService->getMappedForTeacher($teacher, $start, $end);
     return response()->json($lessons);
@@ -435,8 +436,8 @@ class CourseController extends Controller {
   public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
     $this->authorize('listObligatory', Course::class);
 
-    $start = $start ?: $this->configService->getDefaultListStartDate();
-    $end = $end ?: $this->configService->getDefaultListEndDate();
+    $start = $start ?: $this->configService->getDefaultListStartDate($end);
+    $end = $end ?: $this->configService->getDefaultListEndDate($start);
 
     $lessons = $this->courseService->getMappedObligatory($group, $teacher, $subject, $start, $end);
     return response()->json($lessons);

@@ -229,8 +229,8 @@ class RegistrationController extends Controller {
   public function getForStudent(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
     $this->authorize('showRegistrations', $student);
 
-    $start = $start ?: $this->configService->getDefaultListStartDate();
-    $end = $end ?: $this->configService->getDefaultListEndDate();
+    $start = $start ?: $this->configService->getDefaultListStartDate($end);
+    $end = $end ?: $this->configService->getDefaultListEndDate($start);
 
     $registrations = $this->registrationService->getMappedForList($student, $start, $end, $teacher, $subject);
     return response()->json($registrations);

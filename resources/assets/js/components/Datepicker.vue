@@ -162,7 +162,7 @@
       const options = {
         'allowInputToggle': true,
         'ignoreReadonly': true,
-        'format': 'L',
+        'format': this.$t('messages.dateformat'),
         'useCurrent': false,
         'showClear': !this.required || true,
         'showTodayButton': this.computedShowToday,

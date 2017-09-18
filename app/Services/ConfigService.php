@@ -125,16 +125,18 @@ interface ConfigService {
   /**
    * Get the default start date in report lists
    *
+   * @param Date|null $max
    * @return Date
    */
-  public function getDefaultListStartDate();
+  public function getDefaultListStartDate(Date $max = null);
 
   /**
    * Get the default end date in report lists
    *
+   * @param Date|null $min
    * @return Date
    */
-  public function getDefaultListEndDate();
+  public function getDefaultListEndDate(Date $min = null);
 
   /**
    * Store the start and end time of a lesson in the lesson object

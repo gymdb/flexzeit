@@ -157,8 +157,8 @@ class LessonController extends Controller {
     }
     $this->authorize('viewLessons', $teacher ?: Teacher::class);
 
-    $start = $start ?: $this->configService->getDefaultListStartDate();
-    $end = $end ?: $this->configService->getDefaultListEndDate();
+    $start = $start ?: $this->configService->getDefaultListStartDate($end);
+    $end = $end ?: $this->configService->getDefaultListEndDate($start);
 
     $lessons = $this->lessonService->getMappedForTeacher($teacher, $start, $end, null, $number, true);
     return response()->json($lessons);

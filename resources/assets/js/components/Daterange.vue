@@ -4,7 +4,7 @@
     <div class="date-range clearfix">
       <div class="form-group" :class="{required: required}">
         <label for="firstDate" :class="{'sr-only': hideLabels}">{{labelFirst}}</label>
-        <datepicker v-model="firstDate" name="firstDate" :placeholder="defaultStartDate || labelFirst"
+        <datepicker v-model="firstDate" name="firstDate" :placeholder="placeholderFirst"
                     :required="required"
                     :show-today="showToday"
                     :disabled="firstDateDisabled"
@@ -21,7 +21,7 @@
 
       <div class="form-group">
         <label for="lastDate" :class="{'sr-only': hideLabels}">{{labelLast}}</label>
-        <datepicker v-model="lastDate" name="lastDate" :placeholder="defaultEndDate || labelLast"
+        <datepicker v-model="lastDate" name="lastDate" :placeholder="placeholderLast"
                     :show-today="showToday"
                     :disabled="lastDateDisabled"
                     :disabled-days-of-week="lastDateDisabled ? null: lastDateDisabledDaysOfWeek"
@@ -142,6 +142,20 @@
           return types[this.type].course ? this.firstDate.clone().add(1, 'w') : this.firstDate;
         }
         return this.minDateMoment;
+      },
+      placeholderFirst() {
+        if (!this.defaultStartDate) {
+          return this.labelFirst;
+        }
+        let defaultMoment = moment(this.defaultStartDate);
+        return (this.maxFirstDate && this.maxFirstDate.isBefore(defaultMoment)) ? this.$d(this.maxFirstDate, 'short') : this.$d(defaultMoment, 'short');
+      },
+      placeholderLast() {
+        if (!this.defaultEndDate) {
+          return this.labelLast;
+        }
+        let defaultMoment = moment(this.defaultEndDate);
+        return (this.minLastDate && this.minLastDate.isAfter(defaultMoment)) ? this.$d(this.minLastDate, 'short') : this.$d(defaultMoment, 'short');
       },
       lastDateDisabledDaysOfWeek() {
         if (types[this.type].course && this.firstDate) {

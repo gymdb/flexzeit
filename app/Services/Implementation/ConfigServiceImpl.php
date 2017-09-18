@@ -115,15 +115,23 @@ class ConfigServiceImpl implements ConfigService {
     return Date::today();
   }
 
-  public function getDefaultListStartDate() {
+  public function getDefaultListStartDate(Date $max = null) {
+    if ($max) {
+      return $this->getYearStart(min($max, Date::today()->addWeek(-1)));
+    }
+
     return $this->getCache()->remember($this->prefix . '.list.start', $this->cacheDuration, function() {
-      return max(Date::today()->addWeek(-1), $this->getYearStart());
+      return $this->getYearStart(Date::today()->addWeek(-1));
     });
   }
 
-  public function getDefaultListEndDate() {
+  public function getDefaultListEndDate(Date $min = null) {
+    if ($min) {
+      return $this->getYearStart(max($min, Date::today()->addWeek(1)));
+    }
+
     return $this->getCache()->remember($this->prefix . '.list.end', $this->cacheDuration, function() {
-      return min(Date::today()->addWeek(1), $this->getYearEnd());
+      return $this->getYearEnd(Date::today()->addWeek(1));
     });
   }
 

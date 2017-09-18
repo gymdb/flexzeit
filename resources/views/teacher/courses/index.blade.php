@@ -7,8 +7,8 @@
       <filtered-list
           url="{{route('teacher.api.courses')}}"
           :teachers='@json($teachers)'
-          default-start-date='{{$defaultStartDate}}'
-          default-end-date='{{$defaultEndDate}}'
+          default-start-date='{{$defaultStartDate->toDateString()}}'
+          default-end-date='{{$defaultEndDate->toDateString()}}'
           min-date='{{$minDate->toDateString()}}'
           max-date='{{$maxDate->toDateString()}}'
           :disabled-days-of-week='@json($disabledDaysOfWeek)'
