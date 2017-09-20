@@ -63,6 +63,7 @@ class Initial extends Migration {
       $table->string('username', 32)->unique();
       $table->string('password');
       $table->boolean('admin')->default(false);
+      $table->boolean('hidden')->default(false);
       $table->string('info', 32)->nullable();
       $table->string('image')->nullable();
 

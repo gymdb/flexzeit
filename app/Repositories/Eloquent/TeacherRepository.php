@@ -7,7 +7,8 @@ use App\Models\Teacher;
 class TeacherRepository implements \App\Repositories\TeacherRepository {
 
   public function query() {
-    return Teacher::query();
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    return Teacher::where('hidden', false);
   }
 
 }
