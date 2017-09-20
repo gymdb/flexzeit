@@ -6,6 +6,7 @@ use App\Helpers\Date;
 use App\Services\StudentService;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AbsencesCommand extends Command {
 
@@ -37,10 +38,12 @@ class AbsencesCommand extends Command {
   public function handle() {
     try {
       $dateString = $this->argument('date');
-      $date = $dateString ? Date::createFromFormat('Y-m-d', $dateString ):  Date::today();
+      $date = $dateString ? Date::createFromFormat('Y-m-d', $dateString) : Date::today();
       $this->studentService->loadAbsences($date);
+      Log::notice('untis:absences ' . $date->toDateString() . ' executed successfully.');
       $this->line('Loaded absences for ' . $date->toDateString());
     } catch (Exception $e) {
+      Log::error('Error loading absences.', ['exception' => $e]);
       $this->error('Error loading absences: ' . $e->getMessage());
     }
   }

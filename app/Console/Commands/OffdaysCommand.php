@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Services\OffdayService;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class OffdaysCommand extends Command {
 
@@ -25,9 +26,9 @@ class OffdaysCommand extends Command {
   /** @var OffdayService */
   private $offdayService;
 
-  public function __construct(OffdayService $offdayService) {
+  public function __construct(OffdayService $lessonService) {
     parent::__construct();
-    $this->offdayService = $offdayService;
+    $this->offdayService = $lessonService;
   }
 
   /**
@@ -37,8 +38,10 @@ class OffdaysCommand extends Command {
     try {
       $this->offdayService->loadOffdays();
       $this->offdayService->loadGroupOffdays();
+      Log::notice('untis:offdays executed successfully.');
       $this->line('Loaded holidays and group offdays from WebUntis.');
     } catch (Exception $e) {
+      Log::error('Error loading holidays.', ['exception' => $e]);
       $this->error('Error loading holidays: ' . $e->getMessage());
     }
   }
