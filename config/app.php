@@ -124,6 +124,8 @@ return [
 
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
 
+    'api_key' => env('APP_API_KEY'),
+
   /*
   |--------------------------------------------------------------------------
   | Autoloaded Service Providers
