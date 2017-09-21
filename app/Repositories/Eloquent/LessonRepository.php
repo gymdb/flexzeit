@@ -49,12 +49,15 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $student->lessons());
   }
 
+  public function queryForSubstitutions(Collection $substitutions) {
+    return $this->restrictToLessons(Lesson::query(), $substitutions, true);
+  }
+
   public function queryForOccupation(Collection $lessons, Teacher $teacher) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Lesson::where('cancelled', false)
         ->where('teacher_id', '!=', $teacher->id);
-    $this->restrictToLessons($query, $lessons);
-    return $query;
+    return $this->restrictToLessons($query, $lessons);
   }
 
   public function queryAvailable(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
@@ -169,9 +172,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     if ($exclude) {
       $query->where('lessons.course_id', '!=', $exclude->id);
     }
-    $this->restrictToLessons($query, $lessons);
-
-    return $query;
+    return $this->restrictToLessons($query, $lessons);
   }
 
   public function assignCourse(Collection $lessons, Course $course) {

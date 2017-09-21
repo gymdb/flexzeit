@@ -77,6 +77,7 @@ CREATE TABLE `lessons` (
   `cancelled` tinyint(1) NOT NULL DEFAULT '0',
   `room_id` int(10) UNSIGNED NOT NULL,
   `teacher_id` int(10) UNSIGNED NOT NULL,
+  `substitute_id` int(10) UNSIGNED DEFAULT NULL,
   `course_id` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -87,7 +88,7 @@ CREATE TABLE `migrations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
-(1, '2017_06_01_000000_initial', 1);
+  (1, '2017_06_01_000000_initial', 1);
 
 CREATE TABLE `offdays` (
   `id` int(10) UNSIGNED NOT NULL,
@@ -139,6 +140,7 @@ CREATE TABLE `teachers` (
   `id` int(10) UNSIGNED NOT NULL,
   `firstname` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `lastname` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shortname` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `username` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `admin` tinyint(1) NOT NULL DEFAULT '0',
@@ -155,8 +157,8 @@ CREATE TABLE `timetable` (
 
 
 ALTER TABLE `absences`
-  ADD PRIMARY KEY (`student_id`,`date`,`number`),
-  ADD KEY `absences_date_number_index` (`date`,`number`),
+  ADD PRIMARY KEY (`student_id`, `date`, `number`),
+  ADD KEY `absences_date_number_index` (`date`, `number`),
   ADD KEY `absences_number_index` (`number`);
 
 ALTER TABLE `bugreports`
@@ -173,7 +175,7 @@ ALTER TABLE `courses`
   ADD KEY `courses_subject_id_index` (`subject_id`);
 
 ALTER TABLE `course_group`
-  ADD PRIMARY KEY (`course_id`,`group_id`),
+  ADD PRIMARY KEY (`course_id`, `group_id`),
   ADD KEY `course_group_group_id_index` (`group_id`);
 
 ALTER TABLE `forms`
@@ -185,41 +187,41 @@ ALTER TABLE `groups`
   ADD UNIQUE KEY `groups_name_unique` (`name`);
 
 ALTER TABLE `group_student`
-  ADD PRIMARY KEY (`group_id`,`student_id`),
+  ADD PRIMARY KEY (`group_id`, `student_id`),
   ADD KEY `group_student_student_id_index` (`student_id`);
 
 ALTER TABLE `group_teacher`
-  ADD PRIMARY KEY (`group_id`,`teacher_id`),
+  ADD PRIMARY KEY (`group_id`, `teacher_id`),
   ADD KEY `group_teacher_teacher_id_index` (`teacher_id`);
 
 ALTER TABLE `jobs`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `jobs_queue_reserved_at_index` (`queue`,`reserved_at`);
+  ADD KEY `jobs_queue_reserved_at_index` (`queue`, `reserved_at`);
 
 ALTER TABLE `lessons`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `lessons_teacher_id_date_number_unique` (`teacher_id`,`date`,`number`),
+  ADD UNIQUE KEY `lessons_teacher_id_date_number_unique` (`teacher_id`, `date`, `number`),
   ADD KEY `lessons_room_id_foreign` (`room_id`),
-  ADD KEY `lessons_teacher_id_date_number_cancelled_course_id_index` (`teacher_id`,`date`,`number`,`cancelled`,`course_id`),
-  ADD KEY `lessons_date_number_cancelled_index` (`date`,`number`,`cancelled`),
-  ADD KEY `lessons_date_number_room_id_index` (`date`,`number`,`room_id`),
-  ADD KEY `lessons_course_id_date_number_index` (`course_id`,`date`,`number`),
-  ADD KEY `lessons_cancelled_course_id_index` (`cancelled`,`course_id`),
-  ADD KEY `lessons_course_id_teacher_id_index` (`course_id`,`teacher_id`);
+  ADD KEY `lessons_teacher_id_date_number_cancelled_course_id_index` (`teacher_id`, `date`, `number`, `cancelled`, `course_id`),
+  ADD KEY `lessons_date_number_cancelled_index` (`date`, `number`, `cancelled`),
+  ADD KEY `lessons_date_number_room_id_index` (`date`, `number`, `room_id`),
+  ADD KEY `lessons_course_id_date_number_index` (`course_id`, `date`, `number`),
+  ADD KEY `lessons_cancelled_course_id_index` (`cancelled`, `course_id`),
+  ADD KEY `lessons_course_id_teacher_id_index` (`course_id`, `teacher_id`);
 
 ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `offdays`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `offdays_group_id_date_number_unique` (`group_id`,`date`,`number`),
-  ADD KEY `offdays_date_number_index` (`date`,`number`);
+  ADD UNIQUE KEY `offdays_group_id_date_number_unique` (`group_id`, `date`, `number`),
+  ADD KEY `offdays_date_number_index` (`date`, `number`);
 
 ALTER TABLE `registrations`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `registrations_lesson_id_student_id_unique` (`lesson_id`,`student_id`),
-  ADD KEY `registrations_student_id_attendance_index` (`student_id`,`attendance`),
-  ADD KEY `registrations_lesson_id_attendance_index` (`lesson_id`,`attendance`);
+  ADD UNIQUE KEY `registrations_lesson_id_student_id_unique` (`lesson_id`, `student_id`),
+  ADD KEY `registrations_student_id_attendance_index` (`student_id`, `attendance`),
+  ADD KEY `registrations_lesson_id_attendance_index` (`lesson_id`, `attendance`);
 
 ALTER TABLE `rooms`
   ADD PRIMARY KEY (`id`),
@@ -230,23 +232,23 @@ ALTER TABLE `students`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `students_username_unique` (`username`),
   ADD UNIQUE KEY `students_untis_id_unique` (`untis_id`),
-  ADD KEY `students_lastname_firstname_index` (`lastname`,`firstname`);
+  ADD KEY `students_lastname_firstname_index` (`lastname`, `firstname`);
 
 ALTER TABLE `subjects`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `subjects_name_unique` (`name`);
 
 ALTER TABLE `subject_teacher`
-  ADD PRIMARY KEY (`subject_id`,`teacher_id`),
+  ADD PRIMARY KEY (`subject_id`, `teacher_id`),
   ADD KEY `subject_teacher_teacher_id_foreign` (`teacher_id`);
 
 ALTER TABLE `teachers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `teachers_username_unique` (`username`),
-  ADD KEY `teachers_lastname_firstname_index` (`lastname`,`firstname`);
+  ADD KEY `teachers_lastname_firstname_index` (`lastname`, `firstname`);
 
 ALTER TABLE `timetable`
-  ADD PRIMARY KEY (`form_id`,`day`,`number`);
+  ADD PRIMARY KEY (`form_id`, `day`, `number`);
 
 ALTER TABLE `bugreports`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
@@ -302,7 +304,8 @@ ALTER TABLE `group_teacher`
 ALTER TABLE `lessons`
   ADD CONSTRAINT `lessons_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`),
   ADD CONSTRAINT `lessons_room_id_foreign` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`id`),
-  ADD CONSTRAINT `lessons_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`);
+  ADD CONSTRAINT `lessons_teacher_id_foreign` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`),
+  ADD CONSTRAINT `lessons_substitute_id_foreign` FOREIGN KEY (`substitute_id`) REFERENCES `teachers` (`id`);
 
 ALTER TABLE `offdays`
   ADD CONSTRAINT `offdays_group_id_foreign` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`);

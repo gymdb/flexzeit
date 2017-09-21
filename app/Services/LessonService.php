@@ -26,6 +26,11 @@ interface LessonService {
   public function reinstateLesson(Lesson $lesson);
 
   /**
+   * Load substitutions from WebUntis
+   */
+  public function loadSubstitutions();
+
+  /**
    * @param Teacher $teacher
    * @param Date $start Start date
    * @param Date|null $end Optional end date (start day only if empty)

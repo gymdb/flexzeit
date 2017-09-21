@@ -168,14 +168,21 @@ trait RepositoryTrait {
     });
   }
 
-  private function restrictToLessons($query, Collection $lessons) {
-    $query->where(function($or) use ($lessons) {
+  private function restrictToLessons($query, Collection $lessons, $restrictTeacher = false) {
+    return $query->where(function($or) use ($lessons, $restrictTeacher) {
       foreach ($lessons as $lesson) {
-        $or->orWhere(function($sub) use ($lesson) {
+        $or->orWhere(function($sub) use ($lesson, $restrictTeacher) {
           $sub->where([
               'date'   => $lesson['date'],
               'number' => $lesson['number']
           ]);
+          if ($restrictTeacher) {
+            if (empty($lesson['newTeacher'])) {
+              $sub->where('teacher_id', $lesson['teacher']->id);
+            } else {
+              $sub->whereIn('teacher_id', [$lesson['teacher']->id, $lesson['newTeacher']->id]);
+            }
+          }
         });
       }
     });

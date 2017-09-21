@@ -94,6 +94,34 @@ class WebUntisServiceImpl implements WebUntisService {
     });
   }
 
+  public function getSubstitutions(Date $start, Date $end) {
+    $result = $this->authenticatedConnection()->getSubstitutions([
+        'startDate'    => $start->format('Ymd'),
+        'endDate'      => $end->format('Ymd'),
+        'departmentId' => 0
+    ]);
+    $this->logout();
+
+    $result = collect($result)->filter(function($item) {
+      return !is_null(Arr::first($item['su'], function($subject) {
+        return $subject['name'] === 'Flex';
+      }));
+    })->flatMap(function($item) {
+      return collect($item['te'])->map(function($teacher) use ($item) {
+        return [
+            'start'           => $this->getDateTime($item['date'], $item['startTime']),
+            'end'             => $this->getDateTime($item['date'], $item['endTime']),
+            'type'            => $item['type'],
+            'room'            => collect($item['ro'])->pluck('name'),
+            'originalTeacher' => $teacher['orgname'] ?? null,
+            'teacher'         => $teacher['name']
+        ];
+      });
+    });
+
+    return $result;
+  }
+
   /**
    * @param int $date
    * @return Date

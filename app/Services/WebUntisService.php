@@ -37,4 +37,13 @@ interface WebUntisService {
    */
   public function getGroupTimetable($name, Date $start, Date $end);
 
+  /**
+   * Get list of all substitutions
+   *
+   * @param Date $start
+   * @param Date $end
+   * @return array
+   */
+  public function getSubstitutions(Date $start, Date $end);
+
 }

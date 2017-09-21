@@ -93,6 +93,17 @@ class AppServiceProvider extends ServiceProvider {
         return $other->has($key) ? [] : [$list];
       });
     });
+
+    Collection::macro('nestedGet', function(array $keys) {
+      $value = $this;
+      foreach ($keys as $key) {
+        if (!($value instanceof Collection)) {
+          return null;
+        }
+        $value = $value->get($key);
+      }
+      return $value;
+    });
   }
 
   /**

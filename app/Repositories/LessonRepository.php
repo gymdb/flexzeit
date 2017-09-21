@@ -42,6 +42,14 @@ interface LessonRepository {
   public function queryForStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
 
   /**
+   * Query lessons corresponding to the given substitution data
+   *
+   * @param Collection $substitutions
+   * @return Builder
+   */
+  public function queryForSubstitutions(Collection $substitutions);
+
+  /**
    * @param Collection $lessons
    * @param Teacher $teacher Teacher to ignore for occupation
    * @return Builder

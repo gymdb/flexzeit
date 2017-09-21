@@ -60,6 +60,7 @@ class Initial extends Migration {
       $table->increments('id');
       $table->string('firstname', 32);
       $table->string('lastname', 32);
+      $table->string('shortname', 10)->nullable()->unique();
       $table->string('username', 32)->unique();
       $table->string('password');
       $table->boolean('admin')->default(false);
@@ -122,10 +123,12 @@ class Initial extends Migration {
       $table->boolean('cancelled')->default(false);
       $table->unsignedInteger('room_id');
       $table->unsignedInteger('teacher_id');
+      $table->unsignedInteger('substitute_id')->nullable();
       $table->unsignedInteger('course_id')->nullable();
 
       $table->foreign('room_id')->references('id')->on('rooms');
       $table->foreign('teacher_id')->references('id')->on('teachers');
+      $table->foreign('substitute_id')->references('id')->on('teachers');
       $table->foreign('course_id')->references('id')->on('courses');
       $table->unique(['teacher_id', 'date', 'number']);
       $table->index(['teacher_id', 'date', 'number', 'cancelled', 'course_id']);

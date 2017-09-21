@@ -26,6 +26,9 @@ class Kernel extends ConsoleKernel {
           $schedule->command('untis:absences')
               ->days($d)
               ->at($time['start']);
+          $schedule->command('untis:substitutions')
+              ->days($d)
+              ->at($time['start']);
         }
       }
     } catch (QueryException $e) {
@@ -35,6 +38,8 @@ class Kernel extends ConsoleKernel {
 
     $schedule->command('untis:offdays')
         ->twiceDaily(6, 18);
+    $schedule->command('untis:substitutions')
+        ->twiceDaily(7, 17);
   }
 
   /**

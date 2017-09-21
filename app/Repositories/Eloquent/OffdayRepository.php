@@ -24,15 +24,13 @@ class OffdayRepository implements \App\Repositories\OffdayRepository {
   public function queryForLessonsWithStudent(Collection $lessons, Student $student) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Offday::whereIn('group_id', $student->groups()->select('id')->getQuery());
-    $this->restrictToLessons($query, $lessons);
-    return $query;
+    return $this->restrictToLessons($query, $lessons);
   }
 
   public function queryForLessonsWithGroups(Collection $lessons, array $groups) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Offday::whereIn('group_id', $this->relatedGroups($groups));
-    $this->restrictToLessons($query, $lessons);
-    return $query;
+    return $this->restrictToLessons($query, $lessons);
   }
 
   public function queryWithoutGroup() {

@@ -14,6 +14,8 @@ use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use App\Services\WebUntisService;
+use Illuminate\Support\Facades\Log;
 
 class LessonServiceImpl implements LessonService {
 
@@ -22,6 +24,9 @@ class LessonServiceImpl implements LessonService {
 
   /** @var RegistrationService */
   private $registrationService;
+
+  /** @var WebUntisService */
+  private $untisService;
 
   /** @var LessonRepository */
   private $lessonRepository;
@@ -34,12 +39,15 @@ class LessonServiceImpl implements LessonService {
    *
    * @param ConfigService $configService
    * @param RegistrationService $registrationService
+   * @param WebUntisService $untisService
    * @param LessonRepository $lessonRepository
    * @param RegistrationRepository $registrationRepository
    */
-  public function __construct(ConfigService $configService, RegistrationService $registrationService, LessonRepository $lessonRepository, RegistrationRepository $registrationRepository) {
+  public function __construct(ConfigService $configService, RegistrationService $registrationService, WebUntisService $untisService,
+      LessonRepository $lessonRepository, RegistrationRepository $registrationRepository) {
     $this->configService = $configService;
     $this->registrationService = $registrationService;
+    $this->untisService = $untisService;
     $this->lessonRepository = $lessonRepository;
     $this->registrationRepository = $registrationRepository;
   }
@@ -60,7 +68,115 @@ class LessonServiceImpl implements LessonService {
 
     $this->registrationRepository->deleteDuplicate($lesson);
     $lesson->cancelled = false;
+    $lesson->substitute_id = null;
     $lesson->save();
+  }
+
+  public function loadSubstitutions() {
+    // Get start and end date for Untis query
+    $start = $this->configService->getYearStart(Date::today());
+    $end = $this->configService->getYearEnd();
+
+    // Get global lesson times
+    $times = $this->configService->getLessonTimes();
+
+    // Load list of teachers by shortname
+    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
+    $teachers = Teacher::get(['id', 'shortname'])->buildDictionary(['shortname'], false);
+
+    // Load and map substitution data from WebUntis
+    $substitutions = $this->untisService
+        ->getSubstitutions($start, $end)
+        ->flatMap(function($substitution) use ($times, $teachers) {
+          $date = Date::instance($substitution['start']);
+          if (empty($times[$date->dayOfWeek])) {
+            // Ignore lessons if there is no flex on the given day
+            return [];
+          }
+
+          $teacher = $teachers[$substitution['teacher']] ?? null;
+          $originalTeacher = $substitution['originalTeacher'] ? ($teachers[$substitution['originalTeacher']] ?? null) : null;
+          $result = [];
+          foreach ($times[$date->dayOfWeek] as $n => $time) {
+            if ($date->toDateTime($time['start']) >= $substitution['start'] && $date->toDateTime($time['end']) <= $substitution['end']) {
+              if (!$teacher) {
+                Log::warning("Could not find teacher with shortname {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
+                continue;
+              }
+
+              switch ($substitution['type']) {
+                case 'cancel':
+                  $result[] = [
+                      'subst'   => false,
+                      'date'    => $date,
+                      'number'  => $n,
+                      'teacher' => $teacher
+                  ];
+                  break;
+                case 'subst':
+                  if (!$originalTeacher) {
+                    Log::warning("Could not find teacher with shortname {$substitution['originalTeacher']} for lesson {$date->toDateString()}/{$n}.");
+                    break;
+                  }
+                  $result[] = [
+                      'subst'      => true,
+                      'date'       => $date,
+                      'number'     => $n,
+                      'teacher'    => $originalTeacher,
+                      'newTeacher' => $teacher
+                  ];
+                  break;
+                default:
+                  Log::warning("Unknown substitution type '{$substitution['type']}' for teacher {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
+                  break;
+              }
+            }
+          }
+          return $result;
+        });
+
+    // Load the lessons corresponding to the substitution data
+    $lessons = $this->lessonRepository->queryForSubstitutions($substitutions)
+        ->get(['id', 'teacher_id', 'date', 'number', 'cancelled', 'substitute_id', 'room_id'])
+        ->buildDictionary(['teacher_id', 'date', 'number'], false);
+
+    $substitutions->each(function($substitution) use ($lessons) {
+      $lesson = $lessons->nestedGet([$substitution['teacher']->id, $substitution['date']->toDateString(), $substitution['number']]);
+      if (!$lesson) {
+        // The lesson to substitute does not exist
+        Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} does not exist.");
+        return;
+      }
+
+      if ($substitution['subst']) {
+        // Lesson is substituted by another teacher
+        if ($lesson->substitute_id) {
+          // Lesson is already marked as substituted
+          if ($lesson->substitute_id !== $substitution['newTeacher']->id) {
+            // Substitute teacher has changed, log a warning
+            Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be substituted by teacher {$substitution['newTeacher']->shortname}, but is already substituted by #{$lesson->substitute_id}.");
+          }
+          return;
+        }
+
+        $newLesson = $lessons->nestedGet([$substitution['newTeacher']->id, $substitution['date']->toDateString(), $substitution['number']]);
+        if ($newLesson && $newLesson->cancelled) {
+          // The teacher supposed to substitute has a cancelled lesson at the given time, log a warning and only cancel
+          Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be substituted by teacher {$substitution['newTeacher']->shortname}, but that lesson is also marked as cancelled.");
+          $this->cancelLesson($lesson);
+        } else {
+          $this->substituteLesson($lesson, $substitution['newTeacher']);
+        }
+      } else {
+        // Lesson should be cancelled
+        if ($lesson->substitute_id) {
+          Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be cancelled, but is already substituted by #{$lesson->substitute_id}.");
+        } else if (!$lesson->cancelled) {
+          // Only cancel if not already cancelled
+          $this->cancelLesson($lesson);
+        }
+      }
+    });
   }
 
   public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
@@ -222,26 +338,27 @@ class LessonServiceImpl implements LessonService {
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, $lesson->date, null, null, $lesson->number, true)
         ->select('id', 'cancelled');
-    $teacherLesson = $this->lessonRepository
+    $substitutedLesson = $this->lessonRepository
         ->addParticipants($query)
         ->get()
         ->first();
 
-    if (!$teacherLesson) {
+    if (!$substitutedLesson) {
       /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-      $teacherLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
-    } else if ($teacherLesson->cancelled) {
+      $substitutedLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
+    } else if ($substitutedLesson->cancelled) {
       throw new LessonException(LessonException::CANCELLED);
     }
 
-    if (!$lesson->cancelled) {
+    if (!$lesson->cancelled || $lesson->substitute_id !== $teacher->id) {
       $lesson->cancelled = true;
+      $lesson->substitute_id = $teacher->id;
       $lesson->save();
     }
 
     $students = $this->registrationRepository->queryNoneDuplicateRegistrations($lesson)->pluck('student_id');
     if ($students->isNotEmpty()) {
-      $this->registrationService->registerStudentsForLesson($teacherLesson, $students);
+      $this->registrationService->registerStudentsForLesson($substitutedLesson, $students);
     }
   }
 
