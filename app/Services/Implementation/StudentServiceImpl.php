@@ -54,11 +54,11 @@ class StudentServiceImpl implements StudentService {
 
     $this->studentRepository->deleteAbsences($date);
 
-    $students = $this->studentRepository->queryForUntisId($absences->pluck('id'))->get(['id', 'untis_id']);
+    $students = $this->studentRepository->queryForUntisId($absences->pluck('id'))
+        ->get(['id', 'untis_id'])
+        ->buildDictionary(['untis_id'], false);
     $create = $absences->flatMap(function($absence) use ($times, $students) {
-      $student = $students->first(function($item) use ($absence) {
-        return $item->untis_id === $absence['id'];
-      });
+      $student = $students->get($absence['id']);
       if (!$student) {
         Log::warning('Could not find student for Untis ID ' . $absence['id'] . '.');
         return [];

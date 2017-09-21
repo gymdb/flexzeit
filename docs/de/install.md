@@ -9,6 +9,7 @@ Die Systemvoraussetzungen orientieren sich im Wesentlichen an [jenen von Laravel
     * Tokenizer
     * XML
     * Intl
+    * `allow_url_fopen=1`
 * MySQL (getestet: 5.5, 5.6) oder PostgreSQL (getestet: 9.6)
 * Composer (zur Installation, nicht zwingend am Server selbst)
 * Am Entwicklungssystem:

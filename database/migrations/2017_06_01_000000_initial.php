@@ -46,7 +46,7 @@ class Initial extends Migration {
       $table->string('username', 32)->unique();
       $table->string('password');
       $table->string('image')->nullable();
-      $table->unsignedBigInteger('untis_id')->unique();
+      $table->string('untis_id', 14)->unique();
 
       $table->index(['lastname', 'firstname']);
     });

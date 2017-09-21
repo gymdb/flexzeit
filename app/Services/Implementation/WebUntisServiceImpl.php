@@ -50,7 +50,7 @@ class WebUntisServiceImpl implements WebUntisService {
 
     return collect($result)->map(function($item) {
       return [
-          'id'    => intval($item['studentid'], 10),
+          'id'    => $item['studentid'],
           'start' => $this->getDateTime($item['startDate'], $item['startTime']),
           'end'   => $this->getDateTime($item['endDate'], $item['endTime'])
       ];

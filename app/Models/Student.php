@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use App\Helpers\BelongsToManyKey;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Representation of a student
  *
  * @package App\Models
- * @property int $untis_id
+ * @property string $untis_id
  * @property Collection $absences
  * @property Collection $groups
  * @property Collection $forms
