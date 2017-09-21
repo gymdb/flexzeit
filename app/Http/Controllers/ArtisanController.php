@@ -48,7 +48,7 @@ class ArtisanController extends Controller {
 
   private function validateRequest(Request $request) {
     $key = $request->input('key');
-    if (!$key || $key !== config('app.api_key')) {
+    if (!$key || !password_verify($key, config('app.api_key'))) {
       throw new AccessDeniedHttpException('Key is invalid.');
     }
   }
