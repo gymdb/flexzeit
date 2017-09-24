@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <section class="panel panel-default popover-panel">
+  <section class="panel panel-default has-popovers @if($attendanceChangeable) has-dropdowns @endif">
     <h2 class="panel-heading">@lang('lessons.show.heading', ['date' => $lesson->date, 'number' => $lesson->number])</h2>
     <teacher-lesson :id="{{$lesson->id}}" :attendance-checked="{{json_encode($attendanceChecked)}}" inline-template>
       <div class="panel-body">
@@ -25,7 +25,7 @@
         @if($allowCancel)
           @if($lesson->cancelled)
             <confirm confirm-text="@lang('lessons.reinstate.confirm')" inline-template>
-              <form action="{{route('teacher.lessons.reinstate', [$lesson->id])}}" method="post" @submit="destroy($event)">
+              <form action="{{route('teacher.lessons.reinstate', [$lesson->id])}}" method="post" @submit="destroy($event)" class="hidden-print">
                 {{csrf_field()}}
                 <p>
                   <button class="btn btn-default">@lang('lessons.reinstate.submit')</button>
@@ -34,7 +34,7 @@
             </confirm>
           @else
             <confirm confirm-text="@lang('lessons.cancel.confirm')" inline-template>
-              <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)">
+              <form action="{{route('teacher.lessons.cancel', [$lesson->id])}}" method="post" @submit="destroy($event)" class="hidden-print">
                 {{csrf_field()}}
                 <p>
                   <button class="btn btn-default">@lang('lessons.cancel.submit')</button>
@@ -45,7 +45,7 @@
         @endif
 
         @if($showSubstitute)
-          <p>
+          <p class="hidden-print">
             <a href="#" class="btn btn-default" @click.prevent="openSubstitute">@lang('lessons.substitute.button')</a>
           </p>
         @endif
@@ -53,7 +53,7 @@
         <h3>@lang('lessons.registrations.heading')</h3>
         @if($registrations->isEmpty())
           @if($showRegister)
-            <p>
+            <p class="hidden-print">
               <a href="#" class="btn btn-default"
                  @click.prevent="openRegister">@lang($lesson->date->isFuture() ? 'lessons.register.button' : 'lessons.register.buttonPast')</a>
             </p>
@@ -64,7 +64,7 @@
           <error :error="unregisterError">@lang('lessons.unregister.error')</error>
 
           @if($showAttendance || $showRegister)
-            <p>
+            <p class="hidden-print">
               @if($showRegister)
                 <a href="#" class="btn btn-default"
                    @click.prevent="openRegister">@lang($lesson->date->isFuture() ? 'lessons.register.button' : 'lessons.register.buttonPast')</a>
@@ -82,7 +82,7 @@
           @endif
 
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table table-squeezed table-condensed">
               <thead class="sr-only">
               <tr>
                 <th>@lang('messages.student')</th>
@@ -90,21 +90,22 @@
                   <th>@lang('lessons.attendance.heading')</th>
                 @endif
                 @if($showRegister)
-                  <th>@lang('lessons.unregister.heading')</th>
+                  <th class="hidden-print">@lang('lessons.unregister.heading')</th>
                 @endif
                 @if($showFeedback)
-                  <th></th>
+                  <th class="hidden-print"></th>
                 @endif
                 @if($isAdmin)
-                  <th></th>
+                  <th class="hidden-print"></th>
                 @endif
               </tr>
               </thead>
               @foreach($registrations as $reg)
                 <tr>
-                  <td class="popover-container">
-                    <popover trigger="hover" placement="right">
-                      <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
+                  <td>
+                    <popover trigger="hover" placement="right" ref="popover-{{$reg->student->id}}">
+                      <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"
+                           @load="resizePopover({{$reg->student->id}})"/>
                       <span>{{$reg->student->name()}}{{$reg->student->formsString()}}</span>
                     </popover>
                   </td>
@@ -118,7 +119,7 @@
                     </td>
                   @endif
                   @if($showRegister)
-                    <td>
+                    <td class="hidden-print">
                       <unregister :id="{{$reg->id}}" base-url="teacher"
                                   confirm-text="@lang('lessons.unregister.confirm', ['student' => $reg->student->name()])"
                                   v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">
@@ -126,14 +127,14 @@
                     </td>
                   @endif
                   @if($showFeedback)
-                    <td>
+                    <td class="hidden-print">
                       <a href="#" class="btn btn-xs btn-default" @click.prevent="openFeedback({{$reg->id}})">
                         @lang('lessons.feedback.button')
                       </a>
                     </td>
                   @endif
                   @if($isAdmin)
-                    <td>
+                    <td class="hidden-print">
                       <a href="#" class="btn btn-xs btn-default"
                          @click.prevent='openChangeRegistration(@json(["id" => $reg->student->id, "name" => $reg->student->name()]), "{{$lesson->date->toDateString()}}", {{$lesson->number}})'>
                         @lang('lessons.register.change')

@@ -7,36 +7,37 @@
 // Datepicker
 @import "~eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker";
 
+/**
+ * General layout
+ */
+
 body {
   min-width: 300px;
 }
 
-.navbar-brand {
-  & > img {
-    display: inline;
-    margin: -9px 0 -7px;
-    max-height: 38px;
+.container {
+  & > div > div {
+    position: initial;
   }
+
+  @media (max-width: $screen-sm-max) {
+    max-width: $container-md;
+  }
+}
+
+.navbar-brand > img {
+  display: inline;
+  margin: -9px 0 -7px;
+  max-height: 38px;
 }
 
 .login-image {
   max-width: 100%;
 }
 
-h2.panel-heading {
-  margin: 0;
-  font-size: inherit;
-  font-weight: bold;
-  line-height: inherit;
-}
-
-.panel-body > .table:last-child, .panel-body .table-responsive:last-child .table:last-child {
-  margin-bottom: 0;
-}
-
-.glyphicon.register-link {
-  font-size: 120%;
-}
+/**
+ * Loading spinner
+ */
 
 .spin {
   transform-origin: 50% calc(50% - .5px);
@@ -69,51 +70,40 @@ h2.panel-heading {
   }
 }
 
-@media (max-width: $screen-xs-max) {
-  .table-responsive {
-    .dropdown-menu, .popover {
-      position: static !important;
-    }
-  }
+/**
+ * Section panels
+ */
+
+h2.panel-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: bold;
+  line-height: inherit;
 }
 
-@media (max-width: $screen-sm-max) {
-  .container {
-    width: auto;
-    max-width: 808px;
-  }
+.panel-body > .table:last-child, .panel-body .table-responsive:last-child .table:last-child {
+  margin-bottom: 0;
 }
 
-@media (min-width: $screen-md-min), print {
-  .table-responsive {
-    overflow: visible;
-  }
+/**
+ * Forms
+ */
+
+.form-group.required > label:after {
+  content: " *";
+  font-weight: 900;
+  font-family: sans-serif;
+  color: $state-danger-text;
 }
 
-@media (min-width: $screen-sm-min), print {
-  .dl-horizontal {
-    dt {
-      text-align: left;
-    }
+.btn-group.select-container {
+  display: block;
 
-    &.dl-narrow {
-      dt {
-        width: 110px;
-      }
-
-      dd {
-        margin-left: 120px;
-      }
-    }
+  ul.dropdown-menu {
+    max-height: 250px;
+    width: 100%;
+    overflow-y: auto;
   }
-
-  .modal-body {
-    min-height: 300px;
-  }
-}
-
-dt:after {
-  content: ":";
 }
 
 .bootstrap-datetimepicker-widget table td.today:before {
@@ -139,62 +129,6 @@ dt:after {
   cursor: $cursor-disabled;
 }
 
-.form-group.required > label:after {
-  content: " *";
-  font-weight: 900;
-  font-family: sans-serif;
-  color: $state-danger-text;
-}
-
-.table-squeezed td {
-  white-space: nowrap;
-
-  &.wrap {
-    white-space: normal;
-  }
-
-  &:last-child {
-    width: 99%;
-  }
-}
-
-table .popover-container {
-  position: relative;
-
-  .popover {
-    z-index: 1200;
-  }
-}
-
-.popover-panel {
-  margin-bottom: 180px;
-}
-
-.popover-container {
-  .popover-image {
-    display: none;
-  }
-
-  .popover {
-    .popover-image {
-      display: initial;
-      max-width: 200px;
-      max-height: 200px;
-    }
-  }
-}
-
-.btn-group.select-container {
-  display: block;
-
-  ul.dropdown-menu {
-    max-height: 250px;
-    width: 100%;
-    overflow-y: auto;
-  }
-
-}
-
 @media (max-width: 423px) {
   .date-range .date-range-connector {
     display: none;
@@ -203,7 +137,6 @@ table .popover-container {
 
 @media (min-width: 424px) {
   .date-range {
-    //display: table;
     width: 100%;
     vertical-align: bottom;
 
@@ -253,6 +186,119 @@ table .popover-container {
   }
 }
 
+/**
+ * Tables
+ */
+
+.table {
+  td, th {
+    white-space: nowrap;
+
+    &.wrap, &.course, &.room {
+      white-space: normal;
+    }
+
+    &.course:not(:empty) {
+      min-width: 150px;
+    }
+
+    &.room {
+      min-width: 125px;
+    }
+  }
+}
+
+.table-squeezed td:last-child {
+  width: 99%;
+}
+
+/**
+ * Dropdowns, Popovers
+ */
+
+.has-dropdowns .table-responsive {
+  padding-bottom: 70px;
+}
+
+.has-popovers {
+  margin-bottom: 150px;
+}
+
+.popover-image {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+/**
+ * Modals
+ */
+
+@media (min-width: $screen-sm-min) {
+  .modal-body {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: ($modal-lg + 29px)) {
+  .modal-lg {
+    width: auto;
+    margin: 30px 15px;
+  }
+}
+
+@media (min-width: ($modal-lg + 30px)) {
+  .modal-lg {
+    width: $modal-lg;
+    margin: 30px auto;
+  }
+}
+
+/**
+ * Horizontal definition list
+ */
+
+dt:after {
+  content: ":";
+}
+
+@media (min-width: $dl-horizontal-breakpoint) {
+  .dl-horizontal {
+    dt {
+      text-align: left;
+    }
+
+    &.dl-narrow {
+      dt {
+        width: 110px;
+      }
+
+      dd {
+        margin-left: 120px;
+      }
+    }
+  }
+}
+
+/**
+ * Misc
+ */
+
+.glyphicon.register-link {
+  font-size: 120%;
+}
+
+.hidden-date {
+  border-top: none !important;
+
+  span {
+    display: none;
+  }
+}
+
+/**
+ * Print layout
+ */
+
 @media print {
   .container, .print-full-width {
     margin: 0;
@@ -260,7 +306,7 @@ table .popover-container {
     width: 100%;
   }
 
-  section:last-child {
+  section:last-of-type, section.print-last {
     margin-bottom: 0;
 
     .panel-body {
@@ -272,17 +318,15 @@ table .popover-container {
     border: 0;
   }
 
-  .dl-horizontal {
-    dt {
-      float: left;
-      width: ($dl-horizontal-offset - 20);
-      clear: left;
-      @include text-overflow;
-    }
+  .table-responsive {
+    overflow: visible;
+  }
 
-    dd {
-      @include clearfix; // Clear the floated `dt` if an empty `dd` is present
-      margin-left: $dl-horizontal-offset;
-    }
+  .table > tbody > tr > td {
+    border: none;
+  }
+
+  a[href]:after {
+    content: "";
   }
 }

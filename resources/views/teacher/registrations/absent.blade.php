@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <section class="panel panel-default">
+  <section class="panel panel-default has-dropdowns">
     <h2 class="panel-heading">@lang('registrations.absent.heading')</h2>
     <div class="panel-body">
       <teacher-absent inline-template>

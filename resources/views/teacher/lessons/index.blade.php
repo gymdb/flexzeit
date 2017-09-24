@@ -19,7 +19,7 @@
         <div slot="empty" class="alert alert-warning">@lang('lessons.index.none')</div>
         <template scope="props">
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table">
               <thead>
               <tr>
                 <th>@lang('messages.date')</th>
@@ -30,7 +30,7 @@
                 <th>@lang('messages.course')</th>
                 <th>@lang('messages.room')</th>
                 <th>@lang('messages.participants')</th>
-                <th></th>
+                <th class="hidden-print"></th>
               </tr>
               </thead>
               <tr v-for="lesson in props.data" :class="{'text-muted': lesson.cancelled}">
@@ -39,12 +39,12 @@
                 @if($teachers)
                   <td>@{{lesson.teacher}}</td>
                 @endif
-                <td>
+                <td class="course">
                   <a v-if="lesson.course" :href="'{{route('teacher.courses.show', '')}}/' + lesson.course.id">@{{lesson.course.name}}</a>
                 </td>
-                <td>@{{lesson.room}}</td>
+                <td class="room">@{{lesson.room}}</td>
                 <td>@{{lesson.participants}}<span v-if="lesson.maxstudents">/@{{lesson.maxstudents}}</span></td>
-                <td>
+                <td class="hidden-print">
                   <a :href="'{{route('teacher.lessons.show', '')}}/' + lesson.id">@lang('lessons.index.details')</a>
                 </td>
               </tr>

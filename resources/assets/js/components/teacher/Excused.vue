@@ -1,11 +1,12 @@
-<!--suppress JSValidateTypes, JSUnresolvedVariable -->
+<!--suppress JSValidateTypes, JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
   <a href="#" @click.prevent="refresh()" class="btn btn-default btn-xs" :title="$t('registrations.untis.reload')">
-    <span class="glyphicon glyphicon-refresh" :class="{spin: loading}"></span> {{label(excused ? 'excused' : 'present')}}
+    <span class="glyphicon glyphicon-refresh" :class="{spin: loading, 'hidden-print': true}"></span> {{label(excused ? 'excused' : 'present')}}
   </a>
 </template>
 
 <script>
+  // noinspection JSUnusedGlobalSymbols
   export default {
     data() {
       return {

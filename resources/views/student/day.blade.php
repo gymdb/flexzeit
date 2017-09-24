@@ -10,7 +10,7 @@
           @lang('student.day.none')
         @else
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table">
               <thead>
               <tr>
                 <th>@lang('messages.time')</th>
@@ -18,7 +18,7 @@
                 <th>@lang('messages.course')</th>
                 <th>@lang('messages.room')</th>
                 @if($allowRegistration)
-                  <th></th>
+                  <th class="hidden-print"></th>
                 @endif
               </tr>
               </thead>
@@ -33,10 +33,10 @@
                     @endif
                   @else
                     <td>{{$lesson->teacher->name()}}</td>
-                    <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
-                    <td>{{$lesson->room->name}}</td>
+                    <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
+                    <td class="room">{{$lesson->room->name}}</td>
                     @if($allowRegistration)
-                      <td>
+                      <td class="hidden-print">
                         @if($lesson->unregisterPossible)
                           @if($lesson->course)
                             <unregister :id="{{$lesson->course->id}}" course base-url="student" :button="false"
@@ -67,7 +67,7 @@
   </student-registrations>
 
   @if($hasMissing)
-    <section class="panel panel-default popover-panel">
+    <section class="panel panel-default has-popovers">
       <h2 class="panel-heading">@lang('student.available.heading')</h2>
       <div class="panel-body">
         <filtered-list
@@ -79,7 +79,7 @@
           <div slot="empty" class="alert alert-warning">@lang('student.available.none')</div>
           <template scope="props">
             <div class="table-responsive">
-              <table class="table table-squeezed">
+              <table class="table">
                 <thead>
                 <tr>
                   <th>@lang('messages.time')</th>
@@ -87,29 +87,30 @@
                   <th>@lang('messages.course')</th>
                   <th>@lang('messages.room')</th>
                   @if($allowRegistration)
-                    <th></th>
+                    <th class="hidden-print"></th>
                   @endif
                 </tr>
                 </thead>
-                <tr v-for="lesson in props.data">
+                <tr v-for="(lesson, key) in props.data">
                   <td>@{{$t('messages.range', lesson.time)}}</td>
-                  <td class="popover-container">
-                    <popover trigger="hover" placement="right">
+                  <td>
+                    <popover trigger="hover" placement="right" :ref="'popover-' + key">
                       <div slot="content">
                         <p v-if="lesson.teacher.subjects">@{{lesson.teacher.subjects}}</p>
                         <p v-if="lesson.teacher.info">@{{lesson.teacher.info}}</p>
                         <p>
                           <img class="popover-image" src="{{url('/images/avatar.png')}}"
-                               :src="lesson.teacher.image || '{{url('/images/avatar.png')}}'"/>
+                               :src="lesson.teacher.image || '{{url('/images/avatar.png')}}'"
+                               @load="$refs['popover-' + key][0].position()"/>
                         </p>
                       </div>
                       <span>@{{lesson.teacher.name}}</span>
                     </popover>
                   </td>
-                  <td>@{{lesson.course ? lesson.course.name : ''}}</td>
-                  <td>@{{lesson.room}}</td>
+                  <td class="course">@{{lesson.course ? lesson.course.name : ''}}</td>
+                  <td class="room">@{{lesson.room}}</td>
                   @if ($allowRegistration)
-                    <td>
+                    <td class="hidden-print">
                       <a href="#" @click.prevent="$refs.registerModal.open(lesson)" title="@lang('student.register.button')">
                         <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
                         <span class="sr-only">@lang('student.register.button')</span>

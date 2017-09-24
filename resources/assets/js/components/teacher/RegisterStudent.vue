@@ -28,7 +28,7 @@
         <div slot="empty" class="alert alert-warning">{{$t('registrations.student.none')}}</div>
         <template scope="props">
           <div class="table-responsive">
-            <table class="table table-condensed table-squeezed">
+            <table class="table table-condensed">
               <thead>
               <tr>
                 <th v-if="!date">{{$t('messages.date')}}</th>
@@ -44,7 +44,7 @@
                 <td v-if="!date">{{$d(moment(lesson.date), 'short')}}</td>
                 <td v-if="!number">{{$t('messages.range', lesson.time)}}</td>
                 <td>{{lesson.teacher}}</td>
-                <td>{{lesson.course ? lesson.course.name : ''}}</td>
+                <td class="course">{{lesson.course ? lesson.course.name : ''}}</td>
                 <td>{{lesson.participants}}<span v-if="lesson.maxstudents">/{{lesson.maxstudents}}</span></td>
                 <td>
                   <a v-if="!lesson.cancelled" href="#" class="btn btn-xs btn-default" @click.prevent="selectLesson(lesson)">

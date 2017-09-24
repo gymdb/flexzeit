@@ -16,6 +16,9 @@
       },
       openRegister() {
         this.$refs.registerModal.open();
+      },
+      resizePopover(id) {
+        this.$refs['popover-' + id].position();
       }
     }
   }

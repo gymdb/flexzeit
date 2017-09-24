@@ -37,3 +37,8 @@ $input-color-placeholder: lighten($text-color, 30%);
 
 // Panels
 $panel-default-heading-bg: #fff;
+
+// Breakpoints and sizes
+$dl-horizontal-breakpoint: 480px;
+$container-sm: auto;
+$container-md: 975px;

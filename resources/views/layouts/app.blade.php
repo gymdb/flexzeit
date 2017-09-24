@@ -125,7 +125,7 @@
 
   <main class="container">
     <div class="row">
-      <div class="col-md-10 col-md-offset-1 print-full-width" style="display:none" v-show="true">
+      <div class="col-lg-10 col-lg-offset-1 print-full-width" style="display:none" v-show="true">
         @yield('content')
       </div>
       <p v-if="false" class="lead text-center"><span class="glyphicon glyphicon-refresh spin"></span></p>

@@ -19,7 +19,7 @@
         <div slot="empty" class="alert alert-warning">@lang('registrations.list.none')</div>
         <template scope="props">
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table">
               <thead>
               <tr>
                 <th>@lang('messages.date')</th>
@@ -33,17 +33,12 @@
                 <td>@{{$d(moment(reg.date), 'short')}}</td>
                 <td>@{{$t('messages.range', reg.time)}}</td>
                 <td>@{{reg.teacher}}</td>
-                <td><a v-if="reg.course" href="#">@{{reg.course.name}}</a></td>
-                <template v-if="reg.cancelled">
-                  <td>@lang('lessons.dashboard.cancelled')</td>
-                  <td></td>
-                </template>
-                <template v-else>
-                  <td>
-                    <teacher-attendance v-if="!moment().isBefore(reg.date)" :id="reg.id" :attendance="reg.attendance"
-                                :excused="reg.excused" :changeable="false"></teacher-attendance>
-                  </td>
-                </template>
+                <td class="course"><a v-if="reg.course" href="#">@{{reg.course.name}}</a></td>
+                <td v-if="reg.cancelled">@lang('lessons.dashboard.cancelled')</td>
+                <td v-else>
+                  <teacher-attendance v-if="!moment().isBefore(reg.date)" :id="reg.id" :attendance="reg.attendance"
+                                      :excused="reg.excused" :changeable="false"></teacher-attendance>
+                </td>
               </tr>
             </table>
           </div>

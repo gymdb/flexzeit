@@ -99,8 +99,9 @@ Vue.options.components.popover.options.methods.position = function () {
     }
     // noinspection JSUnresolvedVariable
     const trigger = this.$refs.trigger.children[0];
-    this.left = trigger.offsetLeft + trigger.offsetWidth;
-    this.top = trigger.offsetTop + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
+    const pos = $(trigger).offset();
+    this.left = pos.left + trigger.offsetWidth;
+    this.top = pos.top + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
     popover.style.top = this.top + 'px';
     popover.style.left = this.left + 'px';
   });

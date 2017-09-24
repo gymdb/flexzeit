@@ -1,5 +1,6 @@
+<!--suppress JSUnresolvedFunction-->
 <template>
-  <div v-if="code" class="alert alert-danger">
+  <div v-if="code" class="alert alert-danger hidden-print">
     <p><strong>
       <slot></slot>
     </strong></p>

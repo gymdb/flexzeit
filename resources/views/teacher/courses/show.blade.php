@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-  <section class="panel panel-default popover-panel">
+  <section class="panel panel-default has-popovers">
     <h2 class="panel-heading">@lang('courses.show.heading', ['name' => $course->name])</h2>
     <course-show inline-template>
       <div class="panel-body">
@@ -36,7 +36,7 @@
 
         @if($allowDestroy)
           <confirm confirm-text="@lang('courses.destroy.confirm')" inline-template>
-            <form action="{{route('teacher.courses.destroy', [$course->id])}}" method="post" @submit="destroy($event)">
+            <form action="{{route('teacher.courses.destroy', [$course->id])}}" method="post" @submit="destroy($event)" class="hidden-print">
               {{csrf_field()}}
               {{method_field('delete')}}
               <p>
@@ -46,11 +46,12 @@
             </form>
           </confirm>
         @elseif($isOwner)
-          <p><a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a></p>
+          <p class="hidden-print"><a href="{{route('teacher.courses.edit', [$course->id])}}" class="btn btn-default">@lang('courses.edit.link')</a>
+          </p>
         @endif
 
         @if($showRegister)
-          <p>
+          <p class="hidden-print">
             <a href="#" class="btn btn-default" @click.prevent="openRegister">
               @lang($firstLesson->date->isPast() ? 'lessons.register.buttonPast' : 'lessons.register.button')
             </a>
@@ -81,25 +82,26 @@
           @endif
 
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table table-squeezed table-condensed">
               <thead class="sr-only">
               <tr>
                 <th>@lang('messages.student')</th>
                 @if($showRegister)
-                  <th>@lang('courses.unregister.heading')</th>
+                  <th class="hidden-print">@lang('courses.unregister.heading')</th>
                 @endif
               </tr>
               </thead>
               @foreach($registrations as $reg)
                 <tr>
-                  <td class="popover-container">
-                    <popover trigger="hover" placement="right">
-                      <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"/>
+                  <td>
+                    <popover trigger="hover" placement="right" ref="popover-{{$reg->student->id}}">
+                      <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"
+                           @load="resizePopover({{$reg->student->id}})"/>
                       <span>{{$reg->student->name()}}{{$reg->student->formsString()}}</span>
                     </popover>
                   </td>
                   @if($showRegister)
-                    <td>
+                    <td class="hidden-print">
                       <unregister :id="{{$reg->student->id}}" base-url="teacher" course :course-id="{{$course->id}}"
                                   confirm-text="@lang('courses.unregister.confirm', ['student' => $reg->student->name()])"
                                   v-on:success="setUnregisterSuccess" v-on:error="setUnregisterError">

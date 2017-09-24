@@ -17,7 +17,6 @@ module.exports = {
   emptyResult: 'No data found for the given selection.',
   studentsError: 'Error loading students for group.',
   cancel: 'Cancel',
-  daterange: '{start} \u2013 {end}',
   dateformat: 'ddd, MM/DD/YYYY',
   range: 'Flex {number}' //'{start} \u2013 {end}'
 };

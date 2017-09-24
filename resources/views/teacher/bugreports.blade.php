@@ -23,7 +23,7 @@
               <tr v-for="report in props.data">
                 <td>@{{$d(moment(report.date), 'datetime')}}</td>
                 <td>@{{report.author}}</td>
-                <td>@{{report.text}}</td>
+                <td class="wrap">@{{report.text}}</td>
               </tr>
             </table>
           </div>

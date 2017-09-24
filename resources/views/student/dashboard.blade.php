@@ -13,7 +13,7 @@
             @lang('student.today.none')
           @else
             <div class="table-responsive">
-              <table class="table table-squeezed">
+              <table class="table">
                 <thead>
                 <tr>
                   <th>@lang('messages.time')</th>
@@ -29,8 +29,8 @@
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
                     @else
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
-                      <td>{{$lesson->room->name}}</td>
+                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td class="room">{{$lesson->room->name}}</td>
                     @endif
                   </tr>
                 @endforeach
@@ -40,7 +40,7 @@
         </div>
       </section>
 
-      <section class="panel panel-default">
+      <section class="panel panel-default print-last">
         <h2 class="panel-heading">@lang('student.upcoming.heading')</h2>
         <div class="panel-body">
           <error :error="error">@lang('student.unregister.error')</error>
@@ -49,7 +49,7 @@
             @lang('student.upcoming.none')
           @else
             <div class="table-responsive">
-              <table class="table table-squeezed">
+              <table class="table">
                 <thead>
                 <tr>
                   <th>@lang('messages.date')</th>
@@ -63,7 +63,7 @@
                 @php $prevDate = null @endphp
                 @foreach($upcoming as $lesson)
                   <tr>
-                    <td @if($prevDate == $lesson->date) class="invisible" @endif>{{$lesson->date}}</td>
+                    <td @if($prevDate == $lesson->date) class="hidden-date" @endif><span>{{$lesson->date}}</span></td>
                     <td>@lang('messages.format.range', $lesson->time)</td>
                     @if(!$lesson->id)
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
@@ -76,8 +76,8 @@
                       </td>
                     @else
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td>{{$lesson->course ? $lesson->course->name : ''}}</td>
-                      <td>{{$lesson->room->name}}</td>
+                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td class="room">{{$lesson->room->name}}</td>
                       <td>
                         @if($lesson->unregisterPossible)
                           @if($lesson->course)
@@ -114,7 +114,7 @@
             @lang('student.documentation.none')
           @else
             <div class="table-responsive">
-              <table class="table table-squeezed">
+              <table class="table">
                 <thead>
                 <tr>
                   <th>@lang('messages.date')</th>
@@ -127,15 +127,10 @@
                 @php $prevDate = null @endphp
                 @foreach($documentation as $reg)
                   <tr>
-                    <td @if($prevDate == $reg->lesson->date) class="invisible" @endif>{{$reg->lesson->date}}</td>
+                    <td @if($prevDate == $reg->lesson->date) class="hidden-date" @endif><span>{{$reg->lesson->date}}</span></td>
                     <td>@lang('messages.format.range', $reg->lesson->time)</td>
-                    @if($reg->lesson->course)
-                      <td>{{$reg->lesson->teacher->name()}}</td>
-                      <td>{{$reg->lesson->course->name}}</td>
-                    @else
-                      <td>{{$reg->lesson->teacher->name()}}</td>
-                      <td></td>
-                    @endif
+                    <td>{{$reg->lesson->teacher->name()}}</td>
+                    <td class="course">{{$reg->lesson->course ? $reg->lesson->course->name : ''}}</td>
                     <td>
                       <a href="#" class="btn btn-xs {{$reg->documentation ? 'btn-default' : 'btn-danger'}}"
                          @click.prevent='openDocumentation({{$reg->id}}, @json($reg->lesson->teacher->name()), $event.target)'>

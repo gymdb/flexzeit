@@ -273,7 +273,7 @@ class CourseController extends Controller {
     $lastDate = $lastLesson->date;
     $allowDateChange = ($lastDate->copy()->addWeek() >= $minDate);
 
-    $lessons = $this->configService->getLessonTimes()[$firstDate->dayOfWeek];
+    $lessons = $this->configService->getLessonTimes()[$firstDate->dayOfWeek] ?? [];
     $offdays = $this->offdayService->getInRange($minDate, $maxDate, $firstDate->dayOfWeek);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
