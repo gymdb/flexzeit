@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\CacheControlMiddleware;
 use App\Http\Middleware\DateMiddleware;
 use App\Http\Middleware\ParametersMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -66,7 +67,8 @@ class Kernel extends HttpKernel {
           ShareErrorsFromSession::class,
           VerifyCsrfToken::class,
           SubstituteBindings::class,
-          DateMiddleware::class
+          DateMiddleware::class,
+          CacheControlMiddleware::class
       ],
 
       'api' => [
