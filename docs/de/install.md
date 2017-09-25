@@ -28,8 +28,7 @@ Die Systemvoraussetzungen orientieren sich im Wesentlichen an [jenen von Laravel
     * Alternativ: [Archiv herunterladen](https://github.com/gymdb/flexzeit/archive/master.zip)
 * PHP-Dependencies installieren: `composer install --no-dev`
 * Korrekte Einstellungen in der Datei `.env` eintragen (siehe eigener Abschnitt)
-* Datenbankstruktur erstellen mittels Skript `database/sql/create.sql`
-    * Alternativ ist auch eine Installation wie für das Entwicklungssystem möglich, dafür muss bei der Installation der Dependencies die Option `--no-dev` weggelassen werden.
+* Datenbankstruktur erstellen mittels Skript `database/sql/create.sql` oder mit `php artisan migrate` wie im Entwickungssystem
 * Environment-Konfiguration und Routen cachen:
     * `php artisan config:cache`
     * `php artisan route:cache`
@@ -79,7 +78,7 @@ Key                     | Typ                   | Beschreibung
 lessons                 | Object                | Konfiguration der Zeiten der einzelnen Einheiten
 course.create.day       | Relatives Datum       | Letzter Tag, an dem Kurse erstellt werden können
 course.create.week      | Relatives Datum       |
-registration.begin.day  | Relatives Datum       | Erster Tag, an dem man sich für Einheiten registrieren kann
+registration.begin.day  | Relatives Datum       | Letzter Tag, an dem man sich für Einheiten noch nicht registrieren kann
 registration.begin.week | Relatives Datum       |
 registration.end.day    | Relatives Datum       | Letzter Tag, an dem man sich für Einheiten registrieren kann
 registration.end.week   | Relatives Datum       |
@@ -125,16 +124,7 @@ Ein relatives Datum besteht immer aus zwei zusammengehörigen Angaben `week` und
 
 Für das Verfassen der Dokumentation gilt analog *nach dem Termin* bzw. *Folgewoche*.
 
-**Beispiele:**
-* `course.create.week=0`, `course.create.day=3`: Kurse können bis 3 Tage vorher erstellt werden, also
-    * am 18.9. können Kurse für 21.9. und später erstellt werden, bzw.
-    * Kurse für 27.9. können bis spätestens 24.9. erstellt werden.
-* `course.create.week=1`, `course.create.day=3`: Kurse können immer bis Mittwoch der Vorwoche erstellt werden, also
-    * am 13.9.2017 (Mittwoch) können Kurse für 18.9.2017 (Montag) und später erstellt werden,
-    * am 14.9.2017 (Donnerstag) können Kurse für 25.9.2017 (Montag) und später erstellt werden.
-* `registration.begin.day=4`, `registration.begin.week=1`, `registration.end.day=2`, `registration.end.week=0`: Die Anmeldung beginnt am Donnerstag und ist bis zwei Tage vor der Einheit möglich, also
-    * am 14.9.2017 (Donnerstag) kann man sich für Einheiten ab dem 18.9.2017 (Montag) bis (theoretisch, weil Sonntag) 24.9. anmelden,
-    * am 17.9.2017 (Sonntag) kann man sich nur noch für Einheiten ab dem 19.9.2017 anmelden.
+Tabellen mit Beispieldaten dafür gibt es auf einer eigenen [Seite](dates.md).
 
 ## Initiale Daten
 
@@ -235,5 +225,29 @@ Dazu muss minütlich `php artisan schedule:run` aufgerufen werden (das System be
 Alternativ können die Einzelbefehle auch direkt per Cronjob aufgerufen werden:
 * `php artisan untis:absences [YYYY-MM-DD]` für das Laden der Abwesenheiten des aktuellen bzw. spezifierten Tages
 * `php artisan untis:offdays` für das Laden der schulfreien Tage
+* `php artisan untis:substitutions` für das Laden der Supplierungen und abgesagten Einheiten
 
 Weitere Informationen zu den geplanten Aufgaben siehe in der [Laravel-Dokumentation Task Scheduling](https://laravel.com/docs/5.5/scheduling).
+
+### Wartungsaufgaben remote durchführen
+Einige Artisan-Befehle können auch remote durchgeführt werden. Dafür muss ein Schlüssel festgelegt werden und der Hash (wie von [`password_verify`](https://php.net/manual/de/function.password-verify.php) akzekptiert) in `.env` als `APP_API_KEY` gespeichert werden.
+
+Der Aufruf erfolgt als `POST`-Request an `/api/artisan/{command}` wobei im Body der Schlüssel als Parameter `key` angegeben werden muss. Folgende Befehle werden unterstützt:
+* `migrate`: Aus Sicherheitsgründen nur, wenn `APP_ENV` nicht auf `production` gestellt ist.
+* `schedule:run`
+* `untis:absences`
+* `untis:offdays`
+* `untis:substitutions`
+* `clear`: Shortcut zum Löschen von vorkompilierten Daten, bestehend aus folgenden Befehlen:
+    * `clear-compiled`
+    * `cache:clear`
+    * `config:clear`
+    * `route:clear`
+    * `view:clear`
+* `initialize`: Shortcut zum Initialisieren bestimmter vorkompilierter Daten, bestehend aus folgenden Befehlen:
+    * `package:discover`
+    * `config:cache`
+    * `route:cache`
+    * `storage:link`: Link wird nur erstellt, wenn er noch nicht existiert
+
+Es ist zwar nicht zwingend erforderlich, nach einem Aufruf von `clear` auch `initialize` durchzuführen, im Produktivsystem aber empfehlenswert, um die Geschwindigkeitsvorteile durch gecachte Konfiguration und Routen ausnützen zu können.
