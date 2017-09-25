@@ -47,6 +47,7 @@ APP_LOG_LEVEL     | [Log Level](https://laravel.com/docs/5.5/errors#log-severity
 APP_URL           | URL                       | Basis-URL des Systems
 APP_TIMEZONE      | [Zeitzone](https://php.net/manual/de/timezones.php) |
 APP_LOCALE        | `de`&#124;`en`            | Sprache des Systems
+APP_API_KEY       | [Key-Hash](https://php.net/manual/de/function.password-verify.php) | Hash des Keys für Remote-Wartungszugriff
 DB_CONNECTION     | `mysql`&#124;`pgsql`      | Typ des Datenbankservers
 DB_HOST           | IP oder Domain            | Host des Datenbankservers
 DB_PORT           | Port                      | Port des Datenbankservers (Default: MySQL 3306, PostgreSQL 5432)
