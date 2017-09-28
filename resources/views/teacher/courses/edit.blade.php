@@ -101,6 +101,7 @@
                   <ul>
                     <li v-for="lesson in added">
                       <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                      <strong v-if="!lesson.exists">(@lang('courses.edit.additional'))</strong>
                     </li>
                   </ul>
                 </div>

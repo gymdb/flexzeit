@@ -357,8 +357,9 @@ class CourseServiceImpl implements CourseService {
         ->map(function(Lesson $lesson) {
           $this->configService->setTime($lesson);
           return [
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time
+              'exists' => $lesson->exists,
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time
           ];
         })
         ->values();
