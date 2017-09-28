@@ -121,7 +121,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
             ->from('rooms as c')
             ->whereColumn('c.id', 'lessons.room_id');
         $this->excludeForYear($sub, $year);
-      })->orWhereNull('lessons.room_id');
+      })->orWhereNotNull('lessons.course_id');
     });
 
     if ($subject) {
