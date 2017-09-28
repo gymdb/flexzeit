@@ -26,6 +26,7 @@
                 <th>@lang('messages.time')</th>
                 <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.course')</th>
+                <th>@lang('messages.room')</th>
                 <th></th>
               </tr>
               </thead>
@@ -34,6 +35,7 @@
                 <td>@{{$t('messages.range', reg.time)}}</td>
                 <td>@{{reg.teacher}}</td>
                 <td class="course"><a v-if="reg.course" href="#">@{{reg.course.name}}</a></td>
+                <td class="room">@{{reg.room}}</td>
                 <td v-if="reg.cancelled">@lang('lessons.dashboard.cancelled')</td>
                 <td v-else>
                   <teacher-attendance v-if="!moment().isBefore(reg.date)" :id="reg.id" :attendance="reg.attendance"
