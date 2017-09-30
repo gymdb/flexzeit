@@ -219,20 +219,25 @@ class RegistrationController extends Controller {
   /**
    * Get registrations for a student in JSON format
    *
-   * @param Student $student
+   * @param Group $group
+   * @param Student|null $student
    * @param Date|null $start
    * @param Date|null $end
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return JsonResponse
    */
-  public function getForStudent(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
-    $this->authorize('showRegistrations', $student);
+  public function getForStudent(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+    if ($student) {
+      $this->authorize('showRegistrations', $student);
+    } else {
+      $this->authorize('showRegistrations', $group);
+    }
 
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
 
-    $registrations = $this->registrationService->getMappedForList($student, $start, $end, $teacher, $subject);
+    $registrations = $this->registrationService->getMappedForList($group, $student, $start, $end, $teacher, $subject);
     return response()->json($registrations);
   }
 

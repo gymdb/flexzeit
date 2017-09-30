@@ -15,6 +15,7 @@
           max-date='{{$maxDate->toDateString()}}'
           :disabled-days-of-week='@json($disabledDaysOfWeek)'
           :disabled-dates='@json($offdays)'
+          :require-student="false"
           error-text="@lang('registrations.list.error')">
         <div slot="empty" class="alert alert-warning">@lang('registrations.list.none')</div>
         <template scope="props">
@@ -27,6 +28,7 @@
                 <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.course')</th>
                 <th>@lang('messages.room')</th>
+                <th>@lang('messages.student')</th>
                 <th></th>
               </tr>
               </thead>
@@ -36,6 +38,7 @@
                 <td>@{{reg.teacher}}</td>
                 <td class="course"><a v-if="reg.course" href="#">@{{reg.course.name}}</a></td>
                 <td class="room">@{{reg.room}}</td>
+                <td>@{{reg.student}}</td>
                 <td v-if="reg.cancelled">@lang('lessons.dashboard.cancelled')</td>
                 <td v-else>
                   <teacher-attendance v-if="!moment().isBefore(reg.date)" :id="reg.id" :attendance="reg.attendance"

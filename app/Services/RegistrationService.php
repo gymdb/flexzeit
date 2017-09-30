@@ -148,14 +148,15 @@ interface RegistrationService {
   /**
    * Get data for the list overview
    *
-   * @param Student $student
+   * @param Group $group
+   * @param Student|null $student
    * @param Date|null $start
    * @param Date|null $end
    * @param Teacher|null $teacher
    * @param Subject|null $subject
-   * @return Collection<array>
+   * @return Collection <array>
    */
-  public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * @param Group $group

@@ -301,11 +301,11 @@ class RegistrationServiceImpl implements RegistrationService {
     return $lessons;
   }
 
-  public function getMappedForList(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
     return $this->registrationRepository
-        ->queryWithExcused($student, $start, $end, null, true, $teacher, $subject)
-        ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name')
-        ->addSelect(['registrations.id', 'lesson_id', 'attendance'])
+        ->queryWithExcused($student ?: $group, $start, $end, null, true, $teacher, $subject)
+        ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name', 'student:id,lastname,firstname')
+        ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'attendance'])
         ->get()
         ->map(function(Registration $registration) {
           $lesson = $registration->lesson;
@@ -318,6 +318,7 @@ class RegistrationServiceImpl implements RegistrationService {
               'time'       => $lesson->time,
               'room'       => $lesson->room->name,
               'teacher'    => $lesson->teacher->name(),
+              'student'    => $registration->student->name(),
               'cancelled'  => $lesson->cancelled
           ];
           if ($lesson->course) {

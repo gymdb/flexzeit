@@ -61,7 +61,7 @@ interface RegistrationRepository {
   public function querySlots(Student $student, Date $start, Date $end = null);
 
   /**
-   * @param Student $student
+   * @param Student|Group $student
    * @param Date $start
    * @param Date|null $end
    * @param null $number
@@ -70,7 +70,7 @@ interface RegistrationRepository {
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryWithExcused(Student $student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
+  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * @param Student|Group $student

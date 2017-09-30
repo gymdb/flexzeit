@@ -108,7 +108,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryWithExcused(Student $student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
     $query = $this->queryForStudent($student, $start, $end, $number, $showCancelled, $teacher, $subject);
     return $this->addExcused($query);
   }

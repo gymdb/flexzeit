@@ -83,7 +83,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 
     // Registration related API methods
     Route::get('/registrations', 'RegistrationController@getForStudent')
-        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
+        ->middleware('params:group;i|student?;i|subject?;i|teacher?;i|start?;d|end?;d')
         ->name('teacher.api.registrations');
     Route::get('/registrations/warnings/course/{course}', 'RegistrationController@getWarningsForCourse')
         ->middleware('params:student;i');
