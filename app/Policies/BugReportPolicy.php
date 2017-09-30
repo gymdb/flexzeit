@@ -19,4 +19,14 @@ class BugReportPolicy {
     return $user->isTeacher() && $user->admin;
   }
 
+  /**
+   * Determine whether the user can trash/restore bug reports
+   *
+   * @param User $user
+   * @return bool
+   */
+  public function trash(User $user) {
+    return $user->isTeacher() && $user->admin;
+  }
+
 }

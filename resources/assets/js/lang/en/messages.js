@@ -12,6 +12,7 @@ module.exports = {
   participants: 'Participants',
   from: 'From (Date)',
   to: 'To (Date)',
+  showTrashed: 'Show trashed',
   chooseStudent: 'Choose a student first.',
   chooseGroup: 'Choose a group first.',
   emptyResult: 'No data found for the given selection.',

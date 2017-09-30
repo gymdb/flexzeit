@@ -8,6 +8,7 @@ Route::get('/login', 'Auth\LoginController@showLoginForm');
 Route::post('/login', 'Auth\LoginController@login')->name('loginTarget');
 Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 
+/** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
 Route::group(['prefix' => 'api'], function() {
   // Bug reports related API methods
   Route::post('/bugReport', 'Teacher\BugReportController@createBugReport')
@@ -15,6 +16,7 @@ Route::group(['prefix' => 'api'], function() {
 });
 
 // Pages for teachers
+/** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
 Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => ['auth', 'can:teacher']], function() {
   // Lesson related pages
   Route::get('/', 'LessonController@dashboard')->name('teacher.dashboard');
@@ -43,6 +45,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   Route::get('/bugreports', 'BugReportController@showBugReports')->name('teacher.bugreports.list');
 
   // API methods
+  /** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
   Route::group(['prefix' => 'api'], function() {
     // Course related API methods
     Route::get('/courses', 'CourseController@getForTeacher')
@@ -108,17 +111,22 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 
     // Bug report related API methods
     Route::get('/bugreports', 'BugReportController@getBugReports')
-        ->middleware('params:start?;d|end?;d')
+        ->middleware('params:start?;d|end?;d|showTrashed?;b')
         ->name('teacher.api.bugreports');
+
+    Route::post('/bugreports/trash/{report}', 'BugReportController@trash');
+    Route::post('/bugreports/restore/{report}', 'BugReportController@restore');
   });
 });
 
 // Pages for students
+/** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
 Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => ['auth', 'can:student']], function() {
   Route::get('/', 'StudentController@dashboard')->name('student.dashboard');
   Route::get('/day/{date}', 'StudentController@day')->name('student.day');
 
   // API methods
+  /** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
   Route::group(['prefix' => 'api'], function() {
     // Documentation related API methods
     Route::get('/documentation/{registration}', 'ApiController@getDocumentation');

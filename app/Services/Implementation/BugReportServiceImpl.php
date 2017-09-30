@@ -48,12 +48,12 @@ class BugReportServiceImpl implements BugReportService {
     $bugReport->save();
   }
 
-  public function getMappedBugReports(Date $start = null, Date $end = null) {
+  public function getMappedBugReports(Date $start = null, Date $end = null, bool $showTrashed = false) {
     $start = $start ?: $this->configService->getYearStart();
     $end = $end ?: Date::today();
 
     return $this->bugReportRepository
-        ->queryReports($start, $end->addDay())
+        ->queryReports($start, $end->addDay(), $showTrashed)
         ->with('teacher:id,lastname,firstname', 'student:id,lastname,firstname', 'student.forms:forms.group_id', 'student.forms.group:id,name')
         ->get()
         ->map(function(BugReport $report) {
@@ -65,9 +65,11 @@ class BugReportServiceImpl implements BugReportService {
           }
 
           return [
-              'text'   => $report->text,
-              'date'   => $report->date->toIso8601String(),
-              'author' => $author
+              'id'      => $report->id,
+              'text'    => $report->text,
+              'date'    => $report->date->toIso8601String(),
+              'author'  => $author,
+              'trashed' => $report->trashed()
           ];
         });
   }

@@ -21,8 +21,9 @@ interface BugReportService {
    *
    * @param Date|null $start
    * @param Date|null $end
-   * @return Collection<array>
+   * @param bool $showTrashed
+   * @return Collection <array>
    */
-  public function getMappedBugReports(Date $start = null, Date $end = null);
+  public function getMappedBugReports(Date $start = null, Date $end = null, bool $showTrashed = false);
 
 }

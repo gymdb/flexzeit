@@ -11,8 +11,12 @@ class BugReportRepository implements \App\Repositories\BugReportRepository {
 
   protected $noNumber = true;
 
-  public function queryReports(Date $start, Date $end = null) {
-    return $this->inRange(BugReport::query(), $start, $end);
+  public function queryReports(Date $start, Date $end = null, bool $showTrashed = false) {
+    $query = $this->inRange(BugReport::query(), $start, $end);
+    if ($showTrashed) {
+      $query->withTrashed();
+    }
+    return $query;
   }
 
 }

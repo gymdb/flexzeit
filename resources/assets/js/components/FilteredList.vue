@@ -59,6 +59,10 @@
                  v-on:last="setEnd">
       </daterange>
 
+      <div v-if="hasTrashed" class="form-group col-sm-3 col-xs-6">
+        <label for="showTrashed" class="sr-only">{{$t('messages.showTrashed')}}</label>
+        <label class="checkbox-inline"><input type="checkbox" id="showTrashed" v-model="showTrashed"/> {{$t('messages.showTrashed')}}</label>
+      </div>
 
       <div class="col-xs-12">
         <error :error="studentsError">{{$t('messages.studentsError')}}</error>
@@ -139,6 +143,7 @@
         teacher: params.teacher || null,
         subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : (params.subject || null),
         type: params.type || null,
+        showTrashed: params.showTrashed || null,
         initialStart: params.start || null,
         initialEnd: params.end || null,
         start: params.start ? moment(params.start) : null,
@@ -222,6 +227,10 @@
         'type': Boolean,
         'default': true
       },
+      hasTrashed: {
+        'type': Boolean,
+        'default': false
+      },
       errorText: {
         'type': String,
         'required': true
@@ -241,7 +250,7 @@
       query(query) {
         if (this.keepFilter) {
           // noinspection JSCheckFunctionSignatures
-          window.history.replaceState(null, null, window.location.pathname + '?' + query);
+          window.history.replaceState(null, null, window.location.pathname + (query ? '?' + query : ''));
         }
       }
     },
@@ -288,6 +297,10 @@
         if (this.number) {
           filter.number = this.number;
         }
+        if (this.hasTrashed) {
+          filter.showTrashed = this.showTrashed ? 1 : 0;
+        }
+
         return filter;
       },
       query() {
@@ -318,6 +331,9 @@
             params.end = this.end.format('YYYY-MM-DD');
           }
         }
+        if (this.hasTrashed && this.showTrashed) {
+          params.showTrashed = 1;
+        }
 
         return $.param(params, true);
       },
@@ -335,6 +351,9 @@
       }
     },
     methods: {
+      refresh() {
+        this.loadData(this.filter);
+      },
       loadStudents(group) {
         this.student = null;
         this.studentsList = [];

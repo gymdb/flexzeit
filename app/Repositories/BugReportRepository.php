@@ -17,8 +17,9 @@ interface BugReportRepository {
    *
    * @param Date $start
    * @param Date|null $end
+   * @param bool $showTrashed
    * @return Builder
    */
-  public function queryReports(Date $start, Date $end = null);
+  public function queryReports(Date $start, Date $end = null, bool $showTrashed = false);
 
 }

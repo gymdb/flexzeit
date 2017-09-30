@@ -172,6 +172,7 @@ class Initial extends Migration {
       $table->unsignedInteger('student_id')->nullable();
       $table->text('text');
       $table->timestamp('date');
+      $table->softDeletes();
 
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('student_id')->references('id')->on('students');

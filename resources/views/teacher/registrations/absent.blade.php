@@ -5,7 +5,7 @@
     <h2 class="panel-heading">@lang('registrations.absent.heading')</h2>
     <div class="panel-body">
       <teacher-absent inline-template>
-        <filtered-list
+        <filtered-list ref="filter"
             url="{{route('teacher.api.registrations.absent')}}"
             :groups='@json($groups)'
             min-date='{{$minDate->toDateString()}}'

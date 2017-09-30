@@ -17,7 +17,7 @@
         this.refreshError = null;
       },
       setRefreshSuccess() {
-        location.reload();
+        this.$refs.filter.refresh();
       },
       setRefreshError(error) {
         this.refreshError = error;

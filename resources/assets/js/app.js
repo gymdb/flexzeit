@@ -63,12 +63,14 @@ Vue.component('unregister', require('./components/Unregister.vue'));
 // Register components for teacher pages
 Vue.component('teacher-absent', require('./components/teacher/Absent.vue'));
 Vue.component('teacher-attendance', require('./components/teacher/Attendance.vue'));
+Vue.component('teacher-bugreports', require('./components/teacher/BugReports.vue'));
 Vue.component('teacher-excused', require('./components/teacher/Excused.vue'));
 Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue'));
 Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
 Vue.component('teacher-register', require('./components/teacher/Register.vue'));
 Vue.component('teacher-register-student', require('./components/teacher/RegisterStudent.vue'));
 Vue.component('teacher-substitute', require('./components/teacher/Substitute.vue'));
+Vue.component('teacher-trash-report', require('./components/teacher/TrashReport.vue'));
 Vue.component('course-create', require('./components/course/Create.vue'));
 Vue.component('course-edit', require('./components/course/Edit.vue'));
 Vue.component('course-show', require('./components/course/Show.vue'));

@@ -13,6 +13,7 @@ module.exports = {
   participants: 'Anmeldungen',
   from: 'Von (Datum)',
   to: 'Bis (Datum)',
+  showTrashed: 'Gelöschte anzeigen',
   chooseStudent: 'SchülerIn auswählen, um Daten anzuzeigen.',
   chooseGroup: 'Klasse/Gruppe auswählen, um Daten anzuzeigen.',
   emptyResult: 'Für die gewählten Filter wurden keine Daten gefunden.',

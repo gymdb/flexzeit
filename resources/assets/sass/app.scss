@@ -287,6 +287,11 @@ dt:after {
   font-size: 120%;
 }
 
+.icon-flip {
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+}
+
 .hidden-date {
   border-top: none !important;
 

@@ -52,13 +52,38 @@ class BugReportController extends Controller {
    *
    * @param Date|null $start
    * @param Date|null $end
+   * @param bool $showTrashed
    * @return JsonResponse
    */
-  public function getBugReports(Date $start = null, Date $end = null) {
+  public function getBugReports(Date $start = null, Date $end = null, bool $showTrashed = false) {
     $this->authorize('show', BugReport::class);
 
-    $reports = $this->bugReportService->getMappedBugReports($start, $end);
+    $reports = $this->bugReportService->getMappedBugReports($start, $end, $showTrashed);
     return response()->json($reports);
+  }
+
+  /**
+   * Trash a bug report
+   *
+   * @param BugReport $report
+   * @return JsonResponse
+   */
+  public function trash(BugReport $report) {
+    $this->authorize('trash', $report);
+    $success = $report->delete();
+    return response()->json(['success' => $success]);
+  }
+
+  /**
+   * Restore a trashed bug report
+   *
+   * @param BugReport $report
+   * @return JsonResponse
+   */
+  public function restore(BugReport $report) {
+    $this->authorize('trash', $report);
+    $success = $report->restore();
+    return response()->json(['success' => $success]);
   }
 
   /**
