@@ -9,6 +9,7 @@
     methods: {
       refresh() {
         this.$refs.filter.refresh();
+        this.error = null;
       },
       setError(error) {
         this.error = error;

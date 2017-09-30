@@ -176,6 +176,7 @@ class Initial extends Migration {
 
       $table->foreign('teacher_id')->references('id')->on('teachers');
       $table->foreign('student_id')->references('id')->on('students');
+      $table->index(['deleted_at', 'date']);
       $table->index('date');
     });
 

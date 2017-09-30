@@ -6,5 +6,7 @@ module.exports = {
     submit: 'Rückmeldung speichern',
     label: 'Text der Rückmeldung',
     error: 'Fehler beim Speichern der Rückmeldung.'
-  }
+  },
+  trash: 'Rückmeldung löschen',
+  restore: 'Rückmeldung wiederherstellen'
 };

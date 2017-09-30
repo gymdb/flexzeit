@@ -16,7 +16,8 @@ CREATE TABLE `bugreports` (
   `teacher_id` int(10) UNSIGNED DEFAULT NULL,
   `student_id` int(10) UNSIGNED DEFAULT NULL,
   `text` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_at` timestamp DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `config` (
@@ -165,6 +166,7 @@ ALTER TABLE `bugreports`
   ADD PRIMARY KEY (`id`),
   ADD KEY `bugreports_teacher_id_foreign` (`teacher_id`),
   ADD KEY `bugreports_student_id_foreign` (`student_id`),
+  ADD KEY `bugreports_deleted_at_date_index` (`deleted_at`, `date`),
   ADD KEY `bugreports_date_index` (`date`);
 
 ALTER TABLE `config`
