@@ -100,9 +100,9 @@ class OffdayServiceImpl implements OffdayService {
             $result = [];
             foreach ($times[$date->dayOfWeek] as $n => $time) {
               if (!empty($timetable[$form->group_id][$date->dayOfWeek][$n])
-                  && $date->toDateTime($time['start']) >= $item['start']
-                  && $date->toDateTime($time['end']) <= $item['end']) {
-                // Given lesson is not within the timeframe of this flex lesson
+                  && $date->toDateTime($time['start']) < $item['end']
+                  && $date->toDateTime($time['end']) > $item['start']) {
+                // Given lesson is intersecting the timeframe of this flex lesson
                 if ($groupId) {
                   $result[] = new Offday(['group_id' => $groupId, 'date' => $date, 'number' => $n]);
                 } else {
