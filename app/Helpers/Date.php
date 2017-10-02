@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use IntlDateFormatter;
 use InvalidArgumentException;
 

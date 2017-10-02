@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Helpers\Date;
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 

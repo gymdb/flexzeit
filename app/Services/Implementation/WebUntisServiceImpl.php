@@ -5,8 +5,8 @@ namespace App\Services\Implementation;
 use App\Helpers\Date;
 use App\Helpers\DateRange;
 use App\Services\WebUntisService;
-use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use JsonRPC\Client;
 
 class WebUntisServiceImpl implements WebUntisService {

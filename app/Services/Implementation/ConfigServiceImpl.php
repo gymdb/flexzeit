@@ -6,7 +6,7 @@ use App\Helpers\Date;
 use App\Models\Lesson;
 use App\Services\ConfigService;
 use App\Services\ConfigStorageService;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 /**
