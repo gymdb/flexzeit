@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Helpers\Anacron\Schedule as AnacronSchedule;
 use App\Http\Redirector;
 use App\Repositories\BugReportRepository;
 use App\Repositories\ConfigRepository;
@@ -37,6 +38,7 @@ use App\Services\RegistrationService;
 use App\Services\StudentService;
 use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Validator;
@@ -118,6 +120,10 @@ class AppServiceProvider extends ServiceProvider {
         $redirector->setSession($app['session.store']);
       }
       return $redirector;
+    });
+
+    $this->app->extend(Schedule::class, function() {
+      return new AnacronSchedule();
     });
 
     // Bind repositories
