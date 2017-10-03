@@ -101,7 +101,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
       $sub->whereNotNull('l.id')
           ->orWhere(function($or) use ($student) {
             $this->restrictToTimetable($or, $student);
-            $this->excludeOffdays($or, $student);
+            $this->excludeSchoolWideOffdays($or);
           });
     });
 

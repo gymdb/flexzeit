@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationServiceImpl implements RegistrationService {
 
+  use ServiceTrait;
+
   /** @var RegistrationRepository */
   private $registrationRepository;
 
@@ -287,8 +289,9 @@ class RegistrationServiceImpl implements RegistrationService {
     $lessons = $this->registrationRepository->querySlots($student, $date ?: Date::today(), $end)
         ->with('teacher:id,lastname,firstname', 'course:id,name', 'room:id,name')
         ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room_id', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
+    $offdays = $this->offdayRepository->queryForLessonsWithStudent($lessons, $student)->get();
 
-    $lessons->each(function(Lesson $lesson) use ($student) {
+    $lessons->each(function(Lesson $lesson) use ($offdays, $student) {
       $this->configService->setTime($lesson);
 
       $lesson->unregisterPossible = !$lesson->obligatory
@@ -296,6 +299,8 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($lesson->course && $lesson->unregisterPossible) {
         $lesson->unregisterPossible = !$this->isObligatoryFor($lesson->course, $student);
       }
+
+      $lesson->isOffday = $offdays->contains($this->matcher($lesson->date, $lesson->number));
     });
 
     return $lessons;

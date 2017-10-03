@@ -3,6 +3,7 @@
 /** @noinspection SpellCheckingInspection */
 return [
     'missing'       => 'Anmeldung für diese Einheit fehlt!',
+    'offday'        => 'Keine Flexzeit (siehe WebUntis-Stundenplan)',
     'today'         => [
         'heading' => 'Heute: :date',
         'none'    => 'Heute gibt es keine Einheiten.'

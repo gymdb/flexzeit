@@ -25,12 +25,14 @@
                 @foreach($today as $lesson)
                   <tr>
                     <td>@lang('messages.format.range', $lesson->time)</td>
-                    @if(!$lesson->id)
-                      <td colspan="3" class="text-danger">@lang('student.missing')</td>
-                    @else
+                    @if($lesson->id)
                       <td>{{$lesson->teacher->name()}}</td>
                       <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
                       <td class="room">{{$lesson->room->name}}</td>
+                    @elseif($lesson->isOffday)
+                      <td colspan="3">@lang('student.offday')</td>
+                    @else
+                      <td colspan="3" class="text-danger">@lang('student.missing')</td>
                     @endif
                   </tr>
                 @endforeach
@@ -65,16 +67,7 @@
                   <tr>
                     <td @if($prevDate == $lesson->date) class="hidden-date" @endif><span>{{$lesson->date}}</span></td>
                     <td>@lang('messages.format.range', $lesson->time)</td>
-                    @if(!$lesson->id)
-                      <td colspan="3" class="text-danger">@lang('student.missing')</td>
-                      <td>
-                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')"
-                           class="hidden-print">
-                          <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
-                          <span class="sr-only">@lang('student.register.label')</span>
-                        </a>
-                      </td>
-                    @else
+                    @if($lesson->id)
                       <td>{{$lesson->teacher->name()}}</td>
                       <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
                       <td class="room">{{$lesson->room->name}}</td>
@@ -96,6 +89,18 @@
                             </unregister>
                           @endif
                         @endif
+                      </td>
+                    @elseif($lesson->isOffday)
+                      <td colspan="3">@lang('student.offday')</td>
+                      <td></td>
+                    @else
+                      <td colspan="3" class="text-danger">@lang('student.missing')</td>
+                      <td>
+                        <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')"
+                           class="hidden-print">
+                          <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
+                          <span class="sr-only">@lang('student.register.label')</span>
+                        </a>
                       </td>
                     @endif
                   </tr>

@@ -2,6 +2,7 @@
 
 return [
     'missing'       => 'No registrations for this lesson!',
+    'offday'        => 'No flex lesson.',
     'today'         => [
         'heading' => 'Today: :date',
         'none'    => 'No lessons for today.'

@@ -133,6 +133,18 @@ trait RepositoryTrait {
     }, $invert ? 'or' : 'and', !$invert);
   }
 
+  private function excludeSchoolWideOffdays($query, $invert = false) {
+    $query->whereExists(function($exists) {
+      $exists->select(DB::raw(1))
+          ->from('offdays as o')
+          ->whereNull('o.group_id')
+          ->whereColumn('o.date', 'd.date')
+          ->where(function($or) {
+            $or->whereColumn('o.number', 'd.number')->orWhereNull('o.number');
+          });
+    }, $invert ? 'or' : 'and', !$invert);
+  }
+
   private function getParticipantsQuery($forCourseList = false) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = Registration::whereIn('registrations.lesson_id', function($in) use ($forCourseList) {

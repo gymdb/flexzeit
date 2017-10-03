@@ -25,13 +25,7 @@
               @foreach($lessons as $lesson)
                 <tr>
                   <td>@lang('messages.format.range', $lesson->time)</td>
-                  @if(!$lesson->id)
-                    @php $hasMissing = true; @endphp
-                    <td colspan="3" class="text-danger">@lang('student.missing')</td>
-                    @if($allowRegistration)
-                      <td></td>
-                    @endif
-                  @else
+                  @if($lesson->id)
                     <td>{{$lesson->teacher->name()}}</td>
                     <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
                     <td class="room">{{$lesson->room->name}}</td>
@@ -55,6 +49,17 @@
                           @endif
                         @endif
                       </td>
+                    @endif
+                  @elseif($lesson->isOffday)
+                    <td colspan="3">@lang('student.offday')</td>
+                    @if($allowRegistration)
+                      <td></td>
+                    @endif
+                  @else
+                    @php $hasMissing = true; @endphp
+                    <td colspan="3" class="text-danger">@lang('student.missing')</td>
+                    @if($allowRegistration)
+                      <td></td>
                     @endif
                   @endif
                 </tr>
