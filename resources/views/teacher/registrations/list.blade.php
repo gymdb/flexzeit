@@ -36,7 +36,7 @@
                 <td>@{{$d(moment(reg.date), 'short')}}</td>
                 <td>@{{$t('messages.range', reg.time)}}</td>
                 <td>@{{reg.teacher}}</td>
-                <td class="course"><a v-if="reg.course" href="#">@{{reg.course.name}}</a></td>
+                <td class="course"><a v-if="reg.course" :href="'{{route('teacher.courses.show', '')}}/' + reg.course.id">@{{reg.course.name}}</a></td>
                 <td class="room">@{{reg.room}}</td>
                 <td>@{{reg.student}}</td>
                 <td v-if="reg.cancelled">@lang('lessons.dashboard.cancelled')</td>
