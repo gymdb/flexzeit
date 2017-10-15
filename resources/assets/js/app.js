@@ -1,4 +1,5 @@
 /* global require */
+require('es6-promise').polyfill();
 require('./bootstrap');
 
 import Vue from 'vue';
