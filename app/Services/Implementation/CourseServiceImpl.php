@@ -241,7 +241,7 @@ class CourseServiceImpl implements CourseService {
     }
   }
 
-  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers, $room = null) {
+  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers, $room = null, $withCancelled = false) {
     if (is_scalar($numbers)) {
       $numbers = [$numbers];
     }
@@ -269,9 +269,11 @@ class CourseServiceImpl implements CourseService {
       }
     }
 
-    return $lessons->filter(function(Lesson $lesson) {
-      return empty($lesson->cancelled);
-    });
+    return $withCancelled
+        ? $lessons
+        : $lessons->filter(function(Lesson $lesson) {
+          return empty($lesson->cancelled);
+        });
   }
 
   private function assignCourse(Collection $lessons, Course $course) {
@@ -285,7 +287,8 @@ class CourseServiceImpl implements CourseService {
       return compact('withCourse');
     }
 
-    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number);
+    $lessonsWithCancelled = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, null, true)->groupBy('cancelled');
+    $lessons = $lessonsWithCancelled->get(0) ?: collect([]);
     if ($groups) {
       $withObligatory = $this->getWithObligatory($groups, $lessons);
       if ($withObligatory->isNotEmpty()) {
@@ -304,11 +307,12 @@ class CourseServiceImpl implements CourseService {
     }
 
     $forNewCourse = $this->mapLessons($lessons);
+    $cancelled = $this->mapLessons($lessonsWithCancelled->get(1) ?: collect([]));
 
     $roomOccupation = $this->getRoomOccupation($lessons, $teacher);
     $room = $this->getDefaultRoom($teacher, $firstDate, $lastDate, $number);
 
-    return compact('forNewCourse', 'roomOccupation', 'room');
+    return compact('forNewCourse', 'cancelled', 'roomOccupation', 'room');
   }
 
   public function getDataForEdit(Course $course, Date $lastDate = null, array $groups = null) {
@@ -333,9 +337,11 @@ class CourseServiceImpl implements CourseService {
         $removed = $this->mapLessons($lessons['removed']);
         $allLessons = $lessons['kept'];
       } else {
-        $lessons = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number);
+        $lessonsWithCancelled = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, null, true)->groupBy('cancelled');
+        $lessons = $lessonsWithCancelled->get(0) ?: collect([]);
         $withCourse = $this->getWithCourse($teacher, $firstChanged, $lastDate, $number);
         $added = $this->mapLessons($lessons);
+        $cancelled = $this->mapLessons($lessonsWithCancelled->get(1) ?: collect([]));
         $allLessons = $lessons->merge($course->lessons);
       }
     }
@@ -348,7 +354,7 @@ class CourseServiceImpl implements CourseService {
       $offdays = $this->getOffdays($groups, $allLessons);
     }
 
-    return compact('withCourse', 'added', 'removed', 'withObligatory', 'timetable', 'offdays', 'roomOccupation');
+    return compact('withCourse', 'added', 'removed', 'cancelled','withObligatory', 'timetable', 'offdays', 'roomOccupation');
   }
 
   private function mapLessons(Collection $lessons) {
@@ -417,6 +423,9 @@ class CourseServiceImpl implements CourseService {
   }
 
   private function getRoomOccupation(Collection $lessons, Teacher $teacher) {
+    if ($lessons->isEmpty()) {
+      return null;
+    }
     return $this->lessonRepository->queryForOccupation($lessons, $teacher)
         ->with('teacher:id,lastname,firstname')
         ->get(['id', 'date', 'number', 'teacher_id', 'room_id'])

@@ -20,10 +20,12 @@
         withCourse: [],
         added: [],
         removed: [],
+        cancelled: [],
         roomOccupation: [],
         withObligatory: [],
         timetable: [],
         offdays: [],
+        loading: false,
         error: null
       };
     },
@@ -101,7 +103,7 @@
         return options;
       },
       buttonDisabled() {
-        if (!this.changed) {
+        if (!this.changed || this.error || this.loading) {
           return true;
         }
         return this.obligatory
@@ -131,13 +133,16 @@
       },
       loadData: _.debounce(function (params) {
         let self = this;
+        this.loading = true;
         this.$http.get('/teacher/api/course/dataForEdit', {
           params: params
         }).then(function (response) {
           self.error = null;
+          self.loading = false;
           self.withCourse = response.data.withCourse || [];
           self.added = response.data.added || [];
           self.removed = response.data.removed || [];
+          self.cancelled = response.data.cancelled || [];
           self.roomOccupation = response.data.roomOccupation || [];
           if (self.obligatory) {
             self.withObligatory = response.data.withObligatory || [];
@@ -146,6 +151,7 @@
           }
         }).catch(function (error) {
           self.error = error;
+          self.loading = false;
         });
       }, 50)
     }

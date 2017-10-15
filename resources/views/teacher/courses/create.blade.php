@@ -123,6 +123,15 @@
                   </ul>
                 </div>
 
+                <div v-if="cancelled.length" class="alert alert-warning">
+                  <strong>@lang('courses.create.cancelled.warning')</strong>
+                  <ul>
+                    <li v-for="lesson in cancelled">
+                      <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                    </li>
+                  </ul>
+                </div>
+
                 <div v-if="occupied.length" class="alert alert-warning">
                   <strong>@lang('courses.create.occupied')</strong>
                   <ul>
@@ -131,6 +140,14 @@
                     </li>
                   </ul>
                 </div>
+              </div>
+              <div v-else-if="cancelled.length" class="alert alert-danger">
+                <strong>@lang('courses.create.cancelled.error')</strong>
+                <ul>
+                  <li v-for="lesson in cancelled">
+                    <strong>@{{$d(moment(lesson.date), 'short')}}</strong>, @{{$t('messages.range', lesson.time)}}
+                  </li>
+                </ul>
               </div>
             </div>
 

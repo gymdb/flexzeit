@@ -22,10 +22,12 @@
         teacher: this.oldTeacher,
         withCourse: [],
         forNewCourse: [],
+        cancelled: [],
         roomOccupation: [],
         withObligatory: [],
         timetable: [],
         offdays: [],
+        loading: false,
         error: null
       };
     },
@@ -140,11 +142,11 @@
       },
       buttonDisabled() {
         if (this.obligatory) {
-          return !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
+          return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
               || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0 || !this.forNewCourse.length;
         }
 
-        return !this.firstDate || !this.number || !this.name || !this.room
+        return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room
             || this.withCourse.length > 0 || !this.forNewCourse.length;
       }
     },
@@ -162,20 +164,25 @@
       loadLessonsForCourse: _.debounce(function (params) {
         if (!params) {
           this.error = null;
+          this.loading = false;
           this.withCourse = [];
           this.forNewCourse = [];
+          this.cancelled = [];
           this.roomOccupation = [];
           this.withObligatory = [];
           this.timetable = [];
           this.offdays = [];
         } else {
           let self = this;
+          this.loading = true;
           this.$http.get('/teacher/api/course/dataForCreate', {
             params: params
           }).then(function (response) {
             self.error = null;
+            self.loading = false;
             self.withCourse = response.data.withCourse || [];
             self.forNewCourse = response.data.forNewCourse || [];
+            self.cancelled = response.data.cancelled || [];
             self.roomOccupation = response.data.roomOccupation || [];
             if (self.obligatory) {
               self.withObligatory = response.data.withObligatory || [];
@@ -189,6 +196,7 @@
             self.roomOriginal = response.data.room || null;
           }).catch(function (error) {
             self.error = error;
+            self.loading = false;
           });
         }
       }, 50)

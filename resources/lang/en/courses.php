@@ -59,6 +59,10 @@ return [
         'occupied'     => 'The room is already occupied:',
         'saveError'    => 'Error saving the course.',
         'loadError'    => 'Error loading the lesson information.',
+        'cancelled'    => [
+            'warning' => 'The course will not be held in the following lessons, because they have been cancelled:',
+            'error'   => 'The course can not be created, because all selected lessons have been cancelled:'
+        ],
         'obligatory'   => [
             'heading'        => 'Create obligatory course',
             'withObligatory' => 'Some groups already have obligatory courses within the chosen timeframe:',
@@ -77,6 +81,7 @@ return [
         'withCourse'     => 'Courses already exist for some of the additional lessons:',
         'addedLessons'   => 'The course will additionally be held at the following lessons:',
         'additional'     => 'additional lesson!',
+        'cancelled'      => 'The course will not be held in the following lessons, because they have been cancelled:',
         'removedLessons' => 'The course will no longer be held at the following lessons:',
         'occupied'       => 'The room is already occupied:',
         'saveError'      => 'Error saving the course.',

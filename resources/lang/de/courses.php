@@ -60,6 +60,10 @@ return [
         'occupied'     => 'Der Raum ist bereits belegt:',
         'saveError'    => 'Fehler beim Speichern des Kurses.',
         'loadError'    => 'Informationen zu den gewählten Einheiten konnten nicht geladen werden.',
+        'cancelled'    => [
+            'warning' => 'Der Kurs wird in den folgenden Einheiten nicht gehalten, weil sie abgesagt wurden:',
+            'error'   => 'Der Kurs kann nicht erstellt werden, weil alle ausgewählten Einheiten abgesagt wurden:'
+        ],
         'obligatory'   => [
             'heading'        => 'Klassen-/Gruppenbindung erstellen',
             'withObligatory' => 'Für manche Klassen/Gruppen existieren im gewählten Zeitraum bereits Bindungen:',
@@ -78,6 +82,7 @@ return [
         'withCourse'     => 'Für zusätzlich gewählte Einheiten existieren bereits Kurse:',
         'addedLessons'   => 'Der Kurs wird auf folgenden Einheiten verlängert:',
         'additional'     => 'neu angelegte Einheit!',
+        'cancelled'      => 'Der Kurs wird in den folgenden Einheiten nicht gehalten, weil sie abgesagt wurden:',
         'removedLessons' => 'Der Kurs findet in den folgenden Einheiten nicht mehr statt:',
         'occupied'       => 'Der Raum ist bereits belegt:',
         'saveError'      => 'Fehler beim Speichern des Kurses.',
