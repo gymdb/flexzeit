@@ -287,8 +287,13 @@ class CourseServiceImpl implements CourseService {
       return compact('withCourse');
     }
 
-    $lessonsWithCancelled = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, null, true)->groupBy('cancelled');
-    $lessons = $lessonsWithCancelled->get(0) ?: collect([]);
+    $lessonsWithCancelled = $this
+        ->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, null, true)
+        ->groupBy(function(Lesson $lesson) {
+          return $lesson->cancelled ? 'cancelled' : 'held';
+        });
+
+    $lessons = $lessonsWithCancelled->get('held') ?: collect([]);
     if ($groups) {
       $withObligatory = $this->getWithObligatory($groups, $lessons);
       if ($withObligatory->isNotEmpty()) {
@@ -307,7 +312,7 @@ class CourseServiceImpl implements CourseService {
     }
 
     $forNewCourse = $this->mapLessons($lessons);
-    $cancelled = $this->mapLessons($lessonsWithCancelled->get(1) ?: collect([]));
+    $cancelled = $this->mapLessons($lessonsWithCancelled->get('cancelled') ?: collect([]));
 
     $roomOccupation = $this->getRoomOccupation($lessons, $teacher);
     $room = $this->getDefaultRoom($teacher, $firstDate, $lastDate, $number);
@@ -337,11 +342,15 @@ class CourseServiceImpl implements CourseService {
         $removed = $this->mapLessons($lessons['removed']);
         $allLessons = $lessons['kept'];
       } else {
-        $lessonsWithCancelled = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, null, true)->groupBy('cancelled');
-        $lessons = $lessonsWithCancelled->get(0) ?: collect([]);
+        $lessonsWithCancelled = $this
+            ->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, null, true)
+            ->groupBy(function(Lesson $lesson) {
+              return $lesson->cancelled ? 'cancelled' : 'held';
+            });
+        $lessons = $lessonsWithCancelled->get('held') ?: collect([]);
         $withCourse = $this->getWithCourse($teacher, $firstChanged, $lastDate, $number);
         $added = $this->mapLessons($lessons);
-        $cancelled = $this->mapLessons($lessonsWithCancelled->get(1) ?: collect([]));
+        $cancelled = $this->mapLessons($lessonsWithCancelled->get('cancelled') ?: collect([]));
         $allLessons = $lessons->merge($course->lessons);
       }
     }
@@ -354,7 +363,7 @@ class CourseServiceImpl implements CourseService {
       $offdays = $this->getOffdays($groups, $allLessons);
     }
 
-    return compact('withCourse', 'added', 'removed', 'cancelled','withObligatory', 'timetable', 'offdays', 'roomOccupation');
+    return compact('withCourse', 'added', 'removed', 'cancelled', 'withObligatory', 'timetable', 'offdays', 'roomOccupation');
   }
 
   private function mapLessons(Collection $lessons) {
