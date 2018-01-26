@@ -76,6 +76,7 @@ CREATE TABLE `lessons` (
   `date` date NOT NULL,
   `number` tinyint(3) UNSIGNED NOT NULL,
   `cancelled` tinyint(1) NOT NULL DEFAULT '0',
+  `generated` tinyint(1) NOT NULL DEFAULT '0',
   `room_id` int(10) UNSIGNED NOT NULL,
   `teacher_id` int(10) UNSIGNED NOT NULL,
   `substitute_id` int(10) UNSIGNED DEFAULT NULL,
