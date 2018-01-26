@@ -20,6 +20,7 @@ use App\Services\LessonService;
 use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -91,9 +92,10 @@ class CourseController extends Controller {
   }
 
   /**
-   * Display a listing of all courses
+   * Display a listing of all obligatory courses
    *
    * @return Response
+   * @throws AuthorizationException Thrown if the user does not have permission to show the list of obligatory courses
    */
   public function listObligatory() {
     $this->authorize('listObligatory', Course::class);
@@ -116,7 +118,7 @@ class CourseController extends Controller {
    * Show the form for creating a new course
    *
    * @return View
-   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to create a course
    */
   public function create() {
     $this->authorize('create', Course::class);
@@ -135,7 +137,7 @@ class CourseController extends Controller {
    * Show the form for creating a new obligatory course
    *
    * @return View
-   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to create an obligatory course
    */
   public function createObligatory() {
     $this->authorize('create', Course::class);
@@ -201,6 +203,8 @@ class CourseController extends Controller {
    *
    * @param  CreateNormalCourseRequest $request
    * @return RedirectResponse
+   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to create a course
    */
   public function store(CreateNormalCourseRequest $request) {
     $this->authorize('create', Course::class);
@@ -214,6 +218,8 @@ class CourseController extends Controller {
    *
    * @param  CreateObligatoryCourseRequest $request
    * @return RedirectResponse
+   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to create an obligatory course
    */
   public function storeObligatory(CreateObligatoryCourseRequest $request) {
     $this->authorize('create', Course::class);
@@ -259,6 +265,7 @@ class CourseController extends Controller {
    *
    * @param  Course $course
    * @return View
+   * @throws AuthorizationException Thrown if the user does not have permission to edit the given course
    */
   public function edit(Course $course) {
     $this->authorize('update', $course);
@@ -280,19 +287,19 @@ class CourseController extends Controller {
     $rooms = $this->miscService->getRooms();
 
     $courseData = [
-        'id'          => $course->id,
-        'firstDate'   => $firstDate->toDateString(),
-        'lastDate'    => $lastDate->toDateString(),
-        'number'      => $firstLesson->number,
-        'name'        => $course->name,
-        'room'        => $firstLesson->room_id,
+        'id' => $course->id,
+        'firstDate' => $firstDate->toDateString(),
+        'lastDate' => $lastDate->toDateString(),
+        'number' => $firstLesson->number,
+        'name' => $course->name,
+        'room' => $firstLesson->room_id,
         'description' => $course->description
     ];
 
     $old = [
-        'lastDate'    => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
-        'name'        => old('name') ?: $courseData['name'],
-        'room'        => $this->parseOldNumber('room') ?: $courseData['room'],
+        'lastDate' => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
+        'name' => old('name') ?: $courseData['name'],
+        'room' => $this->parseOldNumber('room') ?: $courseData['room'],
         'description' => old('description') ?: $courseData['description']
     ];
 
@@ -340,6 +347,8 @@ class CourseController extends Controller {
    * @param  EditNormalCourseRequest $request
    * @param  Course $course
    * @return RedirectResponse
+   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to edit the given course
    */
   public function update(EditNormalCourseRequest $request, Course $course) {
     $this->authorize('update', $course);
@@ -354,6 +363,8 @@ class CourseController extends Controller {
    * @param  EditObligatoryCourseRequest $request
    * @param  Course $course
    * @return RedirectResponse
+   * @throws CourseException
+   * @throws AuthorizationException Thrown if the user does not have permission to edit the given course
    */
   public function updateObligatory(EditObligatoryCourseRequest $request, Course $course) {
     $this->authorize('update', $course);
@@ -367,6 +378,7 @@ class CourseController extends Controller {
    *
    * @param  Course $course
    * @return RedirectResponse
+   * @throws AuthorizationException Thrown if the user does not have permission to delete the given course
    */
   public function destroy(Course $course) {
     $this->authorize('delete', $course);
@@ -408,9 +420,9 @@ class CourseController extends Controller {
   }
 
   /**
-   * Get lessons for a teacher in JSON format
+   * Get courses for a teacher in JSON format
    *
-   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to currently logged in user
+   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to all teachers
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
@@ -424,14 +436,15 @@ class CourseController extends Controller {
   }
 
   /**
-   * Get lessons for a teacher in JSON format
+   * Get obligatory courses for a teacher in JSON format
    *
    * @param Group|null $group
-   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to currently logged in user
+   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to all teachers
    * @param Subject|null $subject
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
+   * @throws AuthorizationException Thrown if the user does not have permission to list obligatory courses
    */
   public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
     $this->authorize('listObligatory', Course::class);
