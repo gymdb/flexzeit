@@ -117,11 +117,11 @@ class ConfigServiceImpl implements ConfigService {
 
   public function getDefaultListStartDate(Date $max = null) {
     if ($max) {
-      return $this->getYearStart(min($max, Date::today()->addWeek(-1)));
+      return $this->getYearStart(min($max, Date::today()));
     }
 
     return $this->getCache()->remember($this->prefix . '.list.start', $this->cacheDuration, function() {
-      return $this->getYearStart(Date::today()->addWeek(-1));
+      return $this->getYearStart(Date::today());
     });
   }
 
