@@ -34,6 +34,7 @@
                 <th v-if="!date">{{$t('messages.date')}}</th>
                 <th v-if="!number">{{$t('messages.time')}}</th>
                 <th>{{$t('messages.teacher')}}</th>
+                <th>{{$t('messages.room')}}</th>
                 <th>{{$t('messages.course')}}</th>
                 <th>{{$t('messages.participants')}}</th>
                 <th></th>
@@ -44,6 +45,7 @@
                 <td v-if="!date">{{$d(moment(lesson.date), 'short')}}</td>
                 <td v-if="!number">{{$t('messages.range', lesson.time)}}</td>
                 <td>{{lesson.teacher}}</td>
+                <td>{{lesson.room}}</td>
                 <td class="course">{{lesson.course ? lesson.course.name : ''}}</td>
                 <td>{{lesson.participants}}<span v-if="lesson.maxstudents">/{{lesson.maxstudents}}</span></td>
                 <td>
