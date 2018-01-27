@@ -99,6 +99,14 @@
             </ul>
           @endif
 
+          @if(Illuminate\Support\Facades\Auth::user()->isStudent())
+            <ul class="nav navbar-nav">
+              <li>
+                <a href="{{route('student.courses')}}">@lang('nav.courses.next')</a>
+              </li>
+            </ul>
+          @endif
+
           <ul class="nav navbar-nav navbar-right">
             <!-- Authentication Links -->
             <li class="dropdown">

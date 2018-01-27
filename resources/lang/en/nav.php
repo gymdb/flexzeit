@@ -10,6 +10,7 @@ return [
     'courses'       => [
         'list'       => 'All courses',
         'create'     => 'Create course',
+        'next'       => 'Next courses',
         'obligatory' => [
             'list'   => 'Show obligatory courses',
             'create' => 'Create obligatory course'

@@ -5,6 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Group;
+use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
@@ -52,8 +53,62 @@ class CourseRepository implements \App\Repositories\CourseRepository {
     return $query;
   }
 
+  public function queryAvailable(Student $student, Teacher $teacher = null, Date $start, Date $end = null) {
+    $query = Course::doesntHave('groups')
+        ->join('lessons as l', function($join) use ($end, $start) {
+          $join->on('l.course_id', 'courses.id')
+              ->whereNotExists(function($exists) {
+                $exists->select(DB::raw(1))
+                    ->from('lessons as sub')
+                    ->where('sub.cancelled', false)
+                    ->whereColumn('sub.course_id', 'courses.id')
+                    ->whereColumn('sub.date', '<', 'l.date');
+              })
+              ->where('l.cancelled', false);
+          $this->inRange($join, $start, $end, null, null, 'l.');
+        })
+        ->select(['courses.id', 'name', 'description', 'maxstudents', 'l.date', 'l.number'])
+        ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'));
+
+    // The student must not have offdays for all lessons of the course
+    $query->whereNotExists(function($exists) use ($student) {
+      $exists->select(DB::raw(1))
+          ->from('lessons as d')
+          ->where('d.cancelled', false)
+          ->whereColumn('d.course_id', 'courses.id')
+          ->where(function($sub) use ($student) {
+            $this->restrictToTimetable($sub, $student, true);
+            $this->excludeOffdays($sub, $student, true);
+          });
+    });
+
+    // Only show lessons with free spots
+    $query->where(function($or) {
+      $sub = $this->getParticipantsQuery(true);
+      $or->whereNull('maxstudents')
+          ->orWhereRaw("({$sub->toSql()}) < maxstudents")
+          ->addBinding($sub->getBindings());
+    });
+
+    // Limit to allowed years for course
+    $year = $student->forms()->take(1)->pluck('year')->first();
+    $query->where(function($sub) use ($year) {
+      $sub->whereNull('courses.yearfrom');
+      if ($year) {
+        $sub->orWhere('courses.yearfrom', '<=', $year);
+      }
+    })->where(function($sub) use ($year) {
+      $sub->whereNull('courses.yearto');
+      if ($year) {
+        $sub->orWhere('courses.yearto', '>=', $year);
+      }
+    });
+
+    $query->orderBy('l.date')->orderBy('l.number');
+    return $query;
+  }
+
   public function addParticipants($query) {
     return $query->selectSub($this->getParticipantsQuery(true), 'participants');
   }
-
 }

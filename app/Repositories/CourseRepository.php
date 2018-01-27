@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Helpers\Date;
 use App\Models\Group;
+use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,6 +33,17 @@ interface CourseRepository {
    * @return Builder
    */
   public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null);
+
+  /**
+   * Query available courses for a student
+   *
+   * @param Student $student
+   * @param Teacher|null $teacher
+   * @param Date $start
+   * @param Date $end
+   * @return Builder
+   */
+  public function queryAvailable(Student $student, Teacher $teacher = null, Date $start, Date $end = null);
 
   /**
    * @param Builder|Relation $query

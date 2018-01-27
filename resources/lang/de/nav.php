@@ -11,6 +11,7 @@ return [
     'courses'       => [
         'list'       => 'Alle Kurse',
         'create'     => 'Kurs erstellen',
+        'next'       => 'Nächste Kurse',
         'obligatory' => [
             'list'   => 'Klassenbindungen anzeigen',
             'create' => 'Klassenbindung erstellen'

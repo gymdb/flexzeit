@@ -124,6 +124,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
 Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => ['auth', 'can:student']], function() {
   Route::get('/', 'StudentController@dashboard')->name('student.dashboard');
   Route::get('/day/{date}', 'StudentController@day')->name('student.day');
+  Route::get('/courses', 'StudentController@courses')->name('student.courses');
 
   // API methods
   /** @noinspection PhpParamsInspection, PhpMethodParametersCountMismatchInspection */
@@ -143,5 +144,10 @@ Route::group(['prefix' => 'student', 'namespace' => 'Student', 'middleware' => [
     Route::post('/register/lesson/{lesson}', 'ApiController@registerLesson');
     Route::post('/unregister/course/{course}', 'ApiController@unregisterCourse');
     Route::post('/unregister/lesson/{registration}', 'ApiController@unregisterLesson');
+
+    // Course related API methods
+    Route::get('/courses', 'ApiController@getCourses')
+        ->middleware('params:teacher?;i|start?;d|end?;d')
+        ->name('student.api.courses');
   });
 });

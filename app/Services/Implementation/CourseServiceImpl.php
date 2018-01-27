@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
 use App\Models\Offday;
+use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Repositories\CourseRepository;
@@ -374,8 +375,8 @@ class CourseServiceImpl implements CourseService {
           $this->configService->setTime($lesson);
           return [
               'exists' => $lesson->exists,
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time
           ];
         })
         ->values();
@@ -389,8 +390,8 @@ class CourseServiceImpl implements CourseService {
         ->map(function(Lesson $lesson) {
           $this->configService->setTime($lesson);
           return [
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time,
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time,
               'course' => $lesson->course->name
           ];
         });
@@ -404,8 +405,8 @@ class CourseServiceImpl implements CourseService {
         ->map(function(Lesson $lesson) {
           $this->configService->setTime($lesson);
           return [
-              'date' => $lesson->date->toDateString(),
-              'time' => $lesson->time,
+              'date'   => $lesson->date->toDateString(),
+              'time'   => $lesson->time,
               'course' => $lesson->course->name,
               'groups' => $lesson->course->groups->pluck('name')
           ];
@@ -419,7 +420,7 @@ class CourseServiceImpl implements CourseService {
         ->get()
         ->map(function(Offday $offday) {
           return [
-              'date' => $offday->date->toDateString(),
+              'date'  => $offday->date->toDateString(),
               'group' => $offday->group->name
           ];
         });
@@ -444,8 +445,8 @@ class CourseServiceImpl implements CourseService {
           return $lessons->map(function(Lesson $lesson) {
             $this->configService->setTime($lesson);
             return [
-                'date' => $lesson->date->toDateString(),
-                'time' => $lesson->time,
+                'date'    => $lesson->date->toDateString(),
+                'time'    => $lesson->time,
                 'teacher' => $lesson->teacher->name()
             ];
           });
@@ -495,13 +496,13 @@ class CourseServiceImpl implements CourseService {
           $this->configService->setTime($first);
 
           return [
-              'id' => $course->id,
-              'name' => $course->name,
-              'first' => $course->first,
-              'last' => $course->last !== $course->first ? $course->last : null,
-              'time' => $first->time,
-              'teacher' => $course->teacher->first()->name(),
-              'students' => $course->participants,
+              'id'          => $course->id,
+              'name'        => $course->name,
+              'first'       => $course->first,
+              'last'        => $course->last !== $course->first ? $course->last : null,
+              'time'        => $first->time,
+              'teacher'     => $course->teacher->first()->name(),
+              'students'    => $course->participants,
               'maxstudents' => $course->maxstudents
           ];
         });
@@ -516,15 +517,43 @@ class CourseServiceImpl implements CourseService {
           $this->configService->setTime($first);
 
           return [
-              'id' => $course->id,
-              'name' => $course->name,
-              'first' => $course->first,
-              'last' => $course->last !== $course->first ? $course->last : null,
-              'time' => $first->time,
+              'id'      => $course->id,
+              'name'    => $course->name,
+              'first'   => $course->first,
+              'last'    => $course->last !== $course->first ? $course->last : null,
+              'time'    => $first->time,
               'teacher' => $course->teacher->first()->name(),
-              'groups' => $course->groups->pluck('name')
+              'groups'  => $course->groups->pluck('name')
           ];
         });
   }
 
+  public function getMappedForStudent(Student $student, Teacher $teacher = null, Date $start, Date $end = null) {
+    $query = $this->courseRepository->queryAvailable($student, $teacher, $start, $end);
+
+    return $this->courseRepository->addParticipants($query)
+        ->get()
+        ->map(function(Course $course) {
+          $first = new Lesson(['date' => Date::createFromFormat('Y-m-d', $course->date), 'number' => $course->number]);
+          $this->configService->setTime($first);
+          $teacher = $course->teacher()->with('subjects')->first();
+
+          return [
+              'id'          => $course->id,
+              'name'        => $course->name,
+              'description' => $course->description,
+              'first'       => $course->date,
+              'last'        => $course->last !== $course->date ? $course->last : null,
+              'time'        => $first->time,
+              'teacher'     => [
+                  'name'     => $teacher->name(),
+                  'image'    => $teacher->image ? url($teacher->image) : null,
+                  'info'     => $teacher->info,
+                  'subjects' => $teacher->subjects->implode('name', ', ')
+              ],
+              'students'    => $course->participants,
+              'maxstudents' => $course->maxstudents
+          ];
+        });
+  }
 }

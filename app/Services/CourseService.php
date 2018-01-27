@@ -6,6 +6,7 @@ use App\Exceptions\CourseException;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Group;
+use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Specifications\CreateCourseSpecification;
@@ -77,4 +78,14 @@ interface CourseService {
    */
   public function getMappedObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null);
 
+  /**
+   * Get a list of a courses available for a student
+   *
+   * @param Student $student
+   * @param Teacher $teacher
+   * @param Date $start
+   * @param Date|null $end
+   * @return Collection<array>
+   */
+  public function getMappedForStudent(Student $student, Teacher $teacher = null, Date $start, Date $end = null);
 }

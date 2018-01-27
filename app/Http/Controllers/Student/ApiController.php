@@ -9,12 +9,21 @@ use App\Models\Lesson;
 use App\Models\Registration;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Services\ConfigService;
+use App\Services\CourseService;
 use App\Services\DocumentationService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 
 class ApiController extends Controller {
+
+  /** @var ConfigService */
+  private $configService;
+
+  /** @var CourseService */
+  private $courseService;
 
   /** @var DocumentationService */
   private $documentationService;
@@ -28,11 +37,17 @@ class ApiController extends Controller {
   /**
    * Create a new controller instance.
    *
+   * @param ConfigService $configService
+   * @param CourseService $courseService
    * @param DocumentationService $documentationService
    * @param LessonService $lessonService
    * @param RegistrationService $registrationService
    */
-  public function __construct(DocumentationService $documentationService, LessonService $lessonService, RegistrationService $registrationService) {
+  public function __construct(ConfigService $configService, CourseService $courseService,
+      DocumentationService $documentationService, LessonService $lessonService,
+      RegistrationService $registrationService) {
+    $this->configService = $configService;
+    $this->courseService = $courseService;
     $this->documentationService = $documentationService;
     $this->lessonService = $lessonService;
     $this->registrationService = $registrationService;
@@ -70,6 +85,7 @@ class ApiController extends Controller {
   /**
    * @param Registration $registration
    * @return JsonResponse
+   * @throws AuthorizationException Thrown if the student is not allowed to unregister from this lesson
    */
   public function unregisterLesson(Registration $registration) {
     $this->authorize('unregister', $registration);
@@ -95,6 +111,7 @@ class ApiController extends Controller {
    *
    * @param Registration $registration
    * @return JsonResponse
+   * @throws AuthorizationException Thrown if the student is not allowed to read the documentation for this lesson
    */
   public function getDocumentation(Registration $registration) {
     $this->authorize('readDocumentation', $registration);
@@ -111,6 +128,7 @@ class ApiController extends Controller {
    * @param Registration $registration
    * @param string $documentation
    * @return JsonResponse
+   * @throws AuthorizationException Thrown if the student is not allowed to update the documentation for this lesson
    */
   public function setDocumentation(Registration $registration, $documentation = null) {
     $this->authorize('writeDocumentation', $registration);
@@ -119,4 +137,19 @@ class ApiController extends Controller {
     return response()->json(['success' => true]);
   }
 
+  /**
+   * Get courses in JSON format
+   *
+   * @param Teacher|null $teacher Teacher whose lessons are shown; defaults to all teachers
+   * @param Date|null $start
+   * @param Date|null $end
+   * @return JsonResponse
+   */
+  public function getCourses(Teacher $teacher = null, Date $start = null, Date $end = null) {
+    $start = $start ?: $this->configService->getDefaultListStartDate($end);
+    $end = $end ?: $this->configService->getDefaultListEndDate($start);
+
+    $lessons = $this->courseService->getMappedForStudent($this->getStudent(), $teacher, $start, $end);
+    return response()->json($lessons);
+  }
 }
