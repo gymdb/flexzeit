@@ -6,6 +6,7 @@ use App\Exceptions\LessonException;
 use App\Helpers\Date;
 use App\Models\Course;
 use App\Models\Lesson;
+use App\Models\Room;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -81,13 +82,13 @@ class LessonServiceImpl implements LessonService {
     $times = $this->configService->getLessonTimes();
 
     // Load list of teachers by shortname
-    /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $teachers = Teacher::get(['id', 'shortname'])->buildDictionary(['shortname'], false);
+    $rooms = Room::get(['id', 'shortname'])->buildDictionary(['shortname'], false);
 
     // Load and map substitution data from WebUntis
     $substitutions = $this->untisService
         ->getSubstitutions($start, $end)
-        ->flatMap(function($substitution) use ($times, $teachers) {
+        ->flatMap(function($substitution) use ($times, $teachers, $rooms) {
           $date = Date::instance($substitution['start']);
           if (empty($times[$date->dayOfWeek])) {
             // Ignore lessons if there is no flex on the given day
@@ -110,7 +111,8 @@ class LessonServiceImpl implements LessonService {
                       'subst'   => false,
                       'date'    => $date,
                       'number'  => $n,
-                      'teacher' => $teacher
+                      'teacher' => $teacher,
+                      'room'    => null
                   ];
                   break;
                 case 'subst':
@@ -123,7 +125,31 @@ class LessonServiceImpl implements LessonService {
                       'date'       => $date,
                       'number'     => $n,
                       'teacher'    => $originalTeacher,
-                      'newTeacher' => $teacher
+                      'newTeacher' => $teacher,
+                      'room'       => null
+                  ];
+                  break;
+                case 'rmchg':
+                  if ($substitution['rooms']->count() !== 1) {
+                    Log::warning("Room change for teacher {$substitution['teacher']} for lesson {$date->toDateString()}/{$n} should contain exactly one room item.");
+                    continue;
+                  }
+
+                  $room = $rooms[$substitution['rooms'][0]['room']] ?? null;
+                  $originalRoom = $substitution['rooms'][0]['originalRoom']
+                      ? ($rooms[$substitution['rooms'][0]['originalRoom']] ?? null)
+                      : null;
+                  if (!$room) {
+                    Log::warning("Could not find room with shortname {$substitution['rooms'][0]['room']} for lesson {$substitution['teacher']}/{$date->toDateString()}/{$n}.");
+                    continue;
+                  }
+
+                  $result[] = [
+                      'date'         => $date,
+                      'number'       => $n,
+                      'teacher'      => $teacher,
+                      'room'         => $room,
+                      'originalRoom' => $originalRoom,
                   ];
                   break;
                 default:
@@ -148,7 +174,17 @@ class LessonServiceImpl implements LessonService {
         return;
       }
 
-      if ($substitution['subst']) {
+      if ($substitution['room']) {
+        if ($lesson->room->id === $substitution['room']->id) {
+          Log::info("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is already in room {$substitution['room']->shortname}.");
+          return;
+        }
+        if ($substitution['originalRoom'] && $lesson->room->id !== $substitution['originalRoom']->id) {
+          Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is in room {$lesson->room->shortname}, but expected to be in {$substitution['originalRoom']->shortname}.");
+        }
+        $lesson->room()->associate($substitution['room']);
+        $lesson->save();
+      } else if ($substitution['subst']) {
         // Lesson is substituted by another teacher
         if ($lesson->substitute_id) {
           // Lesson is already marked as substituted
@@ -347,8 +383,8 @@ class LessonServiceImpl implements LessonService {
       /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       $substitutedLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
     } else if ($substitutedLesson->cancelled) {
-      throw new LessonException(LessonException::CANCELLED);
-    }
+        throw new LessonException(LessonException::CANCELLED);
+      }
 
     if (!$lesson->cancelled || $lesson->substitute_id !== $teacher->id) {
       $lesson->cancelled = true;

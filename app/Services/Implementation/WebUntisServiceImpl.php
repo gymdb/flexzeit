@@ -108,11 +108,17 @@ class WebUntisServiceImpl implements WebUntisService {
       }));
     })->flatMap(function($item) {
       return collect($item['te'])->map(function($teacher) use ($item) {
+        $rooms = collect($item['ro'])->map(function($room) {
+          return [
+              'room'      => $room['name'],
+              'originalRoom' => $room['orgname'] ?? null
+          ];
+        });
         return [
             'start'           => $this->getDateTime($item['date'], $item['startTime']),
             'end'             => $this->getDateTime($item['date'], $item['endTime']),
             'type'            => $item['type'],
-            'room'            => collect($item['ro'])->pluck('name'),
+            'rooms'           => $rooms,
             'originalTeacher' => $teacher['orgname'] ?? null,
             'teacher'         => $teacher['name']
         ];
