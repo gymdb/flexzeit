@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $id
  * @property string $name
  * @property string $type
+ * @property string $shortname
  * @property int $capacity
  * @property Collection $lessons
  */

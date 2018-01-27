@@ -113,6 +113,7 @@ CREATE TABLE `rooms` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shortname` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `capacity` smallint(5) UNSIGNED NOT NULL,
   `yearfrom` tinyint(3) UNSIGNED DEFAULT NULL,
   `yearto` tinyint(3) UNSIGNED DEFAULT NULL
