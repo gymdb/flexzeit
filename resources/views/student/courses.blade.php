@@ -27,7 +27,7 @@
                 <th>@lang('messages.participants')</th>
               </tr>
               </thead>
-              <tr v-for="course in props.data">
+              <tr v-for="(course, key) in props.data">
                 <td>
                   <a :href="'{{route('student.day', '')}}/' + course.first">
                     @{{$d(moment(course.first), 'short')}}
