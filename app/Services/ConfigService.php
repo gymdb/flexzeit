@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Date;
 use App\Models\Lesson;
+use App\Models\RoomOccupation;
 
 /**
  * Service for accessing config option values from database while using caches
@@ -141,9 +142,9 @@ interface ConfigService {
   /**
    * Store the start and end time of a lesson in the lesson object
    *
-   * @param Lesson $lesson
+   * @param Lesson|RoomOccupation $lesson
    */
-  public function setTime(Lesson $lesson);
+  public function setTime($lesson);
 
   /**
    * Get the mail addresses that should receive email notifications about events

@@ -16,6 +16,7 @@ use App\Repositories\CourseRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\OffdayRepository;
+use App\Repositories\RoomRepository;
 use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\CourseService;
@@ -48,17 +49,22 @@ class CourseServiceImpl implements CourseService {
   /** @var OffdayRepository */
   private $offdayRepository;
 
+  /** @var RoomRepository */
+  private $roomRepository;
+
   /** @var StudentRepository */
   private $studentRepository;
 
   function __construct(ConfigService $configService, RegistrationService $registrationService, CourseRepository $courseRepository,
-      GroupRepository $groupRepository, LessonRepository $lessonRepository, OffdayRepository $offdayRepository, StudentRepository $studentRepository) {
+      GroupRepository $groupRepository, LessonRepository $lessonRepository, OffdayRepository $offdayRepository,
+      RoomRepository $roomRepository, StudentRepository $studentRepository) {
     $this->configService = $configService;
     $this->registrationService = $registrationService;
     $this->courseRepository = $courseRepository;
     $this->groupRepository = $groupRepository;
     $this->lessonRepository = $lessonRepository;
     $this->offdayRepository = $offdayRepository;
+    $this->roomRepository = $roomRepository;
     $this->studentRepository = $studentRepository;
   }
 
@@ -437,17 +443,23 @@ class CourseServiceImpl implements CourseService {
     if ($lessons->isEmpty()) {
       return null;
     }
-    return $this->lessonRepository->queryForOccupation($lessons, $teacher)
+
+    $regularOccupations = $this->roomRepository->queryOccupationForLessons($lessons, $teacher)
         ->with('teacher:id,lastname,firstname')
-        ->get(['id', 'date', 'number', 'teacher_id', 'room_id'])
+        ->get(['id', 'date', 'number', 'teacher_id', 'room_id']);
+    $flexOccupations = $this->lessonRepository->queryForOccupation($lessons, $teacher)
+        ->with('teacher:id,lastname,firstname')
+        ->get(['id', 'date', 'number', 'teacher_id', 'room_id']);
+
+    return $regularOccupations->merge($flexOccupations)
         ->groupBy('room_id')
-        ->map(function(Collection $lessons) {
-          return $lessons->map(function(Lesson $lesson) {
-            $this->configService->setTime($lesson);
+        ->map(function(Collection $items) {
+          return $items->map(function($item) {
+            $this->configService->setTime($item);
             return [
-                'date'    => $lesson->date->toDateString(),
-                'time'    => $lesson->time,
-                'teacher' => $lesson->teacher->name()
+                'date'    => $item->date->toDateString(),
+                'time'    => $item->time,
+                'teacher' => $item->teacher ? $item->teacher->name() : null
             ];
           });
         });

@@ -135,7 +135,7 @@ class ConfigServiceImpl implements ConfigService {
     });
   }
 
-  public function setTime(Lesson $lesson) {
+  public function setTime($lesson) {
     $lesson->time = [
         'number' => $lesson->number
 //        'start' => $this->getLessonStart($lesson->date, $lesson->number),
