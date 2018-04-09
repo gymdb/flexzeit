@@ -29,12 +29,14 @@ use App\Services\Implementation\LessonServiceImpl;
 use App\Services\Implementation\MiscServiceImpl;
 use App\Services\Implementation\OffdayServiceImpl;
 use App\Services\Implementation\RegistrationServiceImpl;
+use App\Services\Implementation\RoomServiceImpl;
 use App\Services\Implementation\StudentServiceImpl;
 use App\Services\Implementation\WebUntisServiceImpl;
 use App\Services\LessonService;
 use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
+use App\Services\RoomService;
 use App\Services\StudentService;
 use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
@@ -149,6 +151,7 @@ class AppServiceProvider extends ServiceProvider {
     $this->app->singleton(MiscService::class, MiscServiceImpl::class);
     $this->app->singleton(OffdayService::class, OffdayServiceImpl::class);
     $this->app->singleton(RegistrationService::class, RegistrationServiceImpl::class);
+    $this->app->singleton(RoomService::class, RoomServiceImpl::class);
     $this->app->singleton(StudentService::class, StudentServiceImpl::class);
     $this->app->singleton(WebUntisService::class, WebUntisServiceImpl::class);
   }

@@ -46,4 +46,14 @@ interface WebUntisService {
    */
   public function getSubstitutions(Date $start, Date $end);
 
+  /**
+   * Get occupations for the specified room
+   *
+   * @param $name
+   * @param Date $start
+   * @param Date $end
+   * @return array List of occupied lessons for the room
+   */
+  public function getRoomOccupations($name, Date $start, Date $end);
+
 }

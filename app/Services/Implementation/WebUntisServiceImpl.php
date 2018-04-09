@@ -85,11 +85,9 @@ class WebUntisServiceImpl implements WebUntisService {
       return [
           'start'     => $this->getDateTime($item['date'], $item['startTime']),
           'end'       => $this->getDateTime($item['date'], $item['endTime']),
-          'cancelled' => !empty($item['cancelled']) && $item['code'] === 'cancelled',
+          'cancelled' => $this->isCancelled($item),
           'group'     => empty($item['sg']) ? null : $item['sg'],
-          'flex'      => !is_null(Arr::first($item['su'], function($subject) {
-            return $subject['name'] === 'Flex';
-          }))
+          'flex'      => $this->isFlex($item)
       ];
     });
   }
@@ -103,14 +101,12 @@ class WebUntisServiceImpl implements WebUntisService {
     $this->logout();
 
     $result = collect($result)->filter(function($item) {
-      return !is_null(Arr::first($item['su'], function($subject) {
-        return $subject['name'] === 'Flex';
-      }));
+      return $this->isFlex($item);
     })->flatMap(function($item) {
       return collect($item['te'])->map(function($teacher) use ($item) {
         $rooms = collect($item['ro'])->map(function($room) {
           return [
-              'room'      => $room['name'],
+              'room'         => $room['name'],
               'originalRoom' => $room['orgname'] ?? null
           ];
         });
@@ -128,6 +124,33 @@ class WebUntisServiceImpl implements WebUntisService {
     return $result;
   }
 
+  public function getRoomOccupations($name, Date $start, Date $end) {
+    $result = $this->authenticatedConnection()->getTimetable([
+        'options' => [
+            'element'       => ['id' => $name, 'type' => 4, 'keyType' => 'name'],
+            'startDate'     => $start->format('Ymd'),
+            'endDate'       => $end->format('Ymd'),
+            'klasseFields'  => [],
+            'roomFields'    => [],
+            'subjectFields' => ['name'],
+            'teacherFields' => ['name']
+        ]
+    ]);
+    $this->logout();
+
+    return collect($result)->filter(function($item) {
+      return !$this->isCancelled($item) && !$this->isFlex($item);
+    })->flatMap(function($item) {
+      return collect($item['te'])->map(function($teacher) use ($item) {
+        return [
+            'start'   => $this->getDateTime($item['date'], $item['startTime']),
+            'end'     => $this->getDateTime($item['date'], $item['endTime']),
+            'teacher' => $teacher['name']
+        ];
+      });
+    });
+  }
+
   /**
    * @param int $date
    * @return Date
@@ -143,6 +166,24 @@ class WebUntisServiceImpl implements WebUntisService {
    */
   protected function getDateTime($date, $time) {
     return Carbon::create(floor($date / 10000), floor($date / 100) % 100, $date % 100, floor($time / 100), $time % 100, 0);
+  }
+
+  /**
+   * @param $item
+   * @return bool
+   */
+  protected function isFlex($item) {
+    return !is_null(Arr::first($item['su'], function($subject) {
+      return $subject['name'] === 'Flex';
+    }));
+  }
+
+  /**
+   * @param $item
+   * @return bool
+   */
+  protected function isCancelled($item) {
+    return !empty($item['code']) && $item['code'] === 'cancelled';
   }
 
 }
