@@ -13,6 +13,7 @@ class ArtisanController extends Controller {
       'schedule:run',
       'untis:absences',
       'untis:offdays',
+      'untis:occupations',
       'untis:substitutions'
   ];
 

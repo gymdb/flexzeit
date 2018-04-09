@@ -36,6 +36,8 @@ class Kernel extends ConsoleKernel {
       Log::error('Failed scheduling absences loading.', [$e->getMessage()]);
     }
 
+    $schedule->command('untis:occupations')
+        ->twiceDaily(6, 18);
     $schedule->command('untis:offdays')
         ->twiceDaily(6, 18);
     $schedule->command('untis:substitutions')
