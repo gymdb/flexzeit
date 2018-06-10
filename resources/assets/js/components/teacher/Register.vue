@@ -12,6 +12,7 @@
                    :groups="groups"
                    :error-text="$t('registrations.register.loadError')"
                    :keep-filter="false"
+                   :multiple-students="true"
                    v-on:filter="setFilter"
                    v-on:data="setData">
       <template slot="chooseStudent"></template>
@@ -19,26 +20,28 @@
         <p v-if="!saveDisabled" class="text-center"><strong>{{$t('registrations.register.confirm')}}</strong></p>
       </template>
       <template scope="props">
-        <div v-if="isSameLesson" class="alert alert-danger">
-          <strong>{{$t('registrations.warnings.sameLesson')}}</strong>
-        </div>
-        <div v-else class="alert alert-warning">
-          <strong>{{$t('registrations.warnings.heading')}}</strong>
-          <ul>
-            <li v-for="(data, key) in props.data">
-              {{$t('registrations.warnings.' + key, data)}}
-              <ul v-if="key === 'lessons'">
-                <li v-for="lesson in data">
-                  {{$d(moment(lesson.date), 'short')}}: {{lesson.teacher}}<span v-if="lesson.course"> ({{lesson.course}})</span>
-                </li>
-              </ul>
-              <ul v-if="key === 'offdays'">
-                <li v-for="offday in data">
-                  {{$d(moment(offday.date), 'short')}}: {{offday.group}}
-                </li>
-              </ul>
-            </li>
-          </ul>
+        <div v-for="student in props.data">
+          <div v-if="isSameLesson(student.data)" class="alert alert-danger">
+            <strong>{{student.name}}: {{$t('registrations.warnings.sameLesson')}}</strong>
+          </div>
+          <div v-else class="alert alert-warning">
+            <strong>{{$t('registrations.warnings.heading')}}</strong> {{student.name}}
+            <ul>
+              <li v-for="(data, key) in student.data">
+                {{$t('registrations.warnings.' + key, data)}}
+                <ul v-if="key === 'lessons'">
+                  <li v-for="lesson in data">
+                    {{$d(moment(lesson.date), 'short')}}: {{lesson.teacher}}<span v-if="lesson.course"> ({{lesson.course}})</span>
+                  </li>
+                </ul>
+                <ul v-if="key === 'offdays'">
+                  <li v-for="offday in data">
+                    {{$d(moment(offday.date), 'short')}}: {{offday.group}}
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <p v-if="!saveDisabled" class="text-center">
@@ -47,7 +50,9 @@
       </template>
     </filtered-list>
 
-    <error :error="error">{{$t('registrations.register.saveError')}}</error>
+    <error v-if="errors" v-for="(error,i) in errors" :key="i" :error="error">
+      {{$t('registrations.register.saveError')}}
+    </error>
   </modal>
 </template>
 
@@ -59,12 +64,13 @@
         show: false,
         shown: false,
         url: '/teacher/api/registrations/warnings/' + (this.course ? 'course' : 'lesson') + '/' + this.id,
-        student: null,
-        registeredLesson: null,
-        registeredLessons: null,
+        students: null,
+        hasSameLesson: false,
+        hasAdminOnly: false,
+        hasChangeLesson: false,
         timetable: null,
         saving: false,
-        error: null,
+        errors: null,
         reload: false
       }
     },
@@ -87,15 +93,11 @@
       }
     },
     computed: {
-      isSameLesson() {
-        return !this.course && this.registeredLesson && this.registeredLesson === this.id;
-      },
       saveDisabled() {
-        return this.saving || !this.student || this.isSameLesson
-            || (!this.admin && (this.registeredLesson || this.registeredLessons || this.timetable));
+        return this.saving || !this.students || this.hasSameLesson || (!this.admin && this.hasAdminOnly);
       },
       submitLabel() {
-        return (this.admin && this.registeredLesson && !this.isSameLesson)
+        return (this.admin && this.hasChangeLesson)
             ? this.$t('registrations.register.change')
             : this.$t('registrations.register.submit');
       }
@@ -112,41 +114,59 @@
         }
       },
       setFilter() {
-        this.student = null;
+        this.students = null;
+      },
+      isSameLesson(data) {
+        return !this.course &&
+            ((data.lesson && data.lesson.id === this.id) || (data.course && data.course.id === this.id));
       },
       setData(data) {
         if (data) {
-          this.student = this.$refs.filter.student;
-          if (data.lesson) {
-            this.registeredLesson = data.lesson.id;
-          } else if (data.course) {
-            this.registeredLesson = data.course.id;
-          } else {
-            this.registeredLesson = null;
-          }
-
-          this.registeredLessons = !!data.lessons;
-          this.timetable = !!data.timetable;
+          this.students = this.$refs.filter.students;
+          this.hasSameLesson = false;
+          this.hasAdminOnly = false;
+          this.hasChangeLesson = false;
+          Object.keys(data).forEach(student => {
+            let studentData = data[student].data;
+            if (this.isSameLesson(studentData)) {
+              this.hasSameLesson = true;
+            }
+            if (studentData.lesson || studentData.course || studentData.lessons || studentData.timetable) {
+              this.hasAdminOnly = true;
+            }
+            if (studentData.lesson || studentData.course) {
+              this.hasChangeLesson = true;
+            }
+          });
         } else {
-          this.student = null;
+          this.students = null;
         }
       },
       save() {
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/teacher/api/register/' + (this.course ? 'course' : 'lesson') + '/' + this.id + '/' + this.student, {}).then(function (response) {
-            if (response.data.success) {
-              self.error = null;
+
+          let promises = this.students.map(student => {
+            let url = `/teacher/api/register/${this.course ? 'course' : 'lesson'}/${this.id}/${student}`;
+            return this.$http.post(url, {});
+          });
+
+          Promise.all(promises).then(function (responses) {
+            let errors = responses
+                .filter(r => !r.data.success)
+                .map(r => r.data.error);
+            if (!errors.length) {
+              self.errors = null;
               self.reload = true;
-              self.$refs.filter.student = null;
+              self.$refs.filter.students = [];
             } else {
-              self.error = response.data.error;
+              self.errors = errors;
             }
             self.saving = false;
           }).catch(function (error) {
             self.saving = false;
-            self.error = error;
+            self.errors = [error];
           });
         }
       }

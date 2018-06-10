@@ -10,12 +10,18 @@
         </select>
       </div>
 
-      <div v-if="groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
+      <div v-if="!multipleStudents && groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
         <label for="student" class="sr-only">{{$t('messages.student')}}</label>
         <select class="form-control" id="student" :disabled="!group" v-model="student">
           <option :value="null">{{$t('messages.student')}}</option>
           <option v-for="s in studentsList" :value="s.id">{{s.name}}</option>
         </select>
+      </div>
+      <div v-if="multipleStudents && groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
+        <label for="students" class="sr-only">{{$t('messages.student')}}</label>
+        <v-select class="select-container" id="students" :disabled="!group" v-model="students" multiple search
+                  :placeholder="$t('messages.student')" :options="studentsList" options-value="id" options-label="name">
+        </v-select>
       </div>
 
       <div v-if="teachersList" class="form-group col-sm-3 col-xs-6">
@@ -142,6 +148,7 @@
         typesList: this.roomTypes,
         group: group,
         student: params.student || null,
+        students: [],
         teacher: params.teacher || null,
         subject: this.subjects && this.subjects.length === 1 ? this.subjects[0].id : (params.subject || null),
         type: params.type || null,
@@ -233,6 +240,10 @@
         'type': Boolean,
         'default': true
       },
+      multipleStudents: {
+        'type': Boolean,
+        'default': false
+      },
       hasTrashed: {
         'type': Boolean,
         'default': false
@@ -271,7 +282,8 @@
         return this.groupsList && this.groupsList.length > 1;
       },
       filter() {
-        if (this.groupsList && this.requireGroup && (!this.group || (this.requireStudent && !this.student))) {
+        const hasStudent = this.multipleStudents ? this.students.length : this.student;
+        if (this.groupsList && this.requireGroup && (!this.group || (this.requireStudent && !hasStudent))) {
           return null;
         }
         if (this.requireTeacher && !this.teacher) {
@@ -384,17 +396,54 @@
         } else {
           let self = this;
           this.loading = true;
-          this.$http.get(this.url, {params: filter}).then(function (response) {
-            self.dataError = null;
-            self.data = response.data;
-            self.loading = false;
-          }).catch(function (error) {
+          let promise = this.multipleStudents
+              ? this.loadForMultipleStudents(filter)
+              : this.loadForSingleStudent(filter);
+          promise.catch(function (error) {
             self.dataError = error;
             self.data = null;
             self.loading = false;
           });
         }
       }, 50),
+      loadForMultipleStudents(filter) {
+        // Things get a little bit more complicated if data has to be loaded for multiple students
+        let self = this;
+        let students = this.students.slice(0);
+
+        // Create a list of promises, reusing the already loaded data if available
+        let promises = students.map(student => {
+          return this.data && this.data[student]
+              ? Promise.resolve({data: this.data[student].data})
+              : this.$http.get(this.url, {params: Object.assign({}, filter, {student})});
+        });
+
+        // Resolve all promises together
+        return Promise.all(promises).then(function (responses) {
+          self.dataError = null;
+          self.loading = false;
+
+          let data = {};
+          responses.forEach((response, i) => {
+            if (Object.keys(response.data).length) {
+              let student = students[i];
+              data[student] = {
+                name: self.findName(self.studentsList, +student),
+                data: response.data
+              };
+            }
+          });
+          self.data = data;
+        });
+      },
+      loadForSingleStudent(filter) {
+        let self = this;
+        return this.$http.get(this.url, {params: filter}).then(function (response) {
+          self.dataError = null;
+          self.data = response.data;
+          self.loading = false;
+        });
+      },
       setStart(date) {
         this.start = date;
       },
