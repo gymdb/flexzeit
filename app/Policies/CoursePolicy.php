@@ -25,7 +25,7 @@ class CoursePolicy {
    * @return bool
    */
   public function view(User $user, Course $course) {
-    return $this->checkUser($user, $course);
+    return $this->isCourseTeacher($user, $course);
   }
 
   /**
@@ -46,7 +46,7 @@ class CoursePolicy {
    * @return bool
    */
   public function update(User $user, Course $course) {
-    return $this->checkUser($user, $course);
+    return $this->isCourseTeacher($user, $course);
   }
 
   /**
@@ -57,7 +57,7 @@ class CoursePolicy {
    * @return bool
    */
   public function delete(User $user, Course $course) {
-    return $this->checkUser($user, $course);
+    return $this->isCourseTeacher($user, $course);
   }
 
   /**
@@ -68,7 +68,7 @@ class CoursePolicy {
    * @return bool
    */
   public function register(User $user, Course $course) {
-    return $this->checkUser($user, $course);
+    return $this->isCourseTeacher($user, $course);
   }
 
   /**
@@ -79,7 +79,7 @@ class CoursePolicy {
    * @return bool
    */
   public function unregister(User $user, Course $course) {
-    return $this->checkUser($user, $course);
+    return $this->isCourseTeacher($user, $course);
   }
 
   /**
@@ -88,12 +88,11 @@ class CoursePolicy {
    * @param User $user
    * @return bool
    */
-  public function listObligatory(/** @noinspection PhpUnusedParameterInspection */
-      User $user) {
-    return false;
+  public function listObligatory(User $user) {
+    return $user->isTeacher();
   }
 
-  private function checkUser(User $user, Course $course) {
+  private function isCourseTeacher(User $user, Course $course) {
     if (!$user->isTeacher()) {
       return false;
     }

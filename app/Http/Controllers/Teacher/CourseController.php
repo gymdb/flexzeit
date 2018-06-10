@@ -88,7 +88,9 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.courses.index', compact('teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.courses.index', compact(
+        'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'
+    ));
   }
 
   /**
@@ -104,6 +106,8 @@ class CourseController extends Controller {
     $teachers = $this->miscService->getTeachers();
     $subjects = $this->miscService->getSubjects();
 
+    $user = $this->getTeacher();
+    $defaultGroup = !$user->admin && $user->form ? $user->form->group_id : null;
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
     $defaultStartDate = $this->configService->getDefaultListStartDate();
@@ -111,7 +115,9 @@ class CourseController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.courses.obligatory', compact('groups', 'teachers', 'subjects', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.courses.obligatory', compact(
+        'groups', 'teachers', 'subjects', 'defaultGroup', 'defaultStartDate', 'defaultEndDate',
+        'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -172,8 +178,10 @@ class CourseController extends Controller {
     $oldRoom = $this->parseOldNumber('room');
     $oldTeacher = $this->parseOldNumber('teacher');
 
-    return view('teacher.courses.create', array_merge($data, compact('minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek',
-        'offdays', 'rooms', 'type', 'obligatory', 'teachers', 'oldFirstDate', 'oldLastDate', 'oldNumber', 'oldRoom', 'oldTeacher')));
+    return view('teacher.courses.create', array_merge($data, compact(
+        'minDate', 'maxDate', 'lessons', 'disabledDaysOfWeek', 'offdays', 'rooms', 'type', 'obligatory',
+        'teachers', 'oldFirstDate', 'oldLastDate', 'oldNumber', 'oldRoom', 'oldTeacher'
+    )));
   }
 
   private function parseOldDate($key) {
@@ -190,9 +198,9 @@ class CourseController extends Controller {
   }
 
   private function parseOldGroups() {
-    $oldGroups = collect(old('groups'))->map(function($group) {
+    $oldGroups = collect(old('groups'))->map(function ($group) {
       return $group && ctype_digit($group) ? (int)$group : null;
-    })->filter(function($group) {
+    })->filter(function ($group) {
       return $group;
     });
     return $oldGroups->isEmpty() ? null : $oldGroups;
@@ -257,7 +265,10 @@ class CourseController extends Controller {
 
     $groups = $showRegister ? $this->miscService->getGroups() : null;
 
-    return view('teacher.courses.show', compact('course', 'lessons', 'registrations', 'firstLesson', 'allowDestroy', 'showRegister', 'groups', 'isOwner', 'isAdmin'));
+    return view('teacher.courses.show', compact(
+        'course', 'lessons', 'registrations', 'firstLesson', 'allowDestroy',
+        'showRegister', 'groups', 'isOwner', 'isAdmin'
+    ));
   }
 
   /**
@@ -337,8 +348,10 @@ class CourseController extends Controller {
       $data = compact('minYear', 'maxYear');
     }
 
-    return view('teacher.courses.edit', array_merge($data, compact('type', 'obligatory', 'allowDateChange', 'minDate', 'maxDate',
-        'lessons', 'disabledDaysOfWeek', 'offdays', 'rooms', 'courseData', 'old')));
+    return view('teacher.courses.edit', array_merge($data, compact(
+        'type', 'obligatory', 'allowDateChange', 'minDate', 'maxDate',
+        'lessons', 'disabledDaysOfWeek', 'offdays', 'rooms', 'courseData', 'old'
+    )));
   }
 
   /**
@@ -396,7 +409,8 @@ class CourseController extends Controller {
    * @param Teacher|null $teacher
    * @return JsonResponse
    */
-  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null, Teacher $teacher = null) {
+  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null,
+      Teacher $teacher = null) {
     $user = $this->getTeacher();
     if (!$user->admin || !$teacher) {
       $teacher = $user;
@@ -446,7 +460,8 @@ class CourseController extends Controller {
    * @return JsonResponse
    * @throws AuthorizationException Thrown if the user does not have permission to list obligatory courses
    */
-  public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
+  public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null,
+      Date $start = null, Date $end = null) {
     $this->authorize('listObligatory', Course::class);
 
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
