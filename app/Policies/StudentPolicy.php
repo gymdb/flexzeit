@@ -53,8 +53,7 @@ class StudentPolicy {
    * @return bool
    */
   public function showMissingDocumentation(User $user, Student $student) {
-    // TODO This should be group teacher instead of form teacher
-    return $this->isFormTeacher($user, $student);
+    return $this->isGroupTeacher($user, $student);
   }
 
   /**
@@ -69,7 +68,7 @@ class StudentPolicy {
   }
 
   /**
-   * Determine whether the user is a teacher that has access for the given student
+   * Determine whether the user is the form teacher for the given student
    *
    * @param User $user
    * @param Student|null $student
@@ -88,4 +87,21 @@ class StudentPolicy {
                 ->wherePivot('student_id', $student->id)->exists());
   }
 
+  /**
+   * Determine whether the user is a teacher that teaches one of the given student's groups
+   *
+   * @param User $user
+   * @param Student|null $student
+   * @return bool
+   */
+  private function isGroupTeacher(User $user, Student $student) {
+    if (!$user->isTeacher()) {
+      return false;
+    }
+    /** @var Teacher $user */
+    if ($user->admin) {
+      return true;
+    }
+    return $student->groups()->whereIn('group_id', $user->groups()->select('group_id')->getQuery())->exists();
+  }
 }
