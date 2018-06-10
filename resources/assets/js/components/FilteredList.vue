@@ -61,7 +61,9 @@
 
       <div v-if="hasTrashed" class="form-group col-sm-3 col-xs-6">
         <label for="showTrashed" class="sr-only">{{$t('messages.showTrashed')}}</label>
-        <label class="checkbox-inline"><input type="checkbox" id="showTrashed" v-model="showTrashed"/> {{$t('messages.showTrashed')}}</label>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="showTrashed" v-model="showTrashed"/> {{$t('messages.showTrashed')}}
+        </label>
       </div>
 
       <div class="col-xs-12">
@@ -126,7 +128,7 @@
             });
       }
 
-      let group = this.groups && this.groups.length === 1 ? this.groups[0].id : (params.group || null);
+      let group = this.groups && this.groups.length === 1 ? this.groups[0].id : (params.group || this.defaultGroup);
       if (group) {
         this.loadStudents(group);
       }
@@ -182,6 +184,10 @@
       number: {
         'type': Number,
         'default': null,
+      },
+      defaultGroup: {
+        'type': Number,
+        'default': null
       },
       defaultStartDate: {
         'type': String,

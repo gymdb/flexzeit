@@ -9,6 +9,7 @@
           :groups='@json($groups)'
           :teachers='@json($teachers)'
           :subjects='@json($subjects)'
+          :default-group='@json($defaultGroup)'
           default-start-date='{{$defaultStartDate->toDateString()}}'
           default-end-date='{{$defaultEndDate->toDateString()}}'
           min-date='{{$minDate->toDateString()}}'

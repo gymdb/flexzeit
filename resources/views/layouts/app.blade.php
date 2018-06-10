@@ -26,7 +26,8 @@
       @endguest
       @auth
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse" title="@lang('nav.toggle')">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                  data-target="#app-navbar-collapse" title="@lang('nav.toggle')">
             <span class="sr-only">@lang('nav.toggle')</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -66,9 +67,13 @@
                     <li>
                       <a href="{{route('teacher.registrations.list')}}">@lang('nav.registrations.list')</a>
                     </li>
+                  @endcan
+                  @can('showMissingRegistrations', \App\Models\Student::class)
                     <li>
                       <a href="{{route('teacher.registrations.missing')}}">@lang('nav.registrations.missing')</a>
                     </li>
+                  @endcan
+                  @can('showAbsent', \App\Models\Student::class)
                     <li>
                       <a href="{{route('teacher.registrations.absent')}}">@lang('nav.registrations.absent')</a>
                     </li>

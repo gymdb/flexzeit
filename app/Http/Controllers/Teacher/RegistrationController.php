@@ -16,6 +16,7 @@ use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use App\Services\StudentService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 
@@ -53,22 +54,26 @@ class RegistrationController extends Controller {
     $this->registrationService = $registrationService;
     $this->studentService = $studentService;
 
-    $this->middleware('transaction', ['only' => ['setAttendance', 'setAttendanceChecked', 'registerLesson', 'unregisterLesson', 'refreshAbsences']]);
+    $this->middleware('transaction', ['only' => [
+        'setAttendance', 'setAttendanceChecked', 'registerLesson', 'unregisterLesson', 'refreshAbsences'
+    ]]);
   }
 
   /**
    * Show the overview page for registrations of the students
    *
    * @return View
+   * @throws AuthorizationException
    */
   public function showRegistrations() {
     $this->authorize('showRegistrations', Student::class);
 
-    $user = $this->getTeacher();
-    $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
+    $groups = $this->miscService->getGroups();
     $subjects = $this->miscService->getSubjects();
     $teachers = $this->miscService->getTeachers();
 
+    $user = $this->getTeacher();
+    $defaultGroup = !$user->admin && $user->form ? $user->form->group_id : null;
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
     $defaultStartDate = $this->configService->getDefaultListStartDate();
@@ -76,17 +81,20 @@ class RegistrationController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.registrations.list', compact('groups', 'subjects', 'teachers', 'minDate', 'maxDate',
-        'defaultStartDate', 'defaultEndDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.registrations.list', compact(
+        'groups', 'subjects', 'teachers', 'defaultGroup', 'minDate', 'maxDate',
+        'defaultStartDate', 'defaultEndDate', 'offdays', 'disabledDaysOfWeek'
+    ));
   }
 
   /**
    * Show the list of missing registrations
    *
    * @return View
+   * @throws AuthorizationException
    */
   public function showMissing() {
-    $this->authorize('showRegistrations', Student::class);
+    $this->authorize('showMissingRegistrations', Student::class);
 
     $user = $this->getTeacher();
     $isAdmin = $user->admin;
@@ -97,16 +105,19 @@ class RegistrationController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.registrations.missing', compact('isAdmin', 'groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.registrations.missing', compact(
+        'isAdmin', 'groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'
+    ));
   }
 
   /**
    * Show the list of absent students
    *
    * @return View
+   * @throws AuthorizationException
    */
   public function showAbsent() {
-    $this->authorize('showRegistrations', Student::class);
+    $this->authorize('showAbsent', Student::class);
 
     $user = $this->getTeacher();
     $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
@@ -116,7 +127,9 @@ class RegistrationController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.registrations.absent', compact('groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.registrations.absent', compact(
+        'groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'
+    ));
   }
 
   /**
@@ -125,12 +138,14 @@ class RegistrationController extends Controller {
    * @param Registration $registration
    * @param boolean $attendance
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function setAttendance(Registration $registration, $attendance) {
     $this->authorize('setAttendance', $registration);
 
     $teacher = $this->getTeacher();
-    $force = $teacher->admin || ($teacher->form && $registration->student->groups()->wherePivot('group_id', $teacher->form->group_id)->exists());
+    $force = $teacher->admin || ($teacher->form && $registration->student->groups()
+                ->wherePivot('group_id', $teacher->form->group_id)->exists());
     $this->registrationService->setAttendance($registration, $attendance, $force);
     return response()->json(['success' => true]);
   }
@@ -140,6 +155,7 @@ class RegistrationController extends Controller {
    *
    * @param Lesson $lesson
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function setAttendanceChecked(Lesson $lesson) {
     $this->authorize('setAttendanceChecked', $lesson);
@@ -155,6 +171,7 @@ class RegistrationController extends Controller {
    * @param Student $student
    * @return JsonResponse
    * @internal param Registration $registration
+   * @throws AuthorizationException
    */
   public function registerLesson(Lesson $lesson, Student $student) {
     $this->authorize('register', $lesson);
@@ -170,6 +187,7 @@ class RegistrationController extends Controller {
    * @param Student $student
    * @return JsonResponse
    * @internal param Registration $registration
+   * @throws AuthorizationException
    */
   public function registerCourse(Course $course, Student $student) {
     $this->authorize('register', $course);
@@ -183,6 +201,7 @@ class RegistrationController extends Controller {
    *
    * @param Registration $registration
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function unregisterLesson(Registration $registration) {
     $this->authorize('unregister', $registration);
@@ -197,6 +216,7 @@ class RegistrationController extends Controller {
    * @param Course $course
    * @param Student $student
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function unregisterCourse(Course $course, Student $student) {
     $this->authorize('unregister', $course);
@@ -226,8 +246,10 @@ class RegistrationController extends Controller {
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return JsonResponse
+   * @throws AuthorizationException
    */
-  public function getForStudent(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+  public function getForStudent(Group $group, Student $student = null, Date $start = null, Date $end = null,
+      Teacher $teacher = null, Subject $subject = null) {
     if ($student) {
       $this->authorize('showRegistrations', $student);
     } else {
@@ -273,12 +295,13 @@ class RegistrationController extends Controller {
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
     if ($student) {
-      $this->authorize('showRegistrations', $student);
+      $this->authorize('showMissingRegistrations', $student);
     } else {
-      $this->authorize('showRegistrations', $group);
+      $this->authorize('showMissingRegistrations', $group);
     }
 
     $missing = $this->registrationService->getMissing($group, $student, $start, $end);
@@ -293,12 +316,13 @@ class RegistrationController extends Controller {
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
+   * @throws AuthorizationException
    */
   public function getAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null) {
     if ($student) {
-      $this->authorize('showRegistrations', $student);
+      $this->authorize('showAbsent', $student);
     } else {
-      $this->authorize('showRegistrations', $group);
+      $this->authorize('showAbsent', $group);
     }
 
     $missing = $this->registrationService->getMappedAbsent($group, $student, $start, $end);
