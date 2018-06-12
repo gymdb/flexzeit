@@ -108,11 +108,11 @@
       <div class="alert alert-info">{{$t(requireStudent ? 'messages.chooseStudent' : 'messages.chooseGroup')}}</div>
     </slot>
     <p v-else-if="loading" class="lead text-center"><span class="glyphicon glyphicon-refresh spin"></span></p>
-    <slot v-else-if="!hasData" name="empty">
+    <slot v-else-if="!hasData" name="empty" :studentName="studentName">
       <div class="alert alert-warning">{{$t('messages.emptyResult')}}</div>
     </slot>
 
-    <slot v-if="hasData" :data="data" :filter="filter"></slot>
+    <slot v-if="hasData" :data="data" :filter="filter" :studentName="studentName" :sorted="sorted"></slot>
   </div>
 </template>
 
@@ -282,7 +282,7 @@
         return this.groupsList && this.groupsList.length > 1;
       },
       filter() {
-        const hasStudent = this.multipleStudents ? this.students.length : this.student;
+        const hasStudent = this.multipleStudents ? !_.isEmpty(this.students) : this.student;
         if (this.groupsList && this.requireGroup && (!this.group || (this.requireStudent && !hasStudent))) {
           return null;
         }
@@ -355,11 +355,16 @@
 
         return $.param(params, true);
       },
+      sorted() {
+        return this.multipleStudents ? _.sortBy(this.data, 'name') : this.data;
+      },
       groupName() {
         return this.showGroup ? this.findName(this.groupsList, +this.group) : null;
       },
       studentName() {
-        return this.findName(this.studentsList, +this.student);
+        return this.multipleStudents
+            ? this.students.map(s => this.findName(this.studentsList, +s)).sort().join(", ")
+            : this.findName(this.studentsList, +this.student);
       },
       teacherName() {
         return this.findName(this.teachersList, +this.teacher);
@@ -425,7 +430,7 @@
 
           let data = {};
           responses.forEach((response, i) => {
-            if (Object.keys(response.data).length) {
+            if (!_.isEmpty(response.data)) {
               let student = students[i];
               data[student] = {
                 name: self.findName(self.studentsList, +student),

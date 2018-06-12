@@ -16,11 +16,14 @@
                    v-on:filter="setFilter"
                    v-on:data="setData">
       <template slot="chooseStudent"></template>
-      <template slot="empty">
-        <p v-if="!saveDisabled" class="text-center"><strong>{{$t('registrations.register.confirm')}}</strong></p>
+      <template slot="empty" scope="props">
+        <p v-if="!saveDisabled" class="text-center">
+          <strong>{{$t(course ? 'registrations.register.confirmCourse' : 'registrations.register.confirm')}}</strong>
+          <br>{{props.studentName}}
+        </p>
       </template>
       <template scope="props">
-        <div v-for="student in props.data">
+        <div v-for="student in props.sorted">
           <div v-if="isSameLesson(student.data)" class="alert alert-danger">
             <strong>{{student.name}}: {{$t('registrations.warnings.sameLesson')}}</strong>
           </div>
@@ -46,6 +49,7 @@
 
         <p v-if="!saveDisabled" class="text-center">
           <strong>{{$t(course ? 'registrations.register.confirmCourse' : 'registrations.register.confirm')}}</strong>
+          <br>{{props.studentName}}
         </p>
       </template>
     </filtered-list>
@@ -126,8 +130,8 @@
           this.hasSameLesson = false;
           this.hasAdminOnly = false;
           this.hasChangeLesson = false;
-          Object.keys(data).forEach(student => {
-            let studentData = data[student].data;
+          _.each(data, value => {
+            let studentData = value.data;
             if (this.isSameLesson(studentData)) {
               this.hasSameLesson = true;
             }
@@ -156,7 +160,7 @@
             let errors = responses
                 .filter(r => !r.data.success)
                 .map(r => r.data.error);
-            if (!errors.length) {
+            if (_.isEmpty(errors)) {
               self.errors = null;
               self.reload = true;
               self.$refs.filter.students = [];
