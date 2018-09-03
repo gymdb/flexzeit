@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\CacheControlMiddleware;
 use App\Http\Middleware\DateMiddleware;
+use App\Http\Middleware\IntranetSignOnMiddleware;
 use App\Http\Middleware\ParametersMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\StripTags;
@@ -68,7 +69,8 @@ class Kernel extends HttpKernel {
           VerifyCsrfToken::class,
           SubstituteBindings::class,
           DateMiddleware::class,
-          CacheControlMiddleware::class
+          CacheControlMiddleware::class,
+          IntranetSignOnMiddleware::class
       ],
 
       'api' => [
