@@ -88,7 +88,3 @@ class IntranetSignOnMiddleware {
     return null;
   }
 }
-
-class TeacherSession {
-  public $username = 'admin';
-}
