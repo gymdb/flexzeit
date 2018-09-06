@@ -2,10 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use __PHP_Incomplete_Class;
 use Closure;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use StudentSession;
+use TeacherSession;
 
 /**
  * Middleware for authenticating users through the intranet single-sign-on system
@@ -16,9 +19,8 @@ class IntranetSignOnMiddleware {
 
   /** @var array An array mapping (fully qualified) class names to the user type */
   private $types = [
-      // TODO The keys should be fully qualified, so it might be necessary to adapt them
-      'TeacherSession' => 'teacher',
-      'StudentSession' => 'student'
+      TeacherSession::class => 'teacher',
+      StudentSession::class => 'student'
   ];
 
   /**
@@ -39,8 +41,8 @@ class IntranetSignOnMiddleware {
   private function doLogin() {
     if (session_status() === PHP_SESSION_NONE) {
       // Start a native PHP session only if it does not exist already
-      // We don't need to change anything, so close it again immediately
-      session_start(['read_and_close' => true]);
+      // We don't need to change anything, so close it again immediately, and never try to cleanup sessions
+      session_start(['read_and_close' => false, 'gc_probability' => 0]);
     }
 
     if (empty($_SESSION['userSession'])) {
@@ -49,6 +51,11 @@ class IntranetSignOnMiddleware {
     }
 
     $session = $_SESSION['userSession'];
+    if ($session instanceof __PHP_Incomplete_Class) {
+      Log::warning('UserSession has unknown type ' . ((array)$session)['__PHP_Incomplete_Class_Name']);
+      return;
+    }
+
     if (empty($session->username)) {
       Log::warning('UserSession does not contain a username.');
       return;
