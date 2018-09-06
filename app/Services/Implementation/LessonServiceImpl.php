@@ -78,6 +78,10 @@ class LessonServiceImpl implements LessonService {
     $start = $this->configService->getYearStart(Date::today());
     $end = $this->configService->getYearEnd();
 
+    if ($start > $end) {
+      return;
+    }
+
     // Get global lesson times
     $times = $this->configService->getLessonTimes();
 

@@ -64,6 +64,10 @@ class OffdayServiceImpl implements OffdayService {
     $start = $this->configService->getYearStart();
     $end = $this->configService->getYearEnd();
 
+    if ($start > $end) {
+      return;
+    }
+
     // Get global lesson times
     $times = $this->configService->getLessonTimes();
 
