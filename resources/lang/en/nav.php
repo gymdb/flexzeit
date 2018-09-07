@@ -24,9 +24,10 @@ return [
         'list' => 'Show feedback'
     ],
     'registrations' => [
-        'list'    => 'Show registrations',
-        'missing' => 'Show missing registrations',
-        'absent'  => 'Show absences'
+        'list'      => 'Show registrations',
+        'missing'   => 'Show missing registrations',
+        'absent'    => 'Show absences',
+        'byteacher' => 'Show registrations by teachers'
     ],
     'bugreports'    => [
         'create' => 'Create bug report',

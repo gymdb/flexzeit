@@ -15,6 +15,7 @@ use App\Repositories\RegistrationRepository;
 use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use App\Services\RegistrationType;
 use App\Services\WebUntisService;
 use Illuminate\Support\Facades\Log;
 
@@ -219,7 +220,8 @@ class LessonServiceImpl implements LessonService {
     });
   }
 
-  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
+  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false,
+      $withCourse = false) {
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)
         ->with('course:id,name,maxstudents', 'room:id,name,capacity', 'teacher:id,lastname,firstname')
@@ -387,8 +389,8 @@ class LessonServiceImpl implements LessonService {
       /** @noinspection PhpDynamicAsStaticMethodCallInspection */
       $substitutedLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
     } else if ($substitutedLesson->cancelled) {
-        throw new LessonException(LessonException::CANCELLED);
-      }
+      throw new LessonException(LessonException::CANCELLED);
+    }
 
     if (!$lesson->cancelled || $lesson->substitute_id !== $teacher->id) {
       $lesson->cancelled = true;
@@ -398,7 +400,7 @@ class LessonServiceImpl implements LessonService {
 
     $students = $this->registrationRepository->queryNoneDuplicateRegistrations($lesson)->pluck('student_id');
     if ($students->isNotEmpty()) {
-      $this->registrationService->registerStudentsForLesson($substitutedLesson, $students);
+      $this->registrationService->registerStudentsForLesson($substitutedLesson, $students, RegistrationType::SUBSTITUTED());
     }
   }
 

@@ -21,6 +21,7 @@ use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\CourseService;
 use App\Services\RegistrationService;
+use App\Services\RegistrationType;
 use App\Specifications\CreateCourseSpecification;
 use App\Specifications\EditCourseSpecification;
 use App\Specifications\ObligatorySpecification;
@@ -103,7 +104,7 @@ class CourseServiceImpl implements CourseService {
       $course->save();
 
       $students = $this->studentRepository->queryForGroups($groups)->pluck('id');
-      $this->registrationService->registerStudentsForCourse($course, $students);
+      $this->registrationService->registerStudentsForCourse($course, $students, RegistrationType::OBLIGATORY());
 
       Mail::to($this->configService->getNotificationRecipients())
           ->send(new ObligatoryCreated($teacher, $course));
@@ -180,7 +181,7 @@ class CourseServiceImpl implements CourseService {
 
         // Register students for added lessons
         $students = $course->registrations()->distinct()->pluck('student_id');
-        $this->registrationService->registerStudentsForCourse($course, $students, $firstChanged);
+        $this->registrationService->registerStudentsForCourse($course, $students, RegistrationType::OBLIGATORY(), $firstChanged);
       }
     }
 
@@ -208,7 +209,7 @@ class CourseServiceImpl implements CourseService {
           $this->registrationService->unregisterStudentsFromCourse($course, $removedStudents->all());
         }
         if ($addedStudents->isNotEmpty()) {
-          $this->registrationService->registerStudentsForCourse($course, $addedStudents);
+          $this->registrationService->registerStudentsForCourse($course, $addedStudents, RegistrationType::OBLIGATORY());
         }
       }
     }

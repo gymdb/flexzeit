@@ -15,6 +15,7 @@ use App\Services\ConfigService;
 use App\Services\MiscService;
 use App\Services\OffdayService;
 use App\Services\RegistrationService;
+use App\Services\RegistrationType;
 use App\Services\StudentService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -133,6 +134,26 @@ class RegistrationController extends Controller {
   }
 
   /**
+   * Show the list of missing registrations
+   *
+   * @return View
+   * @throws AuthorizationException
+   */
+  public function showByTeacher() {
+    $this->authorize('showByTeacherRegistrations', Student::class);
+
+    $user = $this->getTeacher();
+    $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
+
+    $minDate = $this->configService->getYearStart();
+    $maxDate = $this->configService->getYearEnd();
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate);
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+
+    return view('teacher.registrations.byteacher', compact('groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+  }
+
+  /**
    * Set attendance for a given registration
    *
    * @param Registration $registration
@@ -165,7 +186,7 @@ class RegistrationController extends Controller {
   }
 
   /**
-   * Unregister a given registration
+   * Register single student for a given lesson
    *
    * @param Lesson $lesson
    * @param Student $student
@@ -176,12 +197,12 @@ class RegistrationController extends Controller {
   public function registerLesson(Lesson $lesson, Student $student) {
     $this->authorize('register', $lesson);
 
-    $this->registrationService->registerStudentForLesson($lesson, $student, true, $this->getTeacher()->admin);
+    $this->registrationService->registerStudentForLesson($lesson, $student, RegistrationType::BY_TEACHER($this->getTeacher()->admin));
     return response()->json(['success' => true]);
   }
 
   /**
-   * Unregister a given registration
+   * Register single student for a given course
    *
    * @param Course $course
    * @param Student $student
@@ -192,7 +213,7 @@ class RegistrationController extends Controller {
   public function registerCourse(Course $course, Student $student) {
     $this->authorize('register', $course);
 
-    $this->registrationService->registerStudentForCourse($course, $student, true, $this->getTeacher()->admin);
+    $this->registrationService->registerStudentForCourse($course, $student, RegistrationType::BY_TEACHER($this->getTeacher()->admin));
     return response()->json(['success' => true]);
   }
 
@@ -206,7 +227,7 @@ class RegistrationController extends Controller {
   public function unregisterLesson(Registration $registration) {
     $this->authorize('unregister', $registration);
 
-    $this->registrationService->unregisterStudentFromLesson($registration, true);
+    $this->registrationService->unregisterStudentFromLesson($registration, RegistrationType::BY_TEACHER($this->getTeacher()->admin));
     return response()->json(['success' => true]);
   }
 
@@ -221,7 +242,7 @@ class RegistrationController extends Controller {
   public function unregisterCourse(Course $course, Student $student) {
     $this->authorize('unregister', $course);
 
-    $this->registrationService->unregisterStudentFromCourse($course, $student, true);
+    $this->registrationService->unregisterStudentFromCourse($course, $student, RegistrationType::BY_TEACHER($this->getTeacher()->admin));
     return response()->json(['success' => true]);
   }
 
@@ -329,4 +350,24 @@ class RegistrationController extends Controller {
     return response()->json($missing);
   }
 
+  /**
+   * Get students with registrations made by a teacher
+   *
+   * @param Group $group
+   * @param Student|null $student
+   * @param Date|null $start
+   * @param Date|null $end
+   * @return JsonResponse
+   * @throws AuthorizationException
+   */
+  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+    if ($student) {
+      $this->authorize('showByTeacherRegistrations', $student);
+    } else {
+      $this->authorize('showByTeacherRegistrations', $group);
+    }
+
+    $byTeacher = $this->registrationService->getByTeacher($group, $student, $start, $end);
+    return response()->json($byTeacher);
+  }
 }

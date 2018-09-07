@@ -14,6 +14,7 @@ use App\Services\CourseService;
 use App\Services\DocumentationService;
 use App\Services\LessonService;
 use App\Services\RegistrationService;
+use App\Services\RegistrationType;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 
@@ -60,7 +61,7 @@ class ApiController extends Controller {
    * @return JsonResponse
    */
   public function registerCourse(Course $course) {
-    $this->registrationService->registerStudentForCourse($course, $this->getStudent());
+    $this->registrationService->registerStudentForCourse($course, $this->getStudent(), RegistrationType::BY_STUDENT());
     return response()->json(['success' => true]);
   }
 
@@ -69,7 +70,7 @@ class ApiController extends Controller {
    * @return JsonResponse
    */
   public function registerLesson(Lesson $lesson) {
-    $this->registrationService->registerStudentForLesson($lesson, $this->getStudent());
+    $this->registrationService->registerStudentForLesson($lesson, $this->getStudent(), RegistrationType::BY_STUDENT());
     return response()->json(['success' => true]);
   }
 
@@ -78,7 +79,7 @@ class ApiController extends Controller {
    * @return JsonResponse
    */
   public function unregisterCourse(Course $course) {
-    $this->registrationService->unregisterStudentFromCourse($course, $this->getStudent());
+    $this->registrationService->unregisterStudentFromCourse($course, $this->getStudent(), RegistrationType::BY_STUDENT());
     return response()->json(['success' => true]);
   }
 
@@ -90,7 +91,7 @@ class ApiController extends Controller {
   public function unregisterLesson(Registration $registration) {
     $this->authorize('unregister', $registration);
 
-    $this->registrationService->unregisterStudentFromLesson($registration);
+    $this->registrationService->unregisterStudentFromLesson($registration, RegistrationType::BY_STUDENT());
     return response()->json(['success' => true]);
   }
 

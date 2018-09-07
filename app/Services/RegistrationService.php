@@ -19,71 +19,70 @@ interface RegistrationService {
    *
    * @param Course $course Course loaded from the database
    * @param Collection $students IDs of students to add to the course
+   * @param RegistrationType $type The registration parameters
    * @param Date|null $firstDate Only add for lessons on or after this date
    */
-  public function registerStudentsForCourse(Course $course, Collection $students, Date $firstDate = null);
+  public function registerStudentsForCourse(Course $course, Collection $students, RegistrationType $type, Date $firstDate = null);
 
   /**
    * Registers a student for a complete course
    *
    * @param Course $course Course loaded from the database
    * @param Student $student Student loaded from the database
-   * @param bool $force Ignores course restrictions (year, max participants, assigned groups)
-   * @param bool $admin Ignores all restrictions (student already registered somewhere else, course already happened)
+   * @param RegistrationType $type The registration parameters
    */
-  public function registerStudentForCourse(Course $course, Student $student, $force = false, $admin = false);
+  public function registerStudentForCourse(Course $course, Student $student, RegistrationType $type);
 
   /**
    * @param Course $course Course loaded from the database
    * @param Student $student Student loaded from the database
-   * @param bool $force Ignores course restrictions (year, max participants, assigned groups)
-   * @return int 0 if validation succeeds, error code otherwise
+   * @param RegistrationType $type The registration parameters
+   * @return int|null null if validation succeeds, error code otherwise
    */
-  public function validateStudentForCourse(Course $course, Student $student, $force = false);
+  public function validateStudentForCourse(Course $course, Student $student, RegistrationType $type);
 
   /**
    * Registers multiple students for a single lesson
    *
    * @param Lesson $lesson
    * @param Collection $students
+   * @param RegistrationType $type The registration parameters
    */
-  public function registerStudentsForLesson(Lesson $lesson, Collection $students);
+  public function registerStudentsForLesson(Lesson $lesson, Collection $students, RegistrationType $type);
 
   /**
    * Registers a student for a single lesson
    *
    * @param Lesson $lesson Lesson loaded from the database
    * @param Student $student Student loaded from the database
-   * @param bool $force Ignores course restrictions (year, max participants, assigned groups)
-   * @param bool $admin Ignores all restrictions (student already registered somewhere else, course already happened)
+   * @param RegistrationType $type The registration parameters
    */
-  public function registerStudentForLesson(Lesson $lesson, Student $student, $force = false, $admin = false);
+  public function registerStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type);
 
   /**
-   * @param Lesson $lesson
-   * @param Student $student
-   * @param bool $force
-   * @return int
+   * @param Lesson $lesson Lesson loaded from the database
+   * @param Student $student Student loaded from the database
+   * @param RegistrationType $type The registration parameters
+   * @return int|null null if validation succeeds, error code otherwise
    */
-  public function validateStudentForLesson(Lesson $lesson, Student $student, $force = false);
+  public function validateStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type);
 
   /**
    * Unregisters a student from a complete course
    *
    * @param Course $course Course loaded from the database
    * @param Student $student Student loaded from the database
-   * @param bool $force Also unregister from obligatory courses and after registration period ended
+   * @param RegistrationType $type The registration parameters
    */
-  public function unregisterStudentFromCourse(Course $course, Student $student, $force = false);
+  public function unregisterStudentFromCourse(Course $course, Student $student, RegistrationType $type);
 
   /**
    * Unregisters a student from a single lesson
    *
    * @param Registration $registration
-   * @param bool $force Also unregister from obligatory courses and after registration period ended
-   * @return
+   * @param RegistrationType $type The registration parameters
    */
-  public function unregisterStudentFromLesson(Registration $registration, $force = false);
+  public function unregisterStudentFromLesson(Registration $registration, RegistrationType $type);
 
   /**
    * Unregisters all students from a course
@@ -156,7 +155,8 @@ interface RegistrationService {
    * @param Subject|null $subject
    * @return Collection <array>
    */
-  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null,
+      Subject $subject = null);
 
   /**
    * @param Group $group
@@ -175,6 +175,15 @@ interface RegistrationService {
    * @return Collection<array>
    */
   public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
+
+  /**
+   * @param Group $group
+   * @param Student|null $student
+   * @param Date|null $start
+   * @param Date|null $end
+   * @return Collection<array>
+   */
+  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null);
 
   /**
    * @param Course $course

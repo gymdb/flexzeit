@@ -46,6 +46,17 @@ class StudentPolicy {
   }
 
   /**
+   * Determine whether the user can view registrations made by a teacher
+   *
+   * @param User $user
+   * @param Student|null $student
+   * @return bool
+   */
+  public function showByTeacherRegistrations(User $user, Student $student = null) {
+    return $this->isFormTeacher($user, $student);
+  }
+
+  /**
    * Determine whether the user can view registrations
    *
    * @param User $user

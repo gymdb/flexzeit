@@ -29,7 +29,8 @@ interface RegistrationRepository {
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
+  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+      Subject $subject = null);
 
   /**
    * Query registrations where no documentation was added
@@ -53,6 +54,14 @@ interface RegistrationRepository {
   public function queryMissing(Group $group, Student $student = null, Date $start, Date $end);
 
   /**
+   * @param Student|Group $student
+   * @param Date $start
+   * @param Date $end
+   * @return Builder
+   */
+  public function queryByTeacher($student, Date $start, Date $end);
+
+  /**
    * @param Student $student
    * @param Date $start
    * @param Date|null $end
@@ -70,7 +79,8 @@ interface RegistrationRepository {
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
+  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+      Subject $subject = null);
 
   /**
    * @param Student|Group $student
@@ -91,7 +101,7 @@ interface RegistrationRepository {
    *
    * @param int[] $lessons IDs of lessons whose times should be checked
    * @param array $students IDs of students to check
-   * @return
+   * @return Builder
    */
   public function queryForLessons(array $lessons, array $students);
 

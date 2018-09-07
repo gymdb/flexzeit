@@ -20,6 +20,12 @@ return [
         'untis'      => 'Untis-Status',
         'untisError' => 'Fehler beim Aktualisieren der Daten von Untis.'
     ],
+    'byteacher'     => [
+        'heading'   => 'Anmeldungen durch Lehrkräfte',
+        'error'     => 'Fehler beim Laden der Anmeldungen.',
+        'none'      => 'Zu den ausgewählten Filtern gibt es keine Anmeldungen durch Lehrkräfte.',
+        'timestamp' => 'Angemeldet am/um'
+    ],
     'documentation' => [
         'heading' => 'Dokumentation',
         'error'   => 'Fehler beim Laden der Dokumentation.',

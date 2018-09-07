@@ -19,6 +19,12 @@ return [
         'untis'      => 'Untis status',
         'untisError' => 'Error reloading data from Untis'
     ],
+    'byteacher'     => [
+        'heading'   => 'Registrations by teachers',
+        'error'     => 'Error loading the registrations.',
+        'none'      => 'No registrations by the teachers for the given criteria.',
+        'timestamp' => 'Registered at'
+    ],
     'documentation' => [
         'heading' => 'Documentation',
         'error'   => 'Error loading the documentation.',

@@ -25,9 +25,10 @@ return [
         'list' => 'Rückmeldungen anzeigen'
     ],
     'registrations' => [
-        'list'    => 'Anmeldungen anzeigen',
-        'missing' => 'Fehlende Anmeldungen anzeigen',
-        'absent'  => 'Abwesenheiten anzeigen'
+        'list'      => 'Anmeldungen anzeigen',
+        'missing'   => 'Fehlende Anmeldungen anzeigen',
+        'absent'    => 'Abwesenheiten anzeigen',
+        'byteacher' => 'Anmeldungen durch Lehrkräfte anzeigen'
     ],
     'bugreports'    => [
         'create' => 'Rückmeldung zum System',

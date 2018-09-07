@@ -78,6 +78,11 @@
                       <a href="{{route('teacher.registrations.absent')}}">@lang('nav.registrations.absent')</a>
                     </li>
                   @endcan
+                  @can('showByTeacherRegistrations', \App\Models\Student::class)
+                    <li>
+                      <a href="{{route('teacher.registrations.byteacher')}}">@lang('nav.registrations.byteacher')</a>
+                    </li>
+                  @endcan
                   <li>
                     <a href="{{route('teacher.documentation.list')}}">@lang('nav.documentation.list')</a>
                   </li>

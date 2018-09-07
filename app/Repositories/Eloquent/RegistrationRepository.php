@@ -17,7 +17,8 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
 
   use RepositoryTrait;
 
-  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+      Subject $subject = null) {
     $query = $this->inRange($student->registrations()->getQuery(), $start, $end, null, $number, 'l.')
         ->join('lessons as l', 'l.id', 'lesson_id');
 
@@ -79,6 +80,10 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
+  public function queryByTeacher($student, Date $start, Date $end) {
+    return $this->queryForStudent($student, $start, $end)->where('byteacher', true);
+  }
+
   public function querySlots(Student $student, Date $start, Date $end = null) {
     $slotQuery = $this->getSlotQuery($start, $end);
     $joinQuery = DB::table('lessons as l')
@@ -108,7 +113,8 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+      Subject $subject = null) {
     $query = $this->queryForStudent($student, $start, $end, $number, $showCancelled, $teacher, $subject);
     return $this->addExcused($query);
   }

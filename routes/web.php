@@ -40,6 +40,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   Route::get('/registrations', 'RegistrationController@showRegistrations')->name('teacher.registrations.list');
   Route::get('/registrations/missing', 'RegistrationController@showMissing')->name('teacher.registrations.missing');
   Route::get('/registrations/absent', 'RegistrationController@showAbsent')->name('teacher.registrations.absent');
+  Route::get('/registrations/byteacher', 'RegistrationController@showByTeacher')->name('teacher.registrations.byteacher');
 
   // Bug report related pages
   Route::get('/bugreports', 'BugReportController@showBugReports')->name('teacher.bugreports.list');
@@ -95,6 +96,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/registrations/absent', 'RegistrationController@getAbsent')
         ->middleware('params:group;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.absent');
+    Route::get('/registrations/byteacher', 'RegistrationController@getByTeacher')
+        ->middleware('params:group;i|student?;i|start?;d|end?;d')
+        ->name('teacher.api.registrations.byteacher');
     Route::post('/attendance/{registration}', 'RegistrationController@setAttendance')
         ->middleware('params:attendance;b');
     Route::post('/attendanceChecked/{lesson}', 'RegistrationController@setAttendanceChecked');

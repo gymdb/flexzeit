@@ -46,6 +46,17 @@ class GroupPolicy {
   }
 
   /**
+   * Determine whether the user can view registrations done by teachers for this group
+   *
+   * @param User $user
+   * @param Group $group
+   * @return bool
+   */
+  public function showByTeacherRegistrations(User $user, Group $group) {
+    return $this->isFormTeacher($user, $group);
+  }
+
+  /**
    * Determine whether the user can view registrations for this group
    *
    * @param User $user

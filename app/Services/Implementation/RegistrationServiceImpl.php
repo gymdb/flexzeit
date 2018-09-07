@@ -18,6 +18,8 @@ use App\Repositories\RegistrationRepository;
 use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\RegistrationService;
+use App\Services\RegistrationType;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -58,25 +60,29 @@ class RegistrationServiceImpl implements RegistrationService {
     $this->studentRepository = $studentRepository;
   }
 
-  public function registerStudentsForCourse(Course $course, Collection $students, Date $firstDate = null) {
+  public function registerStudentsForCourse(Course $course, Collection $students, RegistrationType $type, Date $firstDate = null) {
     $query = $course->lessons();
     if ($firstDate) {
       $query->where('lessons.date', '>=', $firstDate);
     }
     $lessons = $query->pluck('id');
-    $this->doRegister($lessons, $students, true, true);
+    $this->doRegister($lessons, $students, $type);
   }
 
-  public function registerStudentForCourse(Course $course, Student $student, $force = false, $admin = false) {
-    if (!$admin && ($code = $this->validateStudentForCourse($course, $student, $force)) !== 0) {
+  public function registerStudentForCourse(Course $course, Student $student, RegistrationType $type) {
+    if (($code = $this->validateStudentForCourse($course, $student, $type)) !== null) {
       throw new RegistrationException($code);
     }
-    $this->doRegister($course->lessons->pluck('id'), collect([$student->id]), $force, $admin);
+    $this->doRegister($course->lessons->pluck('id'), collect([$student->id]), $type);
   }
 
-  public function validateStudentForCourse(Course $course, Student $student, $force = false) {
+  public function validateStudentForCourse(Course $course, Student $student, RegistrationType $type) {
+    if ($type->ignoreValidation()) {
+      return null;
+    }
+
     $lesson = $course->firstLesson();
-    if (!$force) {
+    if (!$type->ignoreLimitations()) {
       if ($course->groups()->exists()) {
         return RegistrationException::OBLIGATORY;
       }
@@ -103,22 +109,26 @@ class RegistrationServiceImpl implements RegistrationService {
       return RegistrationException::TIMETABLE;
     }
 
-    return 0;
+    return null;
   }
 
-  public function registerStudentsForLesson(Lesson $lesson, Collection $students) {
-    $this->doRegister(collect([$lesson->id]), $students, true, false);
+  public function registerStudentsForLesson(Lesson $lesson, Collection $students, RegistrationType $type) {
+    $this->doRegister(collect([$lesson->id]), $students, $type);
   }
 
-  public function registerStudentForLesson(Lesson $lesson, Student $student, $force = false, $admin = false) {
-    if (!$admin && ($code = $this->validateStudentForLesson($lesson, $student, $force)) !== 0) {
+  public function registerStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type) {
+    if (($code = $this->validateStudentForLesson($lesson, $student, $type)) !== null) {
       throw new RegistrationException($code);
     }
-    $this->doRegister(collect([$lesson->id]), collect([$student->id]), $force, $admin);
+    $this->doRegister(collect([$lesson->id]), collect([$student->id]), $type);
   }
 
-  public function validateStudentForLesson(Lesson $lesson, Student $student, $force = false) {
-    if (!$force) {
+  public function validateStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type) {
+    if ($type->ignoreValidation()) {
+      return null;
+    }
+
+    if (!$type->ignoreLimitations()) {
       if ($lesson->course()->exists()) {
         return RegistrationException::HAS_COURSE;
       }
@@ -145,7 +155,7 @@ class RegistrationServiceImpl implements RegistrationService {
       return RegistrationException::TIMETABLE;
     }
 
-    return 0;
+    return null;
   }
 
   private function validateYear($object, $student) {
@@ -166,12 +176,12 @@ class RegistrationServiceImpl implements RegistrationService {
     return $result;
   }
 
-  private function doRegister(Collection $lessons, Collection $students, $obligatory, $unregister) {
+  private function doRegister(Collection $lessons, Collection $students, RegistrationType $type) {
     if ($lessons->isEmpty() || $students->isEmpty()) {
       return;
     }
 
-    if ($unregister) {
+    if ($type->unregisterExisting()) {
       $this->registrationRepository->deleteForLessons($lessons->all(), $students->all());
     }
 
@@ -183,19 +193,26 @@ class RegistrationServiceImpl implements RegistrationService {
           return $array;
         }, []);
 
-    $registrations = $lessons->flatMap(function($lesson) use ($students, $obligatory, $existing) {
-      return $students->flatMap(function($student) use ($lesson, $obligatory, $existing) {
-        return empty($existing[$lesson][$student]) ? [['lesson_id' => $lesson, 'student_id' => $student, 'obligatory' => $obligatory]] : [];
+    $now = Carbon::now();
+    $registrations = $lessons->flatMap(function($lesson) use ($students, $type, $existing, $now) {
+      return $students->flatMap(function($student) use ($lesson, $type, $existing, $now) {
+        return empty($existing[$lesson][$student]) ? [[
+            'lesson_id'     => $lesson,
+            'student_id'    => $student,
+            'obligatory'    => $type->isObligatory(),
+            'byteacher'     => $type->isByTeacher(),
+            'registered_at' => $now
+        ]] : [];
       });
     });
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     Registration::insert($registrations->all());
   }
 
-  public function unregisterStudentFromCourse(Course $course, Student $student, $force = false) {
+  public function unregisterStudentFromCourse(Course $course, Student $student, RegistrationType $type) {
     $lesson = $course->firstLesson();
 
-    if (!$force) {
+    if (!$type->ignoreLimitations()) {
       if ($this->isObligatoryFor($course, $student)) {
         throw new RegistrationException(RegistrationException::OBLIGATORY);
       }
@@ -210,10 +227,10 @@ class RegistrationServiceImpl implements RegistrationService {
     $this->unregisterStudentsFromCourse($course, [$student->id]);
   }
 
-  public function unregisterStudentFromLesson(Registration $registration, $force = false) {
+  public function unregisterStudentFromLesson(Registration $registration, RegistrationType $type) {
     $lesson = $registration->lesson;
 
-    if (!$force) {
+    if (!$type->ignoreLimitations()) {
       if ($registration->obligatory) {
         throw new RegistrationException(RegistrationException::OBLIGATORY);
       }
@@ -306,7 +323,8 @@ class RegistrationServiceImpl implements RegistrationService {
     return $lessons;
   }
 
-  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
+  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null,
+      Subject $subject = null) {
     return $this->registrationRepository
         ->queryWithExcused($student ?: $group, $start, $end, null, true, $teacher, $subject)
         ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name', 'student:id,lastname,firstname')
@@ -374,6 +392,27 @@ class RegistrationServiceImpl implements RegistrationService {
               'name'       => $registration->student->name(),
               'attendance' => $registration->attendance,
               'excused'    => boolval($registration->excused)
+          ];
+        });
+  }
+
+  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: $this->configService->getYearEnd();
+
+    return $this->registrationRepository->queryByTeacher($student ?: $group, $start, $end)
+        ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'registered_at'])
+        ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
+        ->get()
+        ->map(function(Registration $registration) {
+          $this->configService->setTime($registration->lesson);
+          return [
+              'date'          => $registration->lesson->date->toDateString(),
+              'number'        => $registration->lesson->number,
+              'time'          => $registration->lesson->time,
+              'teacher'       => $registration->lesson->teacher->name(),
+              'student'       => $registration->student->name(),
+              'registered_at' => $registration->registered_at ? $registration->registered_at->toDateTimeString() : null
           ];
         });
   }
