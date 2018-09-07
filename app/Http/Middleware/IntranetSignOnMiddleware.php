@@ -42,7 +42,7 @@ class IntranetSignOnMiddleware {
     if (session_status() === PHP_SESSION_NONE) {
       // Start a native PHP session only if it does not exist already
       // We don't need to change anything, so close it again immediately, and never try to cleanup sessions
-      session_start(['read_and_close' => false, 'gc_probability' => 0]);
+      session_start(['read_and_close' => true, 'gc_probability' => 0]);
     }
 
     if (empty($_SESSION['userSession'])) {
