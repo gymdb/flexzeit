@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\LessonException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Student;
@@ -32,15 +33,12 @@ interface LessonService {
 
   /**
    * @param Teacher $teacher
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int|int[]|null $number Only show lessons with these numbers
+   * @param DateConstraints $constraints
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
    * @return Collection<array>
    */
-  public function getMappedForTeacher(Teacher $teacher, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
+  public function getMappedForTeacher(Teacher $teacher, DateConstraints $constraints, $showCancelled = false, $withCourse = false);
 
   /**
    * Get lessons held by a teacher on a given day
@@ -61,13 +59,13 @@ interface LessonService {
 
   /**
    * @param Student $student
-   * @param Date $date
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @param string|null $type
    * @return Collection <array>
    */
-  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null);
+  public function getAvailableLessons(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null, $type = null);
 
   /**
    * Checks if attendance has been checked for the given lesson

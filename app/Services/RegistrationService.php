@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
@@ -138,52 +139,46 @@ interface RegistrationService {
 
   /**
    * @param Student $student
-   * @param Date|null $date
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<Registration>
    */
-  public function getSlots(Student $student, Date $date = null, Date $end = null);
+  public function getSlots(Student $student, DateConstraints $constraints);
 
   /**
    * Get data for the list overview
    *
    * @param Group $group
    * @param Student|null $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Collection <array>
    */
-  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null,
-      Subject $subject = null);
+  public function getMappedForList(Group $group, Student $student = null, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * @param Group $group
    * @param Student|null $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null);
+  public function getMissing(Group $group, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Group $group
    * @param Student|null $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null);
+  public function getMappedAbsent(Group $group, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Group $group
    * @param Student|null $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null);
+  public function getByTeacher(Group $group, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Course $course

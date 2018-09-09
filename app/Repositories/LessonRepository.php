@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Student;
 use App\Models\Subject;
@@ -19,27 +19,21 @@ interface LessonRepository {
 
   /**
    * @param Teacher $teacher
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $number Only show lessons with these numbers
+   * @param DateConstraints $constraints
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
    * @return Builder
    */
-  public function queryForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
+  public function queryForTeacher(Teacher $teacher = null, DateConstraints $constraints, $showCancelled = false, $withCourse = false);
 
   /**
    * @param Student $student
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $number Only show lessons with these numbers
+   * @param DateConstraints $constraints
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
    * @return Builder
    */
-  public function queryForStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false);
+  public function queryForStudent(Student $student, DateConstraints $constraints, $showCancelled = false, $withCourse = false);
 
   /**
    * Query lessons corresponding to the given substitution data
@@ -58,13 +52,13 @@ interface LessonRepository {
 
   /**
    * @param Student $student
-   * @param Date $date
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @param string|null $type
    * @return Builder
    */
-  public function queryAvailable(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null);
+  public function queryAvailable(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null, $type = null);
 
   /**
    * @param Builder $query

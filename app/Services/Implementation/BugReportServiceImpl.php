@@ -3,7 +3,7 @@
 namespace App\Services\Implementation;
 
 use App\Exceptions\BugReportException;
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\BugReport;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -48,12 +48,9 @@ class BugReportServiceImpl implements BugReportService {
     $bugReport->save();
   }
 
-  public function getMappedBugReports(Date $start = null, Date $end = null, bool $showTrashed = false) {
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: Date::today();
-
+  public function getMappedBugReports(DateConstraints $constraints, bool $showTrashed = false) {
     return $this->bugReportRepository
-        ->queryReports($start, $end->addDay(), $showTrashed)
+        ->queryReports($constraints, $showTrashed)
         ->with('teacher:id,lastname,firstname', 'student:id,lastname,firstname', 'student.forms:forms.group_id', 'student.forms.group:id,name')
         ->get()
         ->map(function(BugReport $report) {

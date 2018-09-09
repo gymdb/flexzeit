@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\BugReport;
 
 class BugReportRepository implements \App\Repositories\BugReportRepository {
@@ -11,8 +11,8 @@ class BugReportRepository implements \App\Repositories\BugReportRepository {
 
   protected $noNumber = true;
 
-  public function queryReports(Date $start, Date $end = null, bool $showTrashed = false) {
-    $query = $this->inRange(BugReport::query(), $start, $end);
+  public function queryReports(DateConstraints $constraints, bool $showTrashed = false) {
+    $query = $this->inRange(BugReport::query(), $constraints);
     if ($showTrashed) {
       $query->withTrashed();
     }

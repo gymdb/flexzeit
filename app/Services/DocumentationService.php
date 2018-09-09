@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Group;
 use App\Models\Registration;
 use App\Models\Student;
@@ -30,48 +30,44 @@ interface DocumentationService {
 
   /**
    * @param Student $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Collection<Registration>
    */
-  public function getDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getDocumentation(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * Get documentation for a student for returning as JSON
    *
    * @param Student $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Collection<array>
    */
-  public function getMappedDocumentation(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedDocumentation(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * Get missing documentation for returning as JSON
    *
    * @param Group $group
    * @param Student|null $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @return Collection <array>
    */
-  public function getMappedMissing(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null);
+  public function getMappedMissing(Group $group, Student $student = null, DateConstraints $constraints, Teacher $teacher = null);
 
   /**
    * Get feedback for a student for returning as JSON
    *
    * @param Student $student
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Collection<array>
    */
-  public function getMappedFeedback(Student $student, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedFeedback(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
 }

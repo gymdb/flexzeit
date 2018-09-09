@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Room;
@@ -21,17 +21,14 @@ class LessonRepository implements \App\Repositories\LessonRepository {
   /**
    * Build a query for all lessons within a given range
    *
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int[]|int|null $number Only show lessons with these numbers
+   * @param DateConstraints $constraints
    * @param bool $showCancelled Also include cancelled lessons in the result
    * @param bool $withCourse Only show lessons with an assigned course
    * @param Relation|null $relation Relation to run the query on
    * @return Builder
    */
-  private function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false, Relation $relation = null) {
-    $query = $this->inRange($relation ? $relation->getQuery() : Lesson::query(), $start, $end, $dayOfWeek, $number);
+  private function queryInRange(DateConstraints $constraints, $showCancelled = false, $withCourse = false, Relation $relation = null) {
+    $query = $this->inRange($relation ? $relation->getQuery() : Lesson::query(), $constraints);
     if ($withCourse) {
       $query->whereNotNull('course_id');
     }
@@ -41,12 +38,12 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $query;
   }
 
-  public function queryForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
-    return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $teacher ? $teacher->lessons() : null);
+  public function queryForTeacher(Teacher $teacher = null, DateConstraints $constraints, $showCancelled = false, $withCourse = false) {
+    return $this->queryInRange($constraints, $showCancelled, $withCourse, $teacher ? $teacher->lessons() : null);
   }
 
-  public function queryForStudent(Student $student, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false, $withCourse = false) {
-    return $this->queryInRange($start, $end, $dayOfWeek, $number, $showCancelled, $withCourse, $student->lessons());
+  public function queryForStudent(Student $student, DateConstraints $constraints, $showCancelled = false, $withCourse = false) {
+    return $this->queryInRange($constraints, $showCancelled, $withCourse, $student->lessons());
   }
 
   public function queryForSubstitutions(Collection $substitutions) {
@@ -60,8 +57,8 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $this->restrictToLessons($query, $lessons);
   }
 
-  public function queryAvailable(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
-    $query = $this->queryInRange($date, null, null, null, false, false, $teacher ? $teacher->lessons() : null)
+  public function queryAvailable(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null, $type = null) {
+    $query = $this->queryInRange($constraints, false, false, $teacher ? $teacher->lessons() : null)
         // Must not be part of an obligatory course
         ->whereNotExists(function($exists) {
           $exists->select(DB::raw(1))

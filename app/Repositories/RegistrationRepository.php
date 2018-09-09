@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
@@ -21,74 +22,63 @@ interface RegistrationRepository {
 
   /**
    * @param Student|Group $student
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|int[]|null $number Only show the given lesson numbers
+   * @param DateConstraints $constraints
    * @param bool $showCancelled
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
-      Subject $subject = null);
+  public function queryForStudent($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * Query registrations where no documentation was added
    *
    * @param Student|Group $student
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryDocumentation($student, Date $start, Date $end = null, Teacher $teacher = null, Subject $subject = null);
+  public function queryDocumentation($student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * @param Group $group
    * @param Student|null $student
-   * @param Date $start
-   * @param Date $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryMissing(Group $group, Student $student = null, Date $start, Date $end);
+  public function queryMissing(Group $group, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Student|Group $student
-   * @param Date $start
-   * @param Date $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryByTeacher($student, Date $start, Date $end);
+  public function queryByTeacher($student, DateConstraints $constraints);
 
   /**
    * @param Student $student
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function querySlots(Student $student, Date $start, Date $end = null);
+  public function querySlots(Student $student, DateConstraints $constraints);
 
   /**
    * @param Student|Group $student
-   * @param Date $start
-   * @param Date|null $end
-   * @param null $number
+   * @param DateConstraints $constraints
    * @param bool $showCancelled
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
-      Subject $subject = null);
+  public function queryWithExcused($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * @param Student|Group $student
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryAbsent($student, Date $start, Date $end = null);
+  public function queryAbsent($student, DateConstraints $constraints);
 
   /**
    * @param Relation $registrations

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Models\BugReport;
 use App\Models\User;
@@ -58,7 +59,11 @@ class BugReportController extends Controller {
   public function getBugReports(Date $start = null, Date $end = null, bool $showTrashed = false) {
     $this->authorize('show', BugReport::class);
 
-    $reports = $this->bugReportService->getMappedBugReports($start, $end, $showTrashed);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+    $constraints = new DateConstraints($start, $end->addDay());
+
+    $reports = $this->bugReportService->getMappedBugReports($constraints, $showTrashed);
     return response()->json($reports);
   }
 

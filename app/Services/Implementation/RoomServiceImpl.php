@@ -3,6 +3,7 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Room;
 use App\Models\RoomOccupation;
 use App\Models\Teacher;
@@ -83,7 +84,7 @@ class RoomServiceImpl implements RoomService {
     })->buildDictionary(['room_id', 'date', 'number'], false);
 
     $existing = $this->roomRepository
-        ->queryOccupations($start, $end)
+        ->queryOccupations(new DateConstraints($start, $end))
         ->get()
         ->buildDictionary(['room_id', 'date', 'number'], 'id');
 

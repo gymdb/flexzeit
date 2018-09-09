@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -27,11 +27,10 @@ interface RoomRepository {
   /**
    * Build a query for all room occupations within the given range
    *
-   * @param Date $start Start date
-   * @param Date $end Optional end date
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryOccupations(Date $start, Date $end);
+  public function queryOccupations(DateConstraints $constraints);
 
   /**
    * Build a query for all room occupations at the times of the given lessons

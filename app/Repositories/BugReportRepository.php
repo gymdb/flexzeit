@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -15,11 +15,10 @@ interface BugReportRepository {
   /**
    * Query reports within a given timeframe
    *
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param bool $showTrashed
    * @return Builder
    */
-  public function queryReports(Date $start, Date $end = null, bool $showTrashed = false);
+  public function queryReports(DateConstraints $constraints, bool $showTrashed = false);
 
 }

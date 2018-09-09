@@ -3,6 +3,7 @@
 namespace App\Validators;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Repositories\OffdayRepository;
 use App\Services\ConfigService;
 use Illuminate\Support\Arr;
@@ -40,7 +41,7 @@ class CourseValidator {
 
   public function validateSchoolDay(/** @noinspection PhpUnusedParameterInspection */
       $attribute, Date $value) {
-    return !$this->offdayRepository->queryInRange($value)->exists();
+    return !$this->offdayRepository->queryInRange(new DateConstraints($value))->exists();
   }
 
   public function validateLessonNumber(/** @noinspection PhpUnusedParameterInspection */

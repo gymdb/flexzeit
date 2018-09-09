@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\CourseException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
@@ -42,13 +43,11 @@ interface CourseService {
 
   /**
    * @param Teacher $teacher
-   * @param Date $firstDate
-   * @param Date|null $lastDate
-   * @param int|int[] $number
+   * @param DateConstraints $constraints
    * @param array|null $groups
    * @return array
    */
-  public function getDataForCreate(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number, array $groups = null);
+  public function getDataForCreate(Teacher $teacher, DateConstraints $constraints, array $groups = null);
 
   /**
    * @param Course $course
@@ -62,30 +61,27 @@ interface CourseService {
    * Get a list of a teacher's courses
    *
    * @param Teacher $teacher
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null);
+  public function getMappedForTeacher(Teacher $teacher = null, DateConstraints $constraints);
 
   /**
    * @param Group|null $group
    * @param Teacher|null $teacher
    * @param Subject|null $subject
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMappedObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null);
+  public function getMappedObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, DateConstraints $constraints);
 
   /**
    * Get a list of a courses available for a student
    *
    * @param Student $student
    * @param Teacher $teacher
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMappedForStudent(Student $student, Teacher $teacher = null, Date $start, Date $end = null);
+  public function getMappedForStudent(Student $student, Teacher $teacher = null, DateConstraints $constraints);
 }

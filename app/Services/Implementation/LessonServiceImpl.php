@@ -4,6 +4,7 @@ namespace App\Services\Implementation;
 
 use App\Exceptions\LessonException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Room;
@@ -220,10 +221,9 @@ class LessonServiceImpl implements LessonService {
     });
   }
 
-  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null, $dayOfWeek = null, $number = null, $showCancelled = false,
-      $withCourse = false) {
+  public function getMappedForTeacher(Teacher $teacher = null, DateConstraints $constraints, $showCancelled = false, $withCourse = false) {
     $query = $this->lessonRepository
-        ->queryForTeacher($teacher, $start, $end, $dayOfWeek, $number, $showCancelled, $withCourse)
+        ->queryForTeacher($teacher, $constraints, $showCancelled, $withCourse)
         ->with('course:id,name,maxstudents', 'room:id,name,capacity', 'teacher:id,lastname,firstname')
         ->select('lessons.id', 'date', 'number', 'cancelled', 'course_id', 'room_id', 'teacher_id');
 
@@ -263,7 +263,7 @@ class LessonServiceImpl implements LessonService {
 
   public function getForDay(Teacher $teacher, Date $date = null) {
     $query = $this->lessonRepository
-        ->queryForTeacher($teacher, $date ?: Date::today(), null, null, null, true)
+        ->queryForTeacher($teacher, new DateConstraints($date ?: Date::today()), true)
         ->with('course:id,name,maxstudents', 'room:id,name,capacity')
         ->select('id', 'number', 'cancelled', 'course_id', 'room_id');
 
@@ -286,9 +286,9 @@ class LessonServiceImpl implements LessonService {
     return $lessons;
   }
 
-  public function getAvailableLessons(Student $student, Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
+  public function getAvailableLessons(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null, $type = null) {
     $lessons = $this->lessonRepository
-        ->queryAvailable($student, $date, $teacher, $subject, $type)
+        ->queryAvailable($student, $constraints, $teacher, $subject, $type)
         ->addSelect(['lessons.id', 'lessons.date', 'lessons.number', 'lessons.room_id', 'lessons.teacher_id', 'lessons.course_id'])
         ->with(['course.lessons' => function($query) {
           $query->orderBy('date')->orderBy('number')->select('id', 'date', 'course_id');
@@ -346,7 +346,7 @@ class LessonServiceImpl implements LessonService {
     }
 
     $query = $this->lessonRepository
-        ->queryForTeacher($teacher, $lesson->date, null, null, $lesson->number, true)
+        ->queryForTeacher($teacher, new DateConstraints($lesson->date, null, $lesson->number), true)
         ->with('course:id,name,maxstudents', 'room:id,name,capacity')
         ->select('id', 'cancelled', 'course_id', 'room_id');
     $teacherLesson = $this->lessonRepository
@@ -378,7 +378,7 @@ class LessonServiceImpl implements LessonService {
     }
 
     $query = $this->lessonRepository
-        ->queryForTeacher($teacher, $lesson->date, null, null, $lesson->number, true)
+        ->queryForTeacher($teacher, new DateConstraints($lesson->date, null, $lesson->number), true)
         ->select('id', 'cancelled');
     $substitutedLesson = $this->lessonRepository
         ->addParticipants($query)

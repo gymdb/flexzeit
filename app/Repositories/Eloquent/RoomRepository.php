@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Room;
 use App\Models\RoomOccupation;
 use App\Models\Teacher;
@@ -20,9 +20,9 @@ class RoomRepository implements \App\Repositories\RoomRepository {
     return Room::whereNotNull('type')->distinct()->orderBy('type');
   }
 
-  public function queryOccupations(Date $start, Date $end) {
+  public function queryOccupations(DateConstraints $constraints) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-    return $this->inRange(RoomOccupation::query(), $start, $end);
+    return $this->inRange(RoomOccupation::query(), $constraints);
   }
 
   public function queryOccupationForLessons(Collection $lessons, Teacher $teacher) {

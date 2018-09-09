@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -18,14 +18,11 @@ interface OffdayRepository {
   /**
    * Build a query for all lessons within a given range
    *
-   * @param Date $start Start date
-   * @param Date|null $end Optional end date (start day only if empty)
-   * @param int|null $dayOfWeek Only show dates on the given day of week
-   * @param int|int[]|null $number
+   * @param DateConstraints $constraints
    * @param Relation|null $relation Relation to run the query on
    * @return Builder
    */
-  public function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null);
+  public function queryInRange(DateConstraints $constraints, Relation $relation = null);
 
   /**
    * Build a query for all offdays for the student's groups during the given lessons
@@ -55,11 +52,10 @@ interface OffdayRepository {
   /**
    * Build a query for all lessons within a given range assigned to a group
    *
-   * @param Date $start Start date
-   * @param Date $end Optional end date
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryWithGroup(Date $start, Date $end);
+  public function queryWithGroup(DateConstraints $constraints);
 
   /**
    * @param Collection $ids

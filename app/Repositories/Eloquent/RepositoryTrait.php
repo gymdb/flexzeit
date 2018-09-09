@@ -2,8 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
-use App\Helpers\DateRange;
+use App\Helpers\DateConstraints;
 use App\Models\Registration;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,18 +15,14 @@ trait RepositoryTrait {
    * Restrict a query to a date, range of dates or day of week within a range of dates
    *
    * @param Builder $query
-   * @param Date $from
-   * @param Date|null $to
-   * @param int|null $dayOfWeek
-   * @param int|int[]|null $number
+   * @param DateConstraints $constraints
    * @param string $table
    * @return Builder
    */
-  private function inRange($query, Date $from, Date $to = null, $dayOfWeek = null, $number = null, $table = '') {
-    if (!is_null($number) && empty($this->noNumber)) {
-      $query->where(function($query) use ($number, $table) {
-        $query->whereIn($table . 'number', is_scalar($number) ? [$number] : $number)
-            ->orWhereNull($table . 'number');
+  private function inRange($query, DateConstraints $constraints, $table = '') {
+    if ($constraints->getNumbers() && empty($this->noNumber)) {
+      $query->where(function($query) use ($constraints, $table) {
+        $query->whereIn($table . 'number', $constraints->getNumbers())->orWhereNull($table . 'number');
       });
     }
 
@@ -36,13 +31,13 @@ trait RepositoryTrait {
       $query->orderBy($table . 'number');
     }
 
-    if (is_null($to)) {
-      return $query->where($table . 'date', $from);
+    if (!$constraints->getLastDate()) {
+      return $query->where($table . 'date', $constraints->getFirstDate());
     }
 
-    return is_null($dayOfWeek)
-        ? $query->whereBetween($table . 'date', [$from, $to])
-        : $query->whereIn($table . 'date', DateRange::getDates($from, $to, $dayOfWeek));
+    return $constraints->getDayOfWeek()
+        ? $query->whereBetween($table . 'date', [$constraints->getFirstDate(), $constraints->getLastDate()])
+        : $query->whereIn($table . 'date', $constraints->getDateRange());
   }
 
   /**

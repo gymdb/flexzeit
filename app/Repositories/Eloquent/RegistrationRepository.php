@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Lesson;
@@ -17,9 +18,9 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
 
   use RepositoryTrait;
 
-  public function queryForStudent($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+  public function queryForStudent($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null,
       Subject $subject = null) {
-    $query = $this->inRange($student->registrations()->getQuery(), $start, $end, null, $number, 'l.')
+    $query = $this->inRange($student->registrations()->getQuery(), $constraints, 'l.')
         ->join('lessons as l', 'l.id', 'lesson_id');
 
     if (!$showCancelled) {
@@ -46,15 +47,15 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryDocumentation($student, Date $start, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
-    return $this->queryForStudent($student, $start, $end, null, false, $teacher, $subject)
+  public function queryDocumentation($student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null) {
+    return $this->queryForStudent($student, $constraints, false, $teacher, $subject)
         ->where(function($q1) {
           $q1->where('attendance', true)->orWhereNull('attendance');
         });
   }
 
-  public function queryMissing(Group $group, Student $student = null, Date $start, Date $end) {
-    $slotQuery = $this->getSlotQuery($start, $end);
+  public function queryMissing(Group $group, Student $student = null, DateConstraints $constraints) {
+    $slotQuery = $this->getSlotQuery($constraints);
 
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $query = ($student ? Student::whereKey($student->id) : $group->students())
@@ -80,12 +81,12 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryByTeacher($student, Date $start, Date $end) {
-    return $this->queryForStudent($student, $start, $end)->where('byteacher', true);
+  public function queryByTeacher($student, DateConstraints $constraints) {
+    return $this->queryForStudent($student, $constraints)->where('byteacher', true);
   }
 
-  public function querySlots(Student $student, Date $start, Date $end = null) {
-    $slotQuery = $this->getSlotQuery($start, $end);
+  public function querySlots(Student $student, DateConstraints $constraints) {
+    $slotQuery = $this->getSlotQuery($constraints);
     $joinQuery = DB::table('lessons as l')
         ->join('registrations as r', function($join) use ($student) {
           $join->on('r.lesson_id', 'l.id')->where('r.student_id', $student->id)->where('l.cancelled', false);
@@ -113,14 +114,14 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryWithExcused($student, Date $start, Date $end = null, $number = null, $showCancelled = false, Teacher $teacher = null,
+  public function queryWithExcused($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null,
       Subject $subject = null) {
-    $query = $this->queryForStudent($student, $start, $end, $number, $showCancelled, $teacher, $subject);
+    $query = $this->queryForStudent($student, $constraints, $showCancelled, $teacher, $subject);
     return $this->addExcused($query);
   }
 
-  public function queryAbsent($student, Date $start, Date $end = null) {
-    $query = $this->queryForStudent($student, $start, $end)
+  public function queryAbsent($student, DateConstraints $constraints) {
+    $query = $this->queryForStudent($student, $constraints)
         ->where(function($q2) {
           $q2->where(function($q3) {
             $q3->where('attendance', false)->whereNull('a.student_id');
@@ -204,8 +205,8 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         }, 'and', !$invert);
   }
 
-  private function getSlotQuery(Date $start, Date $end = null) {
-    return $this->inRange(DB::table('lessons')->distinct()->select(['date', 'number']), $start, $end);
+  private function getSlotQuery(DateConstraints $constraints) {
+    return $this->inRange(DB::table('lessons')->distinct()->select(['date', 'number']), $constraints);
   }
 
   private function addExcused($query) {

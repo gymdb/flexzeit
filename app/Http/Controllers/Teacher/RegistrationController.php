@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Group;
@@ -269,8 +270,7 @@ class RegistrationController extends Controller {
    * @return JsonResponse
    * @throws AuthorizationException
    */
-  public function getForStudent(Group $group, Student $student = null, Date $start = null, Date $end = null,
-      Teacher $teacher = null, Subject $subject = null) {
+  public function getForStudent(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null, Subject $subject = null) {
     if ($student) {
       $this->authorize('showRegistrations', $student);
     } else {
@@ -279,8 +279,9 @@ class RegistrationController extends Controller {
 
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
+    $constraints = new DateConstraints($start, $end);
 
-    $registrations = $this->registrationService->getMappedForList($group, $student, $start, $end, $teacher, $subject);
+    $registrations = $this->registrationService->getMappedForList($group, $student, $constraints, $teacher, $subject);
     return response()->json($registrations);
   }
 
@@ -325,7 +326,11 @@ class RegistrationController extends Controller {
       $this->authorize('showMissingRegistrations', $group);
     }
 
-    $missing = $this->registrationService->getMissing($group, $student, $start, $end);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
+    $constraints = new DateConstraints($start, $end);
+
+    $missing = $this->registrationService->getMissing($group, $student, $constraints);
     return response()->json($missing);
   }
 
@@ -346,7 +351,11 @@ class RegistrationController extends Controller {
       $this->authorize('showAbsent', $group);
     }
 
-    $missing = $this->registrationService->getMappedAbsent($group, $student, $start, $end);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+    $constraints = new DateConstraints($start, $end);
+
+    $missing = $this->registrationService->getMappedAbsent($group, $student, $constraints);
     return response()->json($missing);
   }
 
@@ -367,7 +376,11 @@ class RegistrationController extends Controller {
       $this->authorize('showByTeacherRegistrations', $group);
     }
 
-    $byTeacher = $this->registrationService->getByTeacher($group, $student, $start, $end);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: $this->configService->getYearEnd();
+    $constraints = new DateConstraints($start, $end);
+
+    $byTeacher = $this->registrationService->getByTeacher($group, $student, $constraints);
     return response()->json($byTeacher);
   }
 }

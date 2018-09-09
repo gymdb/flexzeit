@@ -4,6 +4,7 @@ namespace App\Services\Implementation;
 
 use App\Exceptions\RegistrationException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Absence;
 use App\Models\Course;
 use App\Models\Group;
@@ -128,6 +129,7 @@ class RegistrationServiceImpl implements RegistrationService {
       return null;
     }
 
+    $constraints = new DateConstraints($lesson->date, null, $lesson->number);
     if (!$type->ignoreLimitations()) {
       if ($lesson->course()->exists()) {
         return RegistrationException::HAS_COURSE;
@@ -138,7 +140,7 @@ class RegistrationServiceImpl implements RegistrationService {
       if ($lesson->students()->count() >= $lesson->room->capacity) {
         return RegistrationException::MAXSTUDENTS;
       }
-      if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
+      if ($this->offdayRepository->queryInRange($constraints, $student->offdays())->exists()) {
         return RegistrationException::OFFDAY;
       }
       if ($this->validateYear($lesson->room, $student)) {
@@ -148,7 +150,7 @@ class RegistrationServiceImpl implements RegistrationService {
       return RegistrationException::REGISTRATION_PERIOD;
     }
 
-    if ($this->lessonRepository->queryForStudent($student, $lesson->date, null, null, $lesson->number)->exists()) {
+    if ($this->lessonRepository->queryForStudent($student, $constraints)->exists()) {
       return RegistrationException::ALREADY_REGISTERED;
     }
     if (!$this->studentRepository->queryTimetable($student, $lesson->date->dayOfWeek, $lesson->number)->exists()) {
@@ -302,8 +304,8 @@ class RegistrationServiceImpl implements RegistrationService {
         ->get(['registrations.student_id', 'students.lastname', 'students.firstname', 'students.id']);
   }
 
-  public function getSlots(Student $student, Date $date = null, Date $end = null) {
-    $lessons = $this->registrationRepository->querySlots($student, $date ?: Date::today(), $end)
+  public function getSlots(Student $student, DateConstraints $constraints) {
+    $lessons = $this->registrationRepository->querySlots($student, $constraints)
         ->with('teacher:id,lastname,firstname', 'course:id,name', 'room:id,name')
         ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room_id', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
     $offdays = $this->offdayRepository->queryForLessonsWithStudent($lessons, $student)->get();
@@ -323,10 +325,9 @@ class RegistrationServiceImpl implements RegistrationService {
     return $lessons;
   }
 
-  public function getMappedForList(Group $group, Student $student = null, Date $start = null, Date $end = null, Teacher $teacher = null,
-      Subject $subject = null) {
+  public function getMappedForList(Group $group, Student $student = null, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null) {
     return $this->registrationRepository
-        ->queryWithExcused($student ?: $group, $start, $end, null, true, $teacher, $subject)
+        ->queryWithExcused($student ?: $group, $constraints, true, $teacher, $subject)
         ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name', 'student:id,lastname,firstname')
         ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'attendance'])
         ->get()
@@ -354,11 +355,8 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
-
-    return $this->registrationRepository->queryMissing($group, $student, $start, $end)
+  public function getMissing(Group $group, Student $student = null, DateConstraints $constraints) {
+    return $this->registrationRepository->queryMissing($group, $student, $constraints)
         ->get(['id', 'firstname', 'lastname', 'date', 'number'])
         ->map(function(Student $student) {
           $lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
@@ -373,11 +371,8 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getMappedAbsent(Group $group, Student $student = null, Date $start = null, Date $end = null) {
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: Date::today();
-
-    return $this->registrationRepository->queryAbsent($student ?: $group, $start, $end)
+  public function getMappedAbsent(Group $group, Student $student = null, DateConstraints $constraints) {
+    return $this->registrationRepository->queryAbsent($student ?: $group, $constraints)
         ->addSelect(['registrations.id', 'lesson_id', 'attendance', 'registrations.student_id'])
         ->with('lesson:id,date,number,teacher_id', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
         ->get()
@@ -396,11 +391,8 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null) {
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getYearEnd();
-
-    return $this->registrationRepository->queryByTeacher($student ?: $group, $start, $end)
+  public function getByTeacher(Group $group, Student $student = null, DateConstraints $constraints) {
+    return $this->registrationRepository->queryByTeacher($student ?: $group, $constraints)
         ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'registered_at'])
         ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
         ->get()
@@ -502,7 +494,8 @@ class RegistrationServiceImpl implements RegistrationService {
       ];
     }
 
-    if ($this->offdayRepository->queryInRange($lesson->date, null, null, $lesson->number, $student->offdays())->exists()) {
+    $constraints = new DateConstraints($lesson->date, null, $lesson->number);
+    if ($this->offdayRepository->queryInRange($constraints, $student->offdays())->exists()) {
       $warnings['offday'] = true;
     }
 
@@ -511,7 +504,7 @@ class RegistrationServiceImpl implements RegistrationService {
     }
 
     $registeredLesson = $this->lessonRepository
-        ->queryForStudent($student, $lesson->date, null, null, $lesson->number)
+        ->queryForStudent($student, $constraints)
         ->with('teacher', 'course')
         ->first(['lessons.id', 'lessons.teacher_id', 'lessons.course_id']);
     if ($registeredLesson) {

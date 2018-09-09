@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Student;
@@ -14,13 +14,13 @@ class CourseRepository implements \App\Repositories\CourseRepository {
 
   use RepositoryTrait;
 
-  public function query(Teacher $teacher = null, Date $start, Date $end = null) {
+  public function query(Teacher $teacher = null, DateConstraints $constraints) {
     return Course::query()
-        ->whereIn('id', function($in) use ($start, $end, $teacher) {
+        ->whereIn('id', function($in) use ($constraints, $teacher) {
           $in->select('l.course_id')
               ->whereNotNull('l.course_id')
               ->from('lessons as l');
-          $this->inRange($in, $start, $end, null, null, 'l.');
+          $this->inRange($in, $constraints, 'l.');
           if ($teacher) {
             $in->where('l.teacher_id', $teacher->id);
           }
@@ -35,8 +35,8 @@ class CourseRepository implements \App\Repositories\CourseRepository {
         ->addSelect(DB::raw('(SELECT MIN(number) FROM lessons WHERE course_id = courses.id) as number'));
   }
 
-  public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null) {
-    $query = $this->query($teacher, $start, $end)
+  public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, DateConstraints $constraints) {
+    $query = $this->query($teacher, $constraints)
         ->whereIn('courses.id', function($in) use ($group) {
           $in->select('g.course_id')
               ->from('course_group as g')
@@ -53,9 +53,9 @@ class CourseRepository implements \App\Repositories\CourseRepository {
     return $query;
   }
 
-  public function queryAvailable(Student $student, Teacher $teacher = null, Date $start, Date $end = null) {
+  public function queryAvailable(Student $student, Teacher $teacher = null, DateConstraints $constraints) {
     $query = Course::doesntHave('groups')
-        ->join('lessons as l', function($join) use ($end, $start) {
+        ->join('lessons as l', function($join) use ($constraints) {
           $join->on('l.course_id', 'courses.id')
               ->whereNotExists(function($exists) {
                 $exists->select(DB::raw(1))
@@ -65,7 +65,7 @@ class CourseRepository implements \App\Repositories\CourseRepository {
                     ->whereColumn('sub.date', '<', 'l.date');
               })
               ->where('l.cancelled', false);
-          $this->inRange($join, $start, $end, null, null, 'l.');
+          $this->inRange($join, $constraints, 'l.');
         })
         ->select(['courses.id', 'name', 'description', 'maxstudents', 'l.date', 'l.number'])
         ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'));

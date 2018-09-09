@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Lesson;
@@ -103,7 +104,8 @@ class ApiController extends Controller {
    * @return JsonResponse
    */
   public function getAvailableLessons(Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
-    $lessons = $this->lessonService->getAvailableLessons($this->getStudent(), $date, $teacher, $subject, $type);
+    $constraints = new DateConstraints($date);
+    $lessons = $this->lessonService->getAvailableLessons($this->getStudent(), $constraints, $teacher, $subject, $type);
     return response()->json($lessons);
   }
 
@@ -149,8 +151,9 @@ class ApiController extends Controller {
   public function getCourses(Teacher $teacher = null, Date $start = null, Date $end = null) {
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
+    $constraints = new DateConstraints($start, $end);
 
-    $lessons = $this->courseService->getMappedForStudent($this->getStudent(), $teacher, $start, $end);
+    $lessons = $this->courseService->getMappedForStudent($this->getStudent(), $teacher, $constraints);
     return response()->json($lessons);
   }
 }

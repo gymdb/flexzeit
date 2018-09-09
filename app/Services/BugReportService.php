@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -19,11 +19,10 @@ interface BugReportService {
   /**
    * Get bug reports for a student for returning as JSON
    *
-   * @param Date|null $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @param bool $showTrashed
    * @return Collection <array>
    */
-  public function getMappedBugReports(Date $start = null, Date $end = null, bool $showTrashed = false);
+  public function getMappedBugReports(DateConstraints $constraints, bool $showTrashed = false);
 
 }

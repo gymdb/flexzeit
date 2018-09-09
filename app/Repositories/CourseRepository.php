@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Group;
 use App\Models\Student;
 use App\Models\Subject;
@@ -16,11 +16,10 @@ interface CourseRepository {
    * Return a teacher's courses
    *
    * @param Teacher|null $teacher
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function query(Teacher $teacher = null, Date $start, Date $end = null);
+  public function query(Teacher $teacher = null, DateConstraints $constraints);
 
   /**
    * Query all obligatory courses matching the criteria
@@ -28,22 +27,20 @@ interface CourseRepository {
    * @param Group|null $group
    * @param Teacher|null $teacher
    * @param Subject|null $subject
-   * @param Date $start
-   * @param Date|null $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null);
+  public function queryObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, DateConstraints $constraints);
 
   /**
    * Query available courses for a student
    *
    * @param Student $student
    * @param Teacher|null $teacher
-   * @param Date $start
-   * @param Date $end
+   * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryAvailable(Student $student, Teacher $teacher = null, Date $start, Date $end = null);
+  public function queryAvailable(Student $student, Teacher $teacher = null, DateConstraints $constraints);
 
   /**
    * @param Builder|Relation $query

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Exceptions\CourseException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Course\CreateCourseRequest;
 use App\Http\Requests\Course\CreateNormalCourseRequest;
@@ -198,9 +199,9 @@ class CourseController extends Controller {
   }
 
   private function parseOldGroups() {
-    $oldGroups = collect(old('groups'))->map(function ($group) {
+    $oldGroups = collect(old('groups'))->map(function($group) {
       return $group && ctype_digit($group) ? (int)$group : null;
-    })->filter(function ($group) {
+    })->filter(function($group) {
       return $group;
     });
     return $oldGroups->isEmpty() ? null : $oldGroups;
@@ -292,25 +293,26 @@ class CourseController extends Controller {
     $allowDateChange = ($lastDate->copy()->addWeek() >= $minDate);
 
     $lessons = $this->configService->getLessonTimes()[$firstDate->dayOfWeek] ?? [];
-    $offdays = $this->offdayService->getInRange($minDate, $maxDate, $firstDate->dayOfWeek);
+    // TODO Use actual frequency
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate, 1);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
     $rooms = $this->miscService->getRooms();
 
     $courseData = [
-        'id' => $course->id,
-        'firstDate' => $firstDate->toDateString(),
-        'lastDate' => $lastDate->toDateString(),
-        'number' => $firstLesson->number,
-        'name' => $course->name,
-        'room' => $firstLesson->room_id,
+        'id'          => $course->id,
+        'firstDate'   => $firstDate->toDateString(),
+        'lastDate'    => $lastDate->toDateString(),
+        'number'      => $firstLesson->number,
+        'name'        => $course->name,
+        'room'        => $firstLesson->room_id,
         'description' => $course->description
     ];
 
     $old = [
-        'lastDate' => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
-        'name' => old('name') ?: $courseData['name'],
-        'room' => $this->parseOldNumber('room') ?: $courseData['room'],
+        'lastDate'    => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
+        'name'        => old('name') ?: $courseData['name'],
+        'room'        => $this->parseOldNumber('room') ?: $courseData['room'],
         'description' => old('description') ?: $courseData['description']
     ];
 
@@ -409,14 +411,16 @@ class CourseController extends Controller {
    * @param Teacher|null $teacher
    * @return JsonResponse
    */
-  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null,
-      Teacher $teacher = null) {
+  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null, Teacher $teacher = null) {
     $user = $this->getTeacher();
     if (!$user->admin || !$teacher) {
       $teacher = $user;
     }
 
-    $data = $this->courseService->getDataForCreate($teacher, $firstDate, $lastDate, $number, $groups);
+    // TODO Get frequency from input
+    $constraints = new DateConstraints($firstDate, $lastDate, $number, 1);
+
+    $data = $this->courseService->getDataForCreate($teacher, $constraints, $groups);
     return response()->json($data);
   }
 
@@ -444,8 +448,9 @@ class CourseController extends Controller {
   public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null) {
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
+    $constraints = new DateConstraints($start, $end);
 
-    $lessons = $this->courseService->getMappedForTeacher($teacher, $start, $end);
+    $lessons = $this->courseService->getMappedForTeacher($teacher, $constraints);
     return response()->json($lessons);
   }
 
@@ -460,14 +465,14 @@ class CourseController extends Controller {
    * @return JsonResponse
    * @throws AuthorizationException Thrown if the user does not have permission to list obligatory courses
    */
-  public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null,
-      Date $start = null, Date $end = null) {
+  public function getObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
     $this->authorize('listObligatory', Course::class);
 
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
+    $constraints = new DateConstraints($start, $end);
 
-    $lessons = $this->courseService->getMappedObligatory($group, $teacher, $subject, $start, $end);
+    $lessons = $this->courseService->getMappedObligatory($group, $teacher, $subject, $constraints);
     return response()->json($lessons);
   }
 

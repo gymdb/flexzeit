@@ -3,6 +3,7 @@
 namespace App\Services\Implementation;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Form;
 use App\Models\Group;
 use App\Models\Offday;
@@ -37,8 +38,8 @@ class OffdayServiceImpl implements OffdayService {
     $this->offdayRepository = $offdayRepository;
   }
 
-  public function getInRange(Date $start, Date $end = null, $dayOfWeek = null) {
-    return $this->offdayRepository->queryInRange($start, $end, $dayOfWeek)
+  public function getInRange(Date $start, Date $end = null, $frequency = null) {
+    return $this->offdayRepository->queryInRange(new DateConstraints($start, $end, null, $frequency))
         ->pluck('date')
         ->map(function(Date $date) {
           return $date->toDateString();
@@ -119,7 +120,7 @@ class OffdayServiceImpl implements OffdayService {
     })->buildDictionary(['group_id', 'date', 'number'], false);
 
     $existing = $this->offdayRepository
-        ->queryWithGroup($start, $end)
+        ->queryWithGroup(new DateConstraints($start, $end))
         ->get()
         ->buildDictionary(['group_id', 'date', 'number'], 'id');
 

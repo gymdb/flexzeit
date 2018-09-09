@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Services\ConfigService;
 use App\Services\DocumentationService;
@@ -54,9 +55,13 @@ class StudentController extends Controller {
   public function dashboard() {
     $student = $this->getStudent();
 
-    $today = $this->registrationService->getSlots($student);
-    $upcoming = $this->registrationService->getSlots($student, Date::tomorrow(), $this->configService->getLastRegisterDate());
-    $documentation = $this->documentationService->getDocumentation($student, $this->configService->getFirstDocumentationDate(), $this->configService->getLastDocumentationDate());
+    $today = $this->registrationService->getSlots($student, new DateConstraints(Date::today()));
+
+    $upcomingConstraints = new DateConstraints(Date::tomorrow(), $this->configService->getLastRegisterDate());
+    $upcoming = $this->registrationService->getSlots($student, $upcomingConstraints);
+
+    $documentationConstraints = new DateConstraints($this->configService->getFirstDocumentationDate(), $this->configService->getLastDocumentationDate());
+    $documentation = $this->documentationService->getDocumentation($student, $documentationConstraints);
 
     return view('student.dashboard', compact('today', 'upcoming', 'documentation'));
   }
@@ -68,7 +73,7 @@ class StudentController extends Controller {
   public function day(Date $date) {
     $student = $this->getStudent();
 
-    $lessons = $this->registrationService->getSlots($student, $date);
+    $lessons = $this->registrationService->getSlots($student, new DateConstraints($date));
     $subjects = $this->miscService->getSubjects();
     $teachers = $this->miscService->getTeachers();
     $roomTypes = $this->miscService->getRoomTypes();

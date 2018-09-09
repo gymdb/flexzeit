@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Models\Offday;
 use App\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -12,10 +12,10 @@ class OffdayRepository implements \App\Repositories\OffdayRepository {
 
   use RepositoryTrait;
 
-  public function queryInRange(Date $start, Date $end = null, $dayOfWeek = null, $number = null, Relation $relation = null) {
+  public function queryInRange(DateConstraints $constraints, Relation $relation = null) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-    $query = $this->inRange($relation ? $relation->getQuery() : Offday::whereNull('group_id'), $start, $end, $dayOfWeek, $number);
-    if (is_null($number)) {
+    $query = $this->inRange($relation ? $relation->getQuery() : Offday::whereNull('group_id'), $constraints);
+    if (!$constraints->getNumbers()) {
       $query->whereNull('number');
     }
     return $query;
@@ -38,9 +38,9 @@ class OffdayRepository implements \App\Repositories\OffdayRepository {
     return Offday::whereNull('group_id');
   }
 
-  public function queryWithGroup(Date $start, Date $end) {
+  public function queryWithGroup(DateConstraints $constraints) {
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-    return $this->inRange(Offday::whereNotNull('group_id'), $start, $end);
+    return $this->inRange(Offday::whereNotNull('group_id'), $constraints);
   }
 
   public function deleteById(Collection $ids) {

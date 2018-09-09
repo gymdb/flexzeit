@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Registration;
@@ -83,7 +84,11 @@ class DocumentationController extends Controller {
    * @return JsonResponse
    */
   public function getDocumentation(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
-    $documentation = $this->documentationService->getMappedDocumentation($student, $start, $end, $teacher, $subject);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+    $constraints = new DateConstraints($start, $end);
+
+    $documentation = $this->documentationService->getMappedDocumentation($student, $constraints, $teacher, $subject);
     return response()->json($documentation);
   }
 
@@ -122,7 +127,11 @@ class DocumentationController extends Controller {
       $this->authorize('showMissingDocumentation', $group);
     }
 
-    $missing = $this->documentationService->getMappedMissing($group, $student, $start, $end, $teacher);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: $this->configService->getFirstDocumentationDate()->copy()->addDay(-1);
+    $constraints = new DateConstraints($start, $end);
+
+    $missing = $this->documentationService->getMappedMissing($group, $student, $constraints, $teacher);
     return response()->json($missing);
   }
 
@@ -160,7 +169,11 @@ class DocumentationController extends Controller {
   public function getFeedbackForStudent(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
     $this->authorize('showFeedback', $student);
 
-    $feedback = $this->documentationService->getMappedFeedback($student, $start, $end, $teacher, $subject);
+    $start = $start ?: $this->configService->getYearStart();
+    $end = $end ?: Date::today();
+    $constraints = new DateConstraints($start, $end);
+
+    $feedback = $this->documentationService->getMappedFeedback($student, $constraints, $teacher, $subject);
     return response()->json($feedback);
   }
 

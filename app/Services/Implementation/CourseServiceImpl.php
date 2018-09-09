@@ -4,6 +4,7 @@ namespace App\Services\Implementation;
 
 use App\Exceptions\CourseException;
 use App\Helpers\Date;
+use App\Helpers\DateConstraints;
 use App\Mail\ObligatoryCreated;
 use App\Models\Course;
 use App\Models\Group;
@@ -70,22 +71,21 @@ class CourseServiceImpl implements CourseService {
   }
 
   public function createCourse(CreateCourseSpecification $spec, Teacher $teacher) {
-    $firstDate = $spec->getFirstDate();
-    $lastDate = $spec->getLastDate();
-    $number = $spec->getLessonNumber();
+    // TODO Load the frequency from somewhere
+    $constraints = new DateConstraints($spec->getFirstDate(), $spec->getLastDate(), $spec->getLessonNumber(), 1);
 
     // Check for existing courses on one of the lessons
-    $this->coursePossible($teacher, $firstDate, $lastDate, $number);
+    $this->coursePossible($teacher, $constraints);
 
     // Load all of the teachers lessons for the given slot
-    $lessons = $this->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, $spec->getRoom());
+    $lessons = $this->buildLessonsForCourse($teacher, $constraints, $spec->getRoom());
 
     $groups = null;
     if ($spec instanceof ObligatorySpecification) {
       // Check for existing courses for one of the groups
       $groups = $spec->getGroups();
       $this->obligatoryPossible($groups, $lessons);
-      $this->obligatoryWithinTimetable($groups, $firstDate, $number);
+      $this->obligatoryWithinTimetable($groups, $spec->getFirstDate(), $spec->getLessonNumber());
     }
 
     $course = $spec->populateCourse();
@@ -143,8 +143,10 @@ class CourseServiceImpl implements CourseService {
 
       // Check for existing courses on one of the newly added lessons
       if ($firstChanged > $oldLastDate) {
-        $this->coursePossible($teacher, $firstChanged, $lastDate, $number);
-        $addedLessons = $this->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, $spec->getRoom());
+        // TODO Load the frequency from somewhere
+        $constraints = new DateConstraints($firstChanged, $lastDate, $number, 1);
+        $this->coursePossible($teacher, $constraints);
+        $addedLessons = $this->buildLessonsForCourse($teacher, $constraints, $spec->getRoom());
       }
     }
 
@@ -229,8 +231,8 @@ class CourseServiceImpl implements CourseService {
     $course->delete();
   }
 
-  private function coursePossible(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number) {
-    if ($this->lessonRepository->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true)->exists()) {
+  private function coursePossible(Teacher $teacher, DateConstraints $constraints) {
+    if ($this->lessonRepository->queryForTeacher($teacher, $constraints, false, true)->exists()) {
       throw new CourseException(CourseException::EXISTS);
     }
   }
@@ -250,27 +252,22 @@ class CourseServiceImpl implements CourseService {
     }
   }
 
-  private function buildLessonsForCourse(Teacher $teacher, Date $firstDate, Date $lastDate = null, $numbers, $room = null, $withCancelled = false) {
-    if (is_scalar($numbers)) {
-      $numbers = [$numbers];
-    }
-    $dayOfWeek = $firstDate->dayOfWeek;
-
+  private function buildLessonsForCourse(Teacher $teacher, DateConstraints $constraints, $room = null, $withCancelled = false) {
     $lessons = $this->lessonRepository
-        ->queryForTeacher($teacher, $firstDate, $lastDate, $dayOfWeek, $numbers, true)
+        ->queryForTeacher($teacher, $constraints, true)
         ->get(['id', 'date', 'number', 'cancelled']);
 
-    if (!$lessons->contains($this->matcher($firstDate, null))) {
+    if (!$lessons->contains($this->matcher($constraints->getFirstDate(), null))) {
       // Teacher has no lesson at the first course date, so create them for all days except offdays
-      $offdays = $this->offdayRepository->queryInRange($firstDate, $lastDate, $dayOfWeek, $numbers)->get(['date', 'number']);
+      $offdays = $this->offdayRepository->queryInRange($constraints)->get(['date', 'number']);
 
-      for ($d = $firstDate; $d <= ($lastDate ?: $firstDate); $d = $d->copy()->addWeek()) {
-        foreach ($numbers as $n) {
-          if ($offdays->contains($this->matcher($d, $n))) {
+      foreach ($constraints->getDateRange() as $date) {
+        foreach ($constraints->getNumbers() as $n) {
+          if ($offdays->contains($this->matcher($date, $n))) {
             continue;
           }
-          if (!$lessons->contains($this->matcher($d, $n))) {
-            $lesson = new Lesson(['date' => $d, 'number' => $n, 'generated' => true, 'room_id' => $room]);
+          if (!$lessons->contains($this->matcher($date, $n))) {
+            $lesson = new Lesson(['date' => $date, 'number' => $n, 'generated' => true, 'room_id' => $room]);
             $lesson->teacher()->associate($teacher);
             $lessons->push($lesson);
           }
@@ -290,14 +287,14 @@ class CourseServiceImpl implements CourseService {
     $this->lessonRepository->createWithCourse($lessons->where('exists', false), $course);
   }
 
-  public function getDataForCreate(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number, array $groups = null) {
-    $withCourse = $this->getWithCourse($teacher, $firstDate, $lastDate, $number);
+  public function getDataForCreate(Teacher $teacher, DateConstraints $constraints, array $groups = null) {
+    $withCourse = $this->getWithCourse($teacher, $constraints);
     if ($withCourse->isNotEmpty()) {
       return compact('withCourse');
     }
 
     $lessonsWithCancelled = $this
-        ->buildLessonsForCourse($teacher, $firstDate, $lastDate, $number, null, true)
+        ->buildLessonsForCourse($teacher, $constraints, null, true)
         ->groupBy(function(Lesson $lesson) {
           return $lesson->cancelled ? 'cancelled' : 'held';
         });
@@ -309,7 +306,7 @@ class CourseServiceImpl implements CourseService {
         return compact('withObligatory');
       }
 
-      $timetable = $this->getTimetable($groups, $firstDate, $number);
+      $timetable = $this->getTimetable($groups, $constraints->getFirstDate(), $constraints->getNumbers());
       if ($timetable->isNotEmpty()) {
         return compact('timetable');
       }
@@ -324,7 +321,7 @@ class CourseServiceImpl implements CourseService {
     $cancelled = $this->mapLessons($lessonsWithCancelled->get('cancelled') ?: collect([]));
 
     $roomOccupation = $this->getRoomOccupation($lessons, $teacher);
-    $room = $this->getDefaultRoom($teacher, $firstDate, $lastDate, $number);
+    $room = $this->getDefaultRoom($teacher, $constraints);
 
     return compact('forNewCourse', 'cancelled', 'roomOccupation', 'room');
   }
@@ -351,13 +348,15 @@ class CourseServiceImpl implements CourseService {
         $removed = $this->mapLessons($lessons['removed']);
         $allLessons = $lessons['kept'];
       } else {
+        // TODO Use actual frequency
+        $constraints = new DateConstraints($firstChanged, $lastDate, $number, 1);
         $lessonsWithCancelled = $this
-            ->buildLessonsForCourse($teacher, $firstChanged, $lastDate, $number, null, true)
+            ->buildLessonsForCourse($teacher, $constraints, null, true)
             ->groupBy(function(Lesson $lesson) {
               return $lesson->cancelled ? 'cancelled' : 'held';
             });
         $lessons = $lessonsWithCancelled->get('held') ?: collect([]);
-        $withCourse = $this->getWithCourse($teacher, $firstChanged, $lastDate, $number);
+        $withCourse = $this->getWithCourse($teacher, $constraints);
         $added = $this->mapLessons($lessons);
         $cancelled = $this->mapLessons($lessonsWithCancelled->get('cancelled') ?: collect([]));
         $allLessons = $lessons->merge($course->lessons);
@@ -389,9 +388,9 @@ class CourseServiceImpl implements CourseService {
         ->values();
   }
 
-  private function getWithCourse(Teacher $teacher = null, Date $firstDate, Date $lastDate = null, $number) {
+  private function getWithCourse(Teacher $teacher = null, DateConstraints $constraints) {
     return $this->lessonRepository
-        ->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number, false, true)
+        ->queryForTeacher($teacher, $constraints, false, true)
         ->with('course:id,name')
         ->get(['id', 'date', 'number', 'course_id'])
         ->map(function(Lesson $lesson) {
@@ -466,9 +465,9 @@ class CourseServiceImpl implements CourseService {
         });
   }
 
-  private function getDefaultRoom(Teacher $teacher, Date $firstDate, Date $lastDate = null, $number) {
+  private function getDefaultRoom(Teacher $teacher, DateConstraints $constraints) {
     return $this->lessonRepository
-        ->queryForTeacher($teacher, $firstDate, $lastDate, $firstDate->dayOfWeek, $number)
+        ->queryForTeacher($teacher, $constraints)
         ->orderBy('date')
         ->orderBy('number')
         ->take(1)
@@ -490,7 +489,7 @@ class CourseServiceImpl implements CourseService {
       $firstAdded = $oldLastDate->copy();
       do {
         $firstAdded = $firstAdded->addWeek();
-      } while ($firstAdded <= $lastDate && $this->offdayRepository->queryInRange($firstAdded)->exists());
+      } while ($firstAdded <= $lastDate && $this->offdayRepository->queryInRange(new DateConstraints($firstAdded))->exists());
 
       return ($firstAdded <= $lastDate) ? $firstAdded : null;
     }
@@ -498,8 +497,8 @@ class CourseServiceImpl implements CourseService {
     return null;
   }
 
-  public function getMappedForTeacher(Teacher $teacher = null, Date $start, Date $end = null) {
-    $query = $this->courseRepository->query($teacher, $start, $end)
+  public function getMappedForTeacher(Teacher $teacher = null, DateConstraints $constraints) {
+    $query = $this->courseRepository->query($teacher, $constraints)
         ->with('teacher:lastname,firstname');
 
     return $this->courseRepository->addParticipants($query)
@@ -521,8 +520,8 @@ class CourseServiceImpl implements CourseService {
         });
   }
 
-  public function getMappedObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, Date $start, Date $end = null) {
-    return $this->courseRepository->queryObligatory($group, $teacher, $subject, $start, $end)
+  public function getMappedObligatory(Group $group = null, Teacher $teacher = null, Subject $subject = null, DateConstraints $constraints) {
+    return $this->courseRepository->queryObligatory($group, $teacher, $subject, $constraints)
         ->with('teacher:lastname,firstname', 'groups:name')
         ->get()
         ->map(function(Course $course) {
@@ -541,8 +540,8 @@ class CourseServiceImpl implements CourseService {
         });
   }
 
-  public function getMappedForStudent(Student $student, Teacher $teacher = null, Date $start, Date $end = null) {
-    $query = $this->courseRepository->queryAvailable($student, $teacher, $start, $end);
+  public function getMappedForStudent(Student $student, Teacher $teacher = null, DateConstraints $constraints) {
+    $query = $this->courseRepository->queryAvailable($student, $teacher, $constraints);
 
     return $this->courseRepository->addParticipants($query)
         ->get()
