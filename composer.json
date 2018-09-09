@@ -7,7 +7,8 @@
         "php": ">=7.0.0",
         "fguillot/json-rpc": "@stable",
         "htmlmin/htmlmin": "^5.0",
-        "laravel/framework": "5.5.*"
+        "laravel/framework": "5.5.*",
+        "ext-intl": "*"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
