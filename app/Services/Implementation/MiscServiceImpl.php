@@ -2,9 +2,7 @@
 
 namespace App\Services\Implementation;
 
-use App\Models\Group;
 use App\Models\Room;
-use App\Models\Student;
 use App\Models\Teacher;
 use App\Repositories\GroupRepository;
 use App\Repositories\RoomRepository;

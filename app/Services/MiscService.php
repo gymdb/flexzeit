@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Group;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Collection;
 
