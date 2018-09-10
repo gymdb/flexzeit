@@ -72,6 +72,6 @@ class DateConstraints {
    * @return DateRange
    */
   public function getDateRange() {
-    return new DateRange($this->firstDate, $this->lastDate, $this->dayOfWeek, $this->frequency);
+    return new DateRange($this->firstDate, $this->lastDate ?? $this->firstDate, $this->dayOfWeek, $this->frequency);
   }
 }
