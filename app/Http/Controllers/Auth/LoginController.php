@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 /**
  * Controller for handling login and logout
@@ -39,6 +40,26 @@ class LoginController extends Controller {
   public function redirectPath() {
     $user = $this->guard()->user();
     return route($user instanceof User ? $user->typeString() . '.dashboard' : 'login');
+  }
+
+  public function logout(Request $request) {
+    if ($request->session()->get('isIntranetAuth')) {
+      $requireNewSession = (session_status() === PHP_SESSION_NONE);
+      if ($requireNewSession) {
+        // Start a native PHP session only if it does not exist already
+        // Never try to cleanup sessions
+        session_start(['gc_probability' => 0]);
+      }
+
+      unset($_SESSION['userSession']);
+
+      if ($requireNewSession) {
+        // If PHP session was started just for this close it again
+        session_write_close();
+      }
+    }
+
+    return AuthenticatesUsers::logout($request);
   }
 
 }
