@@ -9,6 +9,7 @@
       return {
         firstDate: null,
         lastDate: null,
+        frequency: null,
         number: this.oldNumber,
         name: this.oldName,
         room: this.oldRoom,
@@ -105,6 +106,30 @@
       }
     },
     computed: {
+      frequencyMax() {
+        return this.lastDate.diff(this.firstDate, 'weeks');
+      },
+      frequencyDisabled() {
+        return !this.lastDate || this.frequencyMax < 1;
+      },
+      frequencyOptions() {
+        if (this.frequencyDisabled) {
+          this.frequency = null;
+          return [];
+        }
+
+        if (!this.frequency) {
+          this.frequency = 1;
+        } else if (this.frequency > this.frequencyMax) {
+          this.frequency = this.frequencyMax;
+        }
+
+        const options = [];
+        for (let i = 1; i <= this.frequencyMax; i++) {
+          options.push({value: i, label: this.$tc('courses.frequency', i, {count: i})});
+        }
+        return options;
+      },
       lessonsOnDay() {
         return (this.firstDate && this.lessons[this.firstDate.day()]) ? this.lessons[this.firstDate.day()] : null;
       },
@@ -134,6 +159,7 @@
           return {
             firstDate: this.firstDate.format('YYYY-MM-DD'),
             lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
+            frequency: this.frequency,
             number: this.number,
             groups: this.groups.length ? this.groups : null,
             teacher: this.teacher || null
@@ -143,7 +169,8 @@
       buttonDisabled() {
         if (this.obligatory) {
           return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
-              || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0 || !this.forNewCourse.length;
+              || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0
+              || !this.forNewCourse.length;
         }
 
         return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room

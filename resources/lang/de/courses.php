@@ -5,6 +5,7 @@ return [
     'data'          => [
         'firstDate'     => 'Kursbeginn',
         'lastDate'      => 'Kursende',
+        'frequency'     => 'Häufigkeit',
         'lesson'        => 'Einheit',
         'chooseDay'     => 'Zuerst Kursbeginn auswählen.',
         'name'          => 'Kursname',

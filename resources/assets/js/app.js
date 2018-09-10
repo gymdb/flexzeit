@@ -18,7 +18,7 @@ Vue.use(VueI18n);
 const messages = {};
 ['en', 'de'].forEach(lang => {
   messages[lang] = {};
-  ['messages', 'errors', 'lessons', 'registrations', 'student', 'bugreports'].forEach(file => {
+  ['messages', 'errors', 'lessons', 'courses', 'registrations', 'student', 'bugreports'].forEach(file => {
     messages[lang][file] = require('./lang/' + lang + '/' + file);
   });
 });

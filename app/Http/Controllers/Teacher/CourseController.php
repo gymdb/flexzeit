@@ -293,7 +293,6 @@ class CourseController extends Controller {
     $allowDateChange = ($lastDate->copy()->addWeek() >= $minDate);
 
     $lessons = $this->configService->getLessonTimes()[$firstDate->dayOfWeek] ?? [];
-    // TODO Use actual frequency
     $offdays = $this->offdayService->getInRange($minDate, $maxDate, 1);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
@@ -303,6 +302,7 @@ class CourseController extends Controller {
         'id'          => $course->id,
         'firstDate'   => $firstDate->toDateString(),
         'lastDate'    => $lastDate->toDateString(),
+        'frequency'   => $course->frequency ?: 1,
         'number'      => $firstLesson->number,
         'name'        => $course->name,
         'room'        => $firstLesson->room_id,
@@ -406,19 +406,19 @@ class CourseController extends Controller {
    *
    * @param Date $firstDate
    * @param Date|null $lastDate
+   * @param int $frequency
    * @param int $number
    * @param array|null $groups
    * @param Teacher|null $teacher
    * @return JsonResponse
    */
-  public function getDataForCreate(Date $firstDate, Date $lastDate = null, $number, array $groups = null, Teacher $teacher = null) {
+  public function getDataForCreate(Date $firstDate, Date $lastDate = null, int $frequency = null, $number, array $groups = null, Teacher $teacher = null) {
     $user = $this->getTeacher();
     if (!$user->admin || !$teacher) {
       $teacher = $user;
     }
 
-    // TODO Get frequency from input
-    $constraints = new DateConstraints($firstDate, $lastDate, $number, 1);
+    $constraints = new DateConstraints($firstDate, $lastDate, $number, $frequency ?: 1);
 
     $data = $this->courseService->getDataForCreate($teacher, $constraints, $groups);
     return response()->json($data);

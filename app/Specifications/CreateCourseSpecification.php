@@ -18,6 +18,11 @@ interface CreateCourseSpecification {
   public function getLastDate();
 
   /**
+   * @return int|null
+   */
+  public function getFrequency();
+
+  /**
    * @return int
    */
   public function getLessonNumber();

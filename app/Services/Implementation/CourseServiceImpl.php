@@ -71,8 +71,7 @@ class CourseServiceImpl implements CourseService {
   }
 
   public function createCourse(CreateCourseSpecification $spec, Teacher $teacher) {
-    // TODO Load the frequency from somewhere
-    $constraints = new DateConstraints($spec->getFirstDate(), $spec->getLastDate(), $spec->getLessonNumber(), 1);
+    $constraints = new DateConstraints($spec->getFirstDate(), $spec->getLastDate(), $spec->getLessonNumber(), $spec->getFrequency() ?: 1);
 
     // Check for existing courses on one of the lessons
     $this->coursePossible($teacher, $constraints);
@@ -133,7 +132,7 @@ class CourseServiceImpl implements CourseService {
     $number = $firstLesson->number;
 
     // Load first modified date
-    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate);
+    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate, $course->frequency ?: 1);
     $addedLessons = collect([]);
     if ($firstChanged) {
       // Check if changing course duration is still possible
@@ -143,8 +142,7 @@ class CourseServiceImpl implements CourseService {
 
       // Check for existing courses on one of the newly added lessons
       if ($firstChanged > $oldLastDate) {
-        // TODO Load the frequency from somewhere
-        $constraints = new DateConstraints($firstChanged, $lastDate, $number, 1);
+        $constraints = new DateConstraints($firstChanged, $lastDate, $number, $course->frequency ?: 1);
         $this->coursePossible($teacher, $constraints);
         $addedLessons = $this->buildLessonsForCourse($teacher, $constraints, $spec->getRoom());
       }
@@ -336,7 +334,7 @@ class CourseServiceImpl implements CourseService {
     $number = $firstLesson->number;
     $oldLastDate = $lastLesson->date;
 
-    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate);
+    $firstChanged = $this->getFirstChangedDate($oldLastDate, $lastDate, $course->frequency ?: 1);
 
     $allLessons = $course->lessons;
     if ($firstChanged) {
@@ -348,8 +346,7 @@ class CourseServiceImpl implements CourseService {
         $removed = $this->mapLessons($lessons['removed']);
         $allLessons = $lessons['kept'];
       } else {
-        // TODO Use actual frequency
-        $constraints = new DateConstraints($firstChanged, $lastDate, $number, 1);
+        $constraints = new DateConstraints($firstChanged, $lastDate, $number, $course->frequency ?: 1);
         $lessonsWithCancelled = $this
             ->buildLessonsForCourse($teacher, $constraints, null, true)
             ->groupBy(function(Lesson $lesson) {
@@ -475,7 +472,7 @@ class CourseServiceImpl implements CourseService {
         ->first();
   }
 
-  private function getFirstChangedDate(Date $oldLastDate, Date $lastDate = null) {
+  private function getFirstChangedDate(Date $oldLastDate, Date $lastDate = null, int $frequency) {
     if (!$lastDate) {
       return null;
     }
@@ -488,7 +485,7 @@ class CourseServiceImpl implements CourseService {
       // New last date is after the old one: Add lessons starting on the first that is not an offday
       $firstAdded = $oldLastDate->copy();
       do {
-        $firstAdded = $firstAdded->addWeek();
+        $firstAdded = $firstAdded->addWeek($frequency);
       } while ($firstAdded <= $lastDate && $this->offdayRepository->queryInRange(new DateConstraints($firstAdded))->exists());
 
       return ($firstAdded <= $lastDate) ? $firstAdded : null;

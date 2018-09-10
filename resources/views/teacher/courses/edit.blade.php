@@ -45,11 +45,16 @@
                        v-on:last="setLastDate">
             </daterange>
 
-            <div class="form-group col-sm-6 col-xs-12">
+            <div class="form-group col-sm-3 col-xs-12">
+              <label for="frequency">@lang('courses.data.frequency')</label>
+              <input type="text" id="frequency" name="frequency" class="form-control" disabled :value="frequencyLabel">
+            </div>
+
+            <div class="form-group col-sm-3 col-xs-12">
               <label>@lang('courses.data.lesson')</label>
               <div>
                 @foreach($lessons as $n=>$time)
-                  <label class="checkbox-inline">
+                  <label class="radio-inline">
                     <input type="radio" name="lessonNumber" value="{{$n}}" disabled @if($n === $courseData['number']) checked @endif/>
                     @lang('messages.format.range', ['number' => $n])
                   </label>

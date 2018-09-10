@@ -4,6 +4,7 @@ return [
     'data'          => [
         'firstDate'     => 'First date',
         'lastDate'      => 'Last date',
+        'frequency'     => 'Frequency',
         'lesson'        => 'Lesson',
         'chooseDay'     => 'Choose a date first.',
         'name'          => 'Course name',

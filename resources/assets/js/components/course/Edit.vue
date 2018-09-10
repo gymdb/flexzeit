@@ -73,6 +73,10 @@
       }
     },
     computed: {
+      frequencyLabel() {
+        const val = this.lastDate === this.data.firstDate ? 0 : this.data.frequency;
+        return this.$tc('courses.frequency', val, {count: val});
+      },
       parsedRooms() {
         return _.map(this.rooms, (room) => {
           return {

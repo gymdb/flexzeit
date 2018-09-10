@@ -64,10 +64,16 @@
                        v-on:last="setLastDate">
             </daterange>
 
-            <div class="form-group col-sm-6 col-xs-12 required">
+            <div class="form-group col-sm-3 col-xs-12">
+              <label for="frequency">@lang('courses.data.frequency')</label>
+              <v-select v-model="frequency" name="frequency" class="select-container" :placeholder="$tc('courses.frequency', 0)" :disabled="frequencyDisabled"
+                        :options="frequencyOptions"></v-select>
+            </div>
+
+            <div class="form-group col-sm-3 col-xs-12 required">
               <label>@lang('courses.data.lesson')</label>
               <div v-if="lessonsOnDay">
-                <label v-for="(time, n) in lessonsOnDay" class="checkbox-inline">
+                <label v-for="(time, n) in lessonsOnDay" class="radio-inline">
                   <input type="radio" name="lessonNumber" :value="n" v-model="number" required/> @{{$t('messages.range', {number: n})}}
                 </label>
               </div>

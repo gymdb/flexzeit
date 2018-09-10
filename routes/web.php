@@ -56,7 +56,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
         ->middleware('params:group?;i|teacher?;i|subject?;i|start?;d|end?;d')
         ->name('teacher.api.courses.obligatory');
     Route::get('/course/dataForCreate', 'CourseController@getDataForCreate')
-        ->middleware('params:firstDate;d|lastDate?;d|number;i|groups*;i|teacher?;i');
+        ->middleware('params:firstDate;d|lastDate?;d|frequency?;i|number;i|groups*;i|teacher?;i');
     Route::get('/course/dataForEdit', 'CourseController@getDataForEdit')
         ->middleware('params:course;i|lastDate?;d|groups*;i');
 

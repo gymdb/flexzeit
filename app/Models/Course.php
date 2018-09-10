@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $id
  * @property string $name
  * @property string $description
+ * @property int $frequency
  * @property Subject $subject
  * @property int $maxstudents
  * @property int $yearfrom
