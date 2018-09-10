@@ -30,29 +30,47 @@ class DateConstraints {
     $this->lastDate = $lastDate;
     $this->dayOfWeek = $lastDate && $frequency ? $firstDate->dayOfWeek : null;
     $this->frequency = $lastDate && $frequency ? $frequency : null;
-    $this->numbers = is_scalar($numbers) ? [$numbers] : $numbers;
+    $this->numbers = $numbers ? (array)$numbers : null;
   }
 
+  /**
+   * @return Date
+   */
   public function getFirstDate(): Date {
     return $this->firstDate;
   }
 
-  public function getLastDate(): Date {
+  /**
+   * @return Date|null
+   */
+  public function getLastDate() {
     return $this->lastDate;
   }
 
-  public function getDayOfWeek(): int {
+  /**
+   * @return int|null
+   */
+  public function getDayOfWeek() {
     return $this->dayOfWeek;
   }
 
-  public function getFrequency(): int {
+  /**
+   * @return int|null
+   */
+  public function getFrequency() {
     return $this->frequency;
   }
 
+  /**
+   * @return int[]|null
+   */
   public function getNumbers() {
     return $this->numbers;
   }
 
+  /**
+   * @return DateRange
+   */
   public function getDateRange() {
     return new DateRange($this->firstDate, $this->lastDate, $this->dayOfWeek, $this->frequency);
   }

@@ -20,14 +20,14 @@ class DateRange extends DatePeriod implements Arrayable {
    * @param Date $start
    * @param Date $end
    * @param int|null $dayOfWeek Day of week, as defined by the constants in Carbon. Null if every day should be included
-   * @param int $frequency Frequency in weeks (ignored if $dayOfWeek is null)
+   * @param int|null $frequency Frequency in weeks (defaults to weekly, ignored if $dayOfWeek is null)
    */
-  public function __construct(Date $start, Date $end, $dayOfWeek = null, int $frequency = 1) {
+  public function __construct(Date $start, Date $end, $dayOfWeek = null, int $frequency = null) {
     if (is_null($dayOfWeek)) {
       $interval = CarbonInterval::day();
     } else {
       $start = $start->copy()->setToDayOfWeek($dayOfWeek);
-      $interval = CarbonInterval::week($frequency);
+      $interval = CarbonInterval::week($frequency ?? 1);
     }
 
     parent::__construct($start, $interval, $end->copy()->addDay());
@@ -39,10 +39,10 @@ class DateRange extends DatePeriod implements Arrayable {
    * @param Date $start
    * @param Date $end
    * @param int|null $dayOfWeek Day of week, as defined by the constants in Carbon. Null if every day should be included
-   * @param int $frequency Frequency in weeks (ignored if $dayOfWeek is null)
+   * @param int|null $frequency Frequency in weeks (defaults to weekly, ignored if $dayOfWeek is null)
    * @return Date[]
    */
-  public static function getDates(Date $start, Date $end, $dayOfWeek = null, int $frequency = 1) {
+  public static function getDates(Date $start, Date $end, $dayOfWeek = null, int $frequency = null) {
     return (new DateRange($start, $end, $dayOfWeek, $frequency))->toArray();
   }
 
@@ -52,7 +52,7 @@ class DateRange extends DatePeriod implements Arrayable {
    * @param Date $start
    * @param Date $end
    * @param int|null $dayOfWeek Day of week, as defined by the constants in Carbon. Null if every day should be included
-   * @param int $frequency Frequency in weeks (ignored if $dayOfWeek is null)
+   * @param int|null $frequency Frequency in weeks (defaults to weekly, ignored if $dayOfWeek is null)
    * @return Collection
    */
   public static function getCollection(Date $start, Date $end, $dayOfWeek = null, int $frequency = 1) {
