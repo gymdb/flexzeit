@@ -35,7 +35,7 @@ trait RepositoryTrait {
       return $query->where($table . 'date', $constraints->getFirstDate());
     }
 
-    return $constraints->getDayOfWeek()
+    return $constraints->getDayOfWeek() === null
         ? $query->whereBetween($table . 'date', [$constraints->getFirstDate(), $constraints->getLastDate()])
         : $query->whereIn($table . 'date', $constraints->getDateRange());
   }
