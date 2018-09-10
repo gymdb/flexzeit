@@ -45,7 +45,8 @@ class LoginController extends Controller {
   }
 
   public function logout(Request $request) {
-    if ($request->session()->get('isIntranetAuth')) {
+    $sessionKey = config('services.sso.session_key');
+    if ($sessionKey && $request->session()->get('isIntranetAuth')) {
       $requireNewSession = (session_status() === PHP_SESSION_NONE);
       if ($requireNewSession) {
         // Start a native PHP session only if it does not exist already
@@ -53,7 +54,7 @@ class LoginController extends Controller {
         session_start(['gc_probability' => 0]);
       }
 
-      unset($_SESSION['userSession']);
+      unset($_SESSION[$sessionKey]);
 
       if ($requireNewSession) {
         // If PHP session was started just for this close it again

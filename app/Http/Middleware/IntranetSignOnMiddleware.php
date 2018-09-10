@@ -41,19 +41,25 @@ class IntranetSignOnMiddleware {
    * Execute the actual login logic
    */
   private function doLogin() {
+    $sessionKey = config('services.sso.session_key');
+    if (!$sessionKey) {
+      // SSO not configured
+      return;
+    }
+
     if (session_status() === PHP_SESSION_NONE) {
       // Start a native PHP session only if it does not exist already
       // We don't need to change anything, so close it again immediately, and never try to cleanup sessions
       session_start(['read_and_close' => true, 'gc_probability' => 0]);
     }
 
-    if (empty($_SESSION['userSession'])) {
+    if (empty($_SESSION[$sessionKey])) {
       // No intranet session given, call logout logic
       $this->doLogout();
       return;
     }
 
-    $session = $_SESSION['userSession'];
+    $session = $_SESSION[$sessionKey];
     if ($session instanceof __PHP_Incomplete_Class) {
       // This might be caused by a change in how logout is handled at the SSO application
       Log::warning('UserSession has unknown type ' . ((array)$session)['__PHP_Incomplete_Class_Name']);
