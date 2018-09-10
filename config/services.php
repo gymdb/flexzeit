@@ -18,6 +18,11 @@ return [
         'domain'   => env('UNTIS_DOMAIN'),
         'username' => env('UNTIS_USERNAME'),
         'password' => env('UNTIS_PASSWORD')
+    ],
+
+    'sso' => [
+        'session_key' => env('SSO_SESSION_KEY'),
+        'url'         => env('SSO_URL')
     ]
 
 ];
