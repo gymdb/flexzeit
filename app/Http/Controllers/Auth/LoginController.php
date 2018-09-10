@@ -14,7 +14,9 @@ use Illuminate\Http\Request;
  */
 class LoginController extends Controller {
 
-  use AuthenticatesUsers;
+  use AuthenticatesUsers {
+    logout as traitLogout;
+  }
 
   /**
    * Create a new controller instance.
@@ -59,7 +61,7 @@ class LoginController extends Controller {
       }
     }
 
-    return AuthenticatesUsers::logout($request);
+    return $this->traitLogout($request);
   }
 
 }
