@@ -2,7 +2,7 @@
 
 @section('content')
   <section class="panel panel-default has-popovers @if($attendanceChangeable) has-dropdowns @endif">
-    <h2 class="panel-heading">@lang('lessons.show.heading', ['date' => $lesson->date, 'number' => $lesson->number])</h2>
+    <h2 class="panel-heading">{!! __('lessons.show.heading', ['date' => $lesson->date, 'number' => $lesson->number]) !!}</h2>
     <teacher-lesson :id="{{$lesson->id}}" :attendance-checked="{{json_encode($attendanceChecked)}}" inline-template>
       <div class="panel-body">
         @if($lesson->cancelled)
