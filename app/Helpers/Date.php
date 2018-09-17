@@ -16,6 +16,8 @@ class Date extends Carbon {
   /** @var IntlDateFormatter */
   public static $formatter;
 
+  protected static $microsecondsFallback = false;
+
   public function __construct($time = null, $tz = null) {
     parent::__construct($time, $tz);
     $this->startOfDay();
