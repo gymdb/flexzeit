@@ -21,14 +21,14 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 interface RegistrationRepository {
 
   /**
-   * @param Student|Group $student
+   * @param Student|Group|null $student
    * @param DateConstraints $constraints
    * @param bool $showCancelled
    * @param Teacher|null $teacher
    * @param Subject|null $subject
    * @return Builder
    */
-  public function queryForStudent($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
+  public function queryForStudent($student = null, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
 
   /**
    * Query registrations where no documentation was added
@@ -42,19 +42,19 @@ interface RegistrationRepository {
   public function queryDocumentation($student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
-   * @param Group $group
+   * @param Group|null $group
    * @param Student|null $student
    * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryMissing(Group $group, Student $student = null, DateConstraints $constraints);
+  public function queryMissing(Group $group = null, Student $student = null, DateConstraints $constraints);
 
   /**
-   * @param Student|Group $student
+   * @param Student|Group|null $student
    * @param DateConstraints $constraints
    * @return Builder
    */
-  public function queryByTeacher($student, DateConstraints $constraints);
+  public function queryByTeacher($student = null, DateConstraints $constraints);
 
   /**
    * @param Student $student

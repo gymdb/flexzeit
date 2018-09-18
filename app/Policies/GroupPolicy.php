@@ -27,10 +27,10 @@ class GroupPolicy {
    * Determine whether the user can view missing registrations for this group
    *
    * @param User $user
-   * @param Group $group
+   * @param Group|null $group
    * @return bool
    */
-  public function showMissingRegistrations(User $user, Group $group) {
+  public function showMissingRegistrations(User $user, Group $group = null) {
     return $this->isFormTeacher($user, $group);
   }
 
@@ -49,10 +49,10 @@ class GroupPolicy {
    * Determine whether the user can view registrations done by teachers for this group
    *
    * @param User $user
-   * @param Group $group
+   * @param Group|null $group
    * @return bool
    */
-  public function showByTeacherRegistrations(User $user, Group $group) {
+  public function showByTeacherRegistrations(User $user, Group $group = null) {
     return $this->isFormTeacher($user, $group);
   }
 
@@ -71,10 +71,10 @@ class GroupPolicy {
    * Allow access only for the form teacher and admin
    *
    * @param User $user
-   * @param Group $group
+   * @param Group|null $group
    * @return bool
    */
-  private function isFormTeacher(User $user, Group $group) {
+  private function isFormTeacher(User $user, Group $group = null) {
     if (!$user->isTeacher()) {
       return false;
     }
@@ -82,7 +82,7 @@ class GroupPolicy {
     if ($user->admin) {
       return true;
     }
-    return $user->form && $user->form->group_id === $group->id;
+    return $group && $user->form && $user->form->group_id === $group->id;
   }
 
   /**

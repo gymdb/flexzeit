@@ -157,12 +157,12 @@ interface RegistrationService {
   public function getMappedForList(Group $group, Student $student = null, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
   /**
-   * @param Group $group
+   * @param Group|null $group
    * @param Student|null $student
    * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getMissing(Group $group, Student $student = null, DateConstraints $constraints);
+  public function getMissing(Group $group = null, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Group $group
@@ -173,12 +173,12 @@ interface RegistrationService {
   public function getMappedAbsent(Group $group, Student $student = null, DateConstraints $constraints);
 
   /**
-   * @param Group $group
+   * @param Group|null $group
    * @param Student|null $student
    * @param DateConstraints $constraints
    * @return Collection<array>
    */
-  public function getByTeacher(Group $group, Student $student = null, DateConstraints $constraints);
+  public function getByTeacher(Group $group = null, Student $student = null, DateConstraints $constraints);
 
   /**
    * @param Course $course

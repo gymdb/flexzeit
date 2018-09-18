@@ -11,6 +11,7 @@
           max-date='{{$maxDate->toDateString()}}'
           :disabled-days-of-week='@json($disabledDaysOfWeek)'
           :disabled-dates='@json($offdays)'
+          :require-group='@json(!$isAdmin)'
           :require-student="false"
           error-text="@lang('registrations.byteacher.error')">
         <div slot="empty" class="alert alert-warning">@lang('registrations.byteacher.none')</div>

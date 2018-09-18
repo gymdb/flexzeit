@@ -144,14 +144,15 @@ class RegistrationController extends Controller {
     $this->authorize('showByTeacherRegistrations', Student::class);
 
     $user = $this->getTeacher();
-    $groups = $user->admin ? $this->miscService->getGroups() : [$user->form->group];
+    $isAdmin = $user->admin;
+    $groups = $isAdmin ? $this->miscService->getGroups() : [$user->form->group];
 
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
 
-    return view('teacher.registrations.byteacher', compact('groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+    return view('teacher.registrations.byteacher', compact('isAdmin', 'groups', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
   }
 
   /**
@@ -312,22 +313,28 @@ class RegistrationController extends Controller {
   /**
    * Get students with missing registrations
    *
-   * @param Group $group
+   * @param Group|null $group
    * @param Student|null $student
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
    * @throws AuthorizationException
    */
-  public function getMissing(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+  public function getMissing(Group $group = null, Student $student = null, Date $start = null, Date $end = null) {
     if ($student) {
       $this->authorize('showMissingRegistrations', $student);
-    } else {
+    } else if ($group) {
       $this->authorize('showMissingRegistrations', $group);
+    } else {
+      $this->authorize('showMissingRegistrations', Group::class);
     }
 
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
+    if (!$group && !$student && !$start && !$end && $this->getTeacher()->admin) {
+      $start = $end = Date::today();
+    } else {
+      $start = $start ?: $this->configService->getYearStart();
+      $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
+    }
     $constraints = new DateConstraints($start, $end);
 
     $missing = $this->registrationService->getMissing($group, $student, $constraints);
@@ -362,22 +369,28 @@ class RegistrationController extends Controller {
   /**
    * Get students with registrations made by a teacher
    *
-   * @param Group $group
+   * @param Group|null $group
    * @param Student|null $student
    * @param Date|null $start
    * @param Date|null $end
    * @return JsonResponse
    * @throws AuthorizationException
    */
-  public function getByTeacher(Group $group, Student $student = null, Date $start = null, Date $end = null) {
+  public function getByTeacher(Group $group = null, Student $student = null, Date $start = null, Date $end = null) {
     if ($student) {
       $this->authorize('showByTeacherRegistrations', $student);
-    } else {
+    } else if ($group) {
       $this->authorize('showByTeacherRegistrations', $group);
+    } else {
+      $this->authorize('showByTeacherRegistrations', Group::class);
     }
 
-    $start = $start ?: $this->configService->getYearStart();
-    $end = $end ?: $this->configService->getYearEnd();
+    if (!$group && !$student && !$start && !$end && $this->getTeacher()->admin) {
+      $start = $end = Date::today();
+    } else {
+      $start = $start ?: $this->configService->getYearStart();
+      $end = $end ?: $this->configService->getYearEnd();
+    }
     $constraints = new DateConstraints($start, $end);
 
     $byTeacher = $this->registrationService->getByTeacher($group, $student, $constraints);

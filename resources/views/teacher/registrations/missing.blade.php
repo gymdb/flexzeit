@@ -12,6 +12,7 @@
             max-date='{{$maxDate->toDateString()}}'
             :disabled-days-of-week='@json($disabledDaysOfWeek)'
             :disabled-dates='@json($offdays)'
+            :require-group='@json(!$isAdmin)'
             :require-student="false"
             error-text="@lang('registrations.missing.error')">
           <div slot="empty" class="alert alert-warning">@lang('registrations.missing.none')</div>
@@ -37,7 +38,7 @@
                   <td>@{{item.name}}</td>
                   <td>
                     <teacher-excused :date="item.date" :excused="false"
-                                     v-on:refreshed="setRefreshSuccess" v-on:error="setRefreshError"></teacher-excused>
+                        v-on:refreshed="setRefreshSuccess" v-on:error="setRefreshError"></teacher-excused>
                   </td>
                   @if($isAdmin)
                     <td class="hidden-print">

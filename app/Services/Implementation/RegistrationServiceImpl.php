@@ -355,18 +355,19 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getMissing(Group $group, Student $student = null, DateConstraints $constraints) {
+  public function getMissing(Group $group = null, Student $student = null, DateConstraints $constraints) {
     return $this->registrationRepository->queryMissing($group, $student, $constraints)
         ->get(['id', 'firstname', 'lastname', 'date', 'number'])
-        ->map(function(Student $student) {
+        ->map(function(Student $student) use ($group) {
           $lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
           $this->configService->setTime($lesson);
+          $name = $group ? $student->name() : $student->name() . $student->formsString();
           return [
               'date'   => $lesson->date->toDateString(),
               'number' => $lesson->number,
               'time'   => $lesson->time,
               'id'     => $student->id,
-              'name'   => $student->name()
+              'name'   => $name
           ];
         });
   }
@@ -391,19 +392,20 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
-  public function getByTeacher(Group $group, Student $student = null, DateConstraints $constraints) {
+  public function getByTeacher(Group $group = null, Student $student = null, DateConstraints $constraints) {
     return $this->registrationRepository->queryByTeacher($student ?: $group, $constraints)
         ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'registered_at'])
         ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'student:id,lastname,firstname')
         ->get()
-        ->map(function(Registration $registration) {
+        ->map(function(Registration $registration) use ($group) {
           $this->configService->setTime($registration->lesson);
+          $student = $group ? $registration->student->name() : $registration->student->name() . $registration->student->formsString();
           return [
               'date'          => $registration->lesson->date->toDateString(),
               'number'        => $registration->lesson->number,
               'time'          => $registration->lesson->time,
               'teacher'       => $registration->lesson->teacher->name(),
-              'student'       => $registration->student->name(),
+              'student'       => $student,
               'registered_at' => $registration->registered_at ? $registration->registered_at->toDateTimeString() : null
           ];
         });

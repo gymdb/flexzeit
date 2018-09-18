@@ -91,13 +91,13 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/registrations/warnings/lesson/{lesson}', 'RegistrationController@getWarningsForLesson')
         ->middleware('params:student;i');
     Route::get('/registrations/missing', 'RegistrationController@getMissing')
-        ->middleware('params:group;i|student?;i|start?;d|end?;d')
+        ->middleware('params:group?;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.missing');
     Route::get('/registrations/absent', 'RegistrationController@getAbsent')
         ->middleware('params:group;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.absent');
     Route::get('/registrations/byteacher', 'RegistrationController@getByTeacher')
-        ->middleware('params:group;i|student?;i|start?;d|end?;d')
+        ->middleware('params:group?;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.byteacher');
     Route::post('/attendance/{registration}', 'RegistrationController@setAttendance')
         ->middleware('params:attendance;b');

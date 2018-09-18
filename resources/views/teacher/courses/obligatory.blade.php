@@ -17,6 +17,7 @@
           :disabled-days-of-week='@json($disabledDaysOfWeek)'
           :disabled-dates='@json($offdays)'
           :require-group="false"
+          :show-student="false"
           error-text="@lang('courses.obligatory.error')">
         <div slot="empty" class="alert alert-warning">@lang('courses.obligatory.none')</div>
         <template scope="props">

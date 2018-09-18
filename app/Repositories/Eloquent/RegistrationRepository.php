@@ -18,9 +18,9 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
 
   use RepositoryTrait;
 
-  public function queryForStudent($student, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null,
-      Subject $subject = null) {
-    $query = $this->inRange($student->registrations()->getQuery(), $constraints, 'l.')
+  public function queryForStudent($student = null, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+    $baseQuery = $student ? $student->registrations()->getQuery() : Registration::query();
+    $query = $this->inRange($baseQuery, $constraints, 'l.')
         ->join('lessons as l', 'l.id', 'lesson_id');
 
     if (!$showCancelled) {
@@ -54,11 +54,19 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         });
   }
 
-  public function queryMissing(Group $group, Student $student = null, DateConstraints $constraints) {
+  public function queryMissing(Group $group = null, Student $student = null, DateConstraints $constraints) {
     $slotQuery = $this->getSlotQuery($constraints);
 
+    if ($student) {
+      $baseQuery = Student::whereKey($student->id);
+    } else if ($group) {
+      $baseQuery = $group->students();
+    } else {
+      $baseQuery = Student::query();
+    }
+
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-    $query = ($student ? Student::whereKey($student->id) : $group->students())
+    $query = $baseQuery
         ->crossJoin(DB::raw("({$slotQuery->toSql()}) as d"))
         ->addBinding($slotQuery->getBindings(), 'join')
         // Don't show slots where the student is known to be absent
@@ -81,7 +89,7 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     return $query;
   }
 
-  public function queryByTeacher($student, DateConstraints $constraints) {
+  public function queryByTeacher($student = null, DateConstraints $constraints) {
     return $this->queryForStudent($student, $constraints)->where('byteacher', true);
   }
 

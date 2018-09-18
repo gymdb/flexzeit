@@ -10,17 +10,17 @@
         </select>
       </div>
 
-      <div v-if="!multipleStudents && groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
+      <div v-if="!multipleStudents && groupsList && showStudent" class="form-group col-sm-3 col-xs-6">
         <label for="student" class="sr-only">{{$t('messages.student')}}</label>
         <select class="form-control" id="student" :disabled="!group" v-model="student">
           <option :value="null">{{$t('messages.student')}}</option>
           <option v-for="s in studentsList" :value="s.id">{{s.name}}</option>
         </select>
       </div>
-      <div v-if="multipleStudents && groupsList && requireGroup" class="form-group col-sm-3 col-xs-6">
+      <div v-if="multipleStudents && groupsList && showStudent" class="form-group col-sm-3 col-xs-6">
         <label for="students" class="sr-only">{{$t('messages.student')}}</label>
         <v-select class="select-container" id="students" :disabled="!group" v-model="students" multiple search
-                  :placeholder="$t('messages.student')" :options="studentsList" options-value="id" options-label="name">
+            :placeholder="$t('messages.student')" :options="studentsList" options-value="id" options-label="name">
         </v-select>
       </div>
 
@@ -49,20 +49,20 @@
       </div>
 
       <daterange v-if="minDate"
-                 :type="1"
-                 :default-start-date="defaultStartDate"
-                 :default-end-date="defaultEndDate"
-                 :min-date="minDate"
-                 :max-date="maxDate"
-                 :disabled-days-of-week="disabledDaysOfWeek"
-                 :disabled-dates="disabledDates"
-                 :old-first-date="initialStart"
-                 :old-last-date="initialEnd"
-                 :label-first="$t('messages.from')"
-                 :label-last="$t('messages.to')"
-                 hide-labels
-                 v-on:first="setStart"
-                 v-on:last="setEnd">
+          :type="1"
+          :default-start-date="defaultStartDate"
+          :default-end-date="defaultEndDate"
+          :min-date="minDate"
+          :max-date="maxDate"
+          :disabled-days-of-week="disabledDaysOfWeek"
+          :disabled-dates="disabledDates"
+          :old-first-date="initialStart"
+          :old-last-date="initialEnd"
+          :label-first="$t('messages.from')"
+          :label-last="$t('messages.to')"
+          hide-labels
+          v-on:first="setStart"
+          v-on:last="setEnd">
       </daterange>
 
       <div v-if="hasTrashed" class="form-group col-sm-3 col-xs-6">
@@ -237,6 +237,10 @@
         'default': true
       },
       requireStudent: {
+        'type': Boolean,
+        'default': true
+      },
+      showStudent: {
         'type': Boolean,
         'default': true
       },
