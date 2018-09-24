@@ -92,8 +92,10 @@ interface LessonService {
   /**
    * @param Lesson $lesson
    * @param Teacher $teacher
+   * @param int|null $untisId
+   * @param bool $updateRoom
    * @throws LessonException
    */
-  public function substituteLesson(Lesson $lesson, Teacher $teacher);
+  public function substituteLesson(Lesson $lesson, Teacher $teacher, $untisId = null, $updateRoom = false);
 
 }

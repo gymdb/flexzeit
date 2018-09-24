@@ -111,6 +111,7 @@ class WebUntisServiceImpl implements WebUntisService {
           ];
         });
         return [
+            'untisId'         => $item['lsid'],
             'start'           => $this->getDateTime($item['date'], $item['startTime']),
             'end'             => $this->getDateTime($item['date'], $item['endTime']),
             'type'            => $item['type'],

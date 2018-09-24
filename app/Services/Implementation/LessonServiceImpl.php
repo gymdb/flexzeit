@@ -104,72 +104,77 @@ class LessonServiceImpl implements LessonService {
           $teacher = $teachers[$substitution['teacher']] ?? null;
           $originalTeacher = $substitution['originalTeacher'] ? ($teachers[$substitution['originalTeacher']] ?? null) : null;
           $result = [];
+
+          if ($substitution['rooms']->count() === 1) {
+            $room = $rooms[$substitution['rooms'][0]['room']] ?? null;
+            $originalRoom = $substitution['rooms'][0]['originalRoom']
+                ? ($rooms[$substitution['rooms'][0]['originalRoom']] ?? null)
+                : null;
+          } else {
+            $room = $originalRoom = null;
+          }
+
           foreach ($times[$date->dayOfWeek] as $n => $time) {
-            if ($date->toDateTime($time['start']) >= $substitution['start'] && $date->toDateTime($time['end']) <= $substitution['end']) {
-              if (!$teacher) {
-                Log::warning("Could not find teacher with shortname {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
-                continue;
-              }
+            if ($date->toDateTime($time['start']) < $substitution['start'] || $date->toDateTime($time['end']) > $substitution['end']) {
+              // Ignore if currently checked flex lesson is not within the substitution's timeframe
+              continue;
+            }
 
-              switch ($substitution['type']) {
-                case 'cancel':
-                  $result[] = [
-                      'subst'   => false,
-                      'date'    => $date,
-                      'number'  => $n,
-                      'teacher' => $teacher,
-                      'room'    => null
-                  ];
-                  break;
-                case 'subst':
-                  if (!$originalTeacher) {
-                    Log::warning("Could not find teacher with shortname {$substitution['originalTeacher']} for lesson {$date->toDateString()}/{$n}.");
-                    break;
-                  }
-                  $result[] = [
-                      'subst'      => true,
-                      'date'       => $date,
-                      'number'     => $n,
-                      'teacher'    => $originalTeacher,
-                      'newTeacher' => $teacher,
-                      'room'       => null
-                  ];
-                  break;
-                case 'rmchg':
-                  if ($substitution['rooms']->count() !== 1) {
-                    Log::warning("Room change for teacher {$substitution['teacher']} for lesson {$date->toDateString()}/{$n} should contain exactly one room item.");
-                    continue;
-                  }
+            if (!$teacher) {
+              Log::warning("Could not find teacher with shortname {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
+              continue;
+            }
 
-                  $room = $rooms[$substitution['rooms'][0]['room']] ?? null;
-                  $originalRoom = $substitution['rooms'][0]['originalRoom']
-                      ? ($rooms[$substitution['rooms'][0]['originalRoom']] ?? null)
-                      : null;
-                  if (!$room) {
-                    Log::warning("Could not find room with shortname {$substitution['rooms'][0]['room']} for lesson {$substitution['teacher']}/{$date->toDateString()}/{$n}.");
-                    continue;
-                  }
+            if ($substitution['rooms']->count() === 1 && !$room) {
+              Log::warning("Could not find room with shortname {$substitution['rooms'][0]['room']} for lesson {$substitution['teacher']}/{$date->toDateString()}/{$n}.");
+            }
 
-                  $result[] = [
-                      'date'         => $date,
-                      'number'       => $n,
-                      'teacher'      => $teacher,
-                      'room'         => $room,
-                      'originalRoom' => $originalRoom,
-                  ];
-                  break;
-                default:
-                  Log::warning("Unknown substitution type '{$substitution['type']}' for teacher {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
-                  break;
-              }
+            $data = [
+                'untisId'      => $substitution['untisId'] ?? null,
+                'date'         => $date,
+                'number'       => $n,
+                'teacher'      => $teacher,
+                'room'         => $room,
+                'originalRoom' => $originalRoom,
+            ];
+
+            switch ($substitution['type']) {
+              case 'cancel':
+                $data['cancel'] = true;
+                break;
+              case 'subst':
+                if (!$originalTeacher) {
+                  Log::warning("Could not find teacher with shortname {$substitution['originalTeacher']} for lesson {$date->toDateString()}/{$n}.");
+                  $data = null;
+                } else {
+                  $data['subst'] = true;
+                  $data['teacher'] = $originalTeacher;
+                  $data['newTeacher'] = $teacher;
+                }
+                break;
+              case 'rmchg':
+                if (!$room) {
+                  Log::warning("Room missing for changing room of lesson {$substitution['teacher']}/{$date->toDateString()}/{$n}.");
+                  $data = null;
+                }
+                break;
+              default:
+                Log::warning("Unknown substitution type '{$substitution['type']}' for teacher {$substitution['teacher']} for lesson {$date->toDateString()}/{$n}.");
+                $data = null;
+                break;
+            }
+
+            if ($data) {
+              $result[] = $data;
             }
           }
+
           return $result;
         });
 
     // Load the lessons corresponding to the substitution data
     $lessons = $this->lessonRepository->queryForSubstitutions($substitutions)
-        ->get(['id', 'teacher_id', 'date', 'number', 'cancelled', 'substitute_id', 'room_id'])
+        ->get(['id', 'teacher_id', 'date', 'number', 'cancelled', 'substitute_id', 'room_id', 'untis_id'])
         ->buildDictionary(['teacher_id', 'date', 'number'], false);
 
     $substitutions->each(function($substitution) use ($lessons) {
@@ -180,17 +185,21 @@ class LessonServiceImpl implements LessonService {
         return;
       }
 
-      if ($substitution['room']) {
+      if (!empty($substitution['room'])) {
+        // Change room if a new room is given
         if ($lesson->room->id === $substitution['room']->id) {
           Log::info("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is already in room {$substitution['room']->shortname}.");
-          return;
+        } else {
+          if (!empty($substitution['originalRoom']) && $lesson->room->id !== $substitution['originalRoom']->id) {
+            Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is in room {$lesson->room->shortname}, but expected to be in {$substitution['originalRoom']->shortname}.");
+          }
+
+          $lesson->room()->associate($substitution['room']);
+          $lesson->save();
         }
-        if ($substitution['originalRoom'] && $lesson->room->id !== $substitution['originalRoom']->id) {
-          Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is in room {$lesson->room->shortname}, but expected to be in {$substitution['originalRoom']->shortname}.");
-        }
-        $lesson->room()->associate($substitution['room']);
-        $lesson->save();
-      } else if ($substitution['subst']) {
+      }
+
+      if (!empty($substitution['subst'])) {
         // Lesson is substituted by another teacher
         if ($lesson->substitute_id) {
           // Lesson is already marked as substituted
@@ -198,20 +207,22 @@ class LessonServiceImpl implements LessonService {
             // Substitute teacher has changed, log a warning
             Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be substituted by teacher {$substitution['newTeacher']->shortname}, but is already substituted by #{$lesson->substitute_id}.");
           }
-          return;
-        }
-
-        $newLesson = $lessons->nestedGet([$substitution['newTeacher']->id, $substitution['date']->toDateString(), $substitution['number']]);
-        if ($newLesson && $newLesson->cancelled) {
-          // The teacher supposed to substitute has a cancelled lesson at the given time, log a warning and only cancel
-          Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be substituted by teacher {$substitution['newTeacher']->shortname}, but that lesson is also marked as cancelled.");
-          $this->cancelLesson($lesson);
         } else {
-          $this->substituteLesson($lesson, $substitution['newTeacher']);
+          $newLesson = $lessons->nestedGet([$substitution['newTeacher']->id, $substitution['date']->toDateString(), $substitution['number']]);
+          if ($newLesson && $newLesson->cancelled) {
+            // The teacher supposed to substitute has a cancelled lesson at the given time, log a warning and only cancel
+            Log::info("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be substituted by teacher {$substitution['newTeacher']->shortname}, whose lesson is reinstated.");
+          }
+
+          $this->substituteLesson($lesson, $substitution['newTeacher'], $substitution['untisId'], true);
         }
-      } else {
+      }
+
+      if (!empty($substitution['cancel'])) {
         // Lesson should be cancelled
-        if ($lesson->substitute_id) {
+        if ($lesson->untis_id && $lesson->untis_id !== $substitution['untisId']) {
+          Log::info("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be cancelled, but is already bound to another untis lesson.");
+        } else if ($lesson->substitute_id) {
           Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} should be cancelled, but is already substituted by #{$lesson->substitute_id}.");
         } else if (!$lesson->cancelled) {
           // Only cancel if not already cancelled
@@ -368,7 +379,7 @@ class LessonServiceImpl implements LessonService {
     ];
   }
 
-  public function substituteLesson(Lesson $lesson, Teacher $teacher) {
+  public function substituteLesson(Lesson $lesson, Teacher $teacher, $untisId = null, $updateRoom = false) {
     if ($lesson->date->isPast()) {
       throw new LessonException(LessonException::CANCEL_PERIOD);
     }
@@ -379,17 +390,42 @@ class LessonServiceImpl implements LessonService {
 
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, new DateConstraints($lesson->date, null, $lesson->number), true)
-        ->select('id', 'cancelled');
+        ->select('id', 'cancelled', 'date');
+
+    /** @var Lesson $substitutedLesson */
     $substitutedLesson = $this->lessonRepository
         ->addParticipants($query)
         ->get()
         ->first();
 
-    if (!$substitutedLesson) {
+    if ($substitutedLesson) {
+      if ($substitutedLesson->cancelled) {
+        // Reinstate the lesson, if it has been marked as cancelled before
+        $this->reinstateLesson($substitutedLesson);
+      }
+
+      $save = false;
+      if ($untisId) {
+        // Bind the lesson to the untis lesson if given
+        $substitutedLesson->untis_id = $untisId;
+        $save = true;
+      }
+      if ($updateRoom && $substitutedLesson->room_id !== $lesson->room_id) {
+        $substitutedLesson->room_id = $lesson->room_id;
+        $save = true;
+      }
+      if ($save) {
+        $substitutedLesson->save();
+      }
+    } else {
       /** @noinspection PhpDynamicAsStaticMethodCallInspection */
-      $substitutedLesson = Lesson::create(['date' => $lesson->date, 'number' => $lesson->number, 'room_id' => $lesson->room_id, 'teacher_id' => $teacher->id]);
-    } else if ($substitutedLesson->cancelled) {
-      throw new LessonException(LessonException::CANCELLED);
+      $substitutedLesson = Lesson::create([
+          'date'       => $lesson->date,
+          'number'     => $lesson->number,
+          'room_id'    => $lesson->room_id,
+          'teacher_id' => $teacher->id,
+          'untis_id'   => $untisId
+      ]);
     }
 
     if (!$lesson->cancelled || $lesson->substitute_id !== $teacher->id) {

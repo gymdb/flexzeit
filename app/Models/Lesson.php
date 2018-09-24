@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property Course $course
  * @property bool $cancelled
  * @property bool $generated
+ * @property int|null $untis_id
  * @property Room $room
  * @property Collection $registrations
  * @property Collection $students
@@ -24,7 +25,7 @@ class Lesson extends Model {
 
   public $timestamps = false;
   protected $casts = ['date' => 'date', 'cancelled' => 'boolean', 'generated' => 'boolean', 'number' => 'int'];
-  protected $fillable = ['teacher_id', 'date', 'number', 'generated', 'room_id'];
+  protected $fillable = ['teacher_id', 'date', 'number', 'generated', 'room_id', 'untis_id'];
 
   public function teacher() {
     return $this->belongsTo(Teacher::class);
