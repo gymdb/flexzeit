@@ -43,7 +43,7 @@
       unregister() {
         // noinspection JSCheckFunctionSignatures
         if (window.confirm(this.confirmText)) {
-          let url = '/' + this.baseUrl + '/api/unregister/' + (this.course ? 'course' : 'lesson') + '/';
+          let url = this.baseUrl + '/api/unregister/' + (this.course ? 'course' : 'lesson') + '/';
           this.save(url);
         }
       },

@@ -37,7 +37,7 @@
       },
       setAttendanceChecked() {
         let self = this;
-        this.$http.post('/teacher/api/attendanceChecked/' + this.id).then(function (response) {
+        this.$http.post('teacher/api/attendanceChecked/' + this.id).then(function (response) {
           if (response.data.success) {
             self.modifiedAttendanceChecked = true;
             self.setAttendanceSuccess();

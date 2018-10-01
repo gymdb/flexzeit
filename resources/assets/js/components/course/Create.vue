@@ -202,7 +202,7 @@
         } else {
           let self = this;
           this.loading = true;
-          this.$http.get('/teacher/api/course/dataForCreate', {
+          this.$http.get('teacher/api/course/dataForCreate', {
             params: params
           }).then(function (response) {
             self.error = null;

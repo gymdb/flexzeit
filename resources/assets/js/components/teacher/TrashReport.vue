@@ -29,7 +29,7 @@
         if (!this.loading) {
           let self = this;
           this.loading = true;
-          this.$http.post('/teacher/api/bugreports/' + (this.trashed ? 'restore' : 'trash') + '/' + this.id, {}).then(function (response) {
+          this.$http.post('teacher/api/bugreports/' + (this.trashed ? 'restore' : 'trash') + '/' + this.id, {}).then(function (response) {
             if (response.data.success) {
               self.$emit('success');
             } else {

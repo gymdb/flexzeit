@@ -28,7 +28,7 @@
         if (!this.loading) {
           let self = this;
           this.loading = true;
-          this.$http.post('/teacher/api/absences/refresh/' + this.date, {}).then(function (response) {
+          this.$http.post('teacher/api/absences/refresh/' + this.date, {}).then(function (response) {
             if (response.data.success) {
               self.$emit('refreshed');
             } else {

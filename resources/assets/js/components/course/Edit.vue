@@ -138,7 +138,7 @@
       loadData: _.debounce(function (params) {
         let self = this;
         this.loading = true;
-        this.$http.get('/teacher/api/course/dataForEdit', {
+        this.$http.get('teacher/api/course/dataForEdit', {
           params: params
         }).then(function (response) {
           self.error = null;

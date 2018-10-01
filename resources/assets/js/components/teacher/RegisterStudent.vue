@@ -15,7 +15,7 @@
         <strong>{{$t('registrations.student.lessons', {date: $d(moment(date), 'short'), number: number})}}</strong>
       </p>
       <filtered-list
-              url="/teacher/api/lessons"
+              url="teacher/api/lessons"
               :teachers="teachers"
               :date="date"
               :number="number"
@@ -132,7 +132,7 @@
           this.warningsLoading = true;
           this.warningsLoaded = false;
           this.warnings = null;
-          this.$http.get('/teacher/api/registrations/warnings/lesson/' + lesson.id, {
+          this.$http.get('teacher/api/registrations/warnings/lesson/' + lesson.id, {
             params: {
               student: this.student.id
             }
@@ -212,7 +212,7 @@
           let self = this;
           this.saving = true;
 
-          this.$http.post('/teacher/api/register/' + this.lesson.id + '/' + this.student.id, {}).then(function (response) {
+          this.$http.post('teacher/api/register/' + this.lesson.id + '/' + this.student.id, {}).then(function (response) {
             if (response.data.success) {
               self.saveError = null;
               self.reload = true;

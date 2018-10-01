@@ -386,7 +386,7 @@
         this.studentsList = [];
         if (group && this.groups) {
           let self = this;
-          this.$http.get('/teacher/api/students', {
+          this.$http.get('teacher/api/students', {
             params: {
               group: group
             }

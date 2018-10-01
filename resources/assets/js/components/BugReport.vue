@@ -48,7 +48,7 @@
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/api/bugReport', {text: this.text}).then(function (response) {
+          this.$http.post('api/bugReport', {text: this.text}).then(function (response) {
             if (response.data.success) {
               self.error = null;
               self.text = null;

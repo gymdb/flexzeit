@@ -45,7 +45,7 @@
         if (this.id) {
           let self = this;
 
-          this.$http.get('/teacher/api/feedback/' + id).then(function (response) {
+          this.$http.get('teacher/api/feedback/' + id).then(function (response) {
             self.student = response.data.student;
             self.original = self.text = response.data.feedback;
             self.loading = false;
@@ -76,7 +76,7 @@
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/teacher/api/feedback/' + this.id, {feedback: this.text}).then(function (response) {
+          this.$http.post('teacher/api/feedback/' + this.id, {feedback: this.text}).then(function (response) {
             if (response.data.success) {
               self.original = self.text;
               self.saveError = null;

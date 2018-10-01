@@ -67,7 +67,7 @@
       return {
         show: false,
         shown: false,
-        url: '/teacher/api/registrations/warnings/' + (this.course ? 'course' : 'lesson') + '/' + this.id,
+        url: 'teacher/api/registrations/warnings/' + (this.course ? 'course' : 'lesson') + '/' + this.id,
         students: null,
         hasSameLesson: false,
         hasAdminOnly: false,
@@ -152,7 +152,7 @@
           this.saving = true;
 
           let promises = this.students.map(student => {
-            let url = `/teacher/api/register/${this.course ? 'course' : 'lesson'}/${this.id}/${student}`;
+            let url = `teacher/api/register/${this.course ? 'course' : 'lesson'}/${this.id}/${student}`;
             return this.$http.post(url, {});
           });
 

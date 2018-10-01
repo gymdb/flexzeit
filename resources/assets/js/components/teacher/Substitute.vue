@@ -46,7 +46,7 @@
       return {
         show: false,
         shown: false,
-        url: '/teacher/api/lessons/substitute/' + this.lesson,
+        url: 'teacher/api/lessons/substitute/' + this.lesson,
         teacher: null,
         data: null,
         loading: false,
@@ -99,7 +99,7 @@
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/teacher/api/lessons/substitute/' + this.lesson + '/' + this.teacher, {}).then(function (response) {
+          this.$http.post('teacher/api/lessons/substitute/' + this.lesson + '/' + this.teacher, {}).then(function (response) {
             if (response.data.success) {
               self.error = null;
               self.reload = true;

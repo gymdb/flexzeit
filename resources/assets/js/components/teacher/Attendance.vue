@@ -82,7 +82,7 @@
       save(newAttendance) {
         if (newAttendance !== null) {
           let self = this;
-          this.$http.post('/teacher/api/attendance/' + this.id, {attendance: newAttendance}).then(function (response) {
+          this.$http.post('teacher/api/attendance/' + this.id, {attendance: newAttendance}).then(function (response) {
             if (response.data.success) {
               self.currAttendance = newAttendance;
               self.$emit('success');

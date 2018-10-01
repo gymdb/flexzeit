@@ -65,8 +65,8 @@
           this.saving = true;
 
           const url = this.lesson.course
-              ? '/student/api/register/course/' + this.lesson.course.id
-              : '/student/api/register/lesson/' + this.lesson.id;
+              ? 'student/api/register/course/' + this.lesson.course.id
+              : 'student/api/register/lesson/' + this.lesson.id;
 
           this.$http.post(url, {}).then(function (response) {
             if (response.data.success) {

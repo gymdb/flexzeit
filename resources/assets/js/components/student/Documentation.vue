@@ -45,7 +45,7 @@
         if (this.id) {
           let self = this;
 
-          this.$http.get('/student/api/documentation/' + id).then(function (response) {
+          this.$http.get('student/api/documentation/' + id).then(function (response) {
             self.original = self.text = response.data.documentation;
             self.loading = false;
             self.loadError = null;
@@ -82,7 +82,7 @@
         if (!this.saveDisabled) {
           let self = this;
           this.saving = true;
-          this.$http.post('/student/api/documentation/' + this.id, {documentation: this.text}).then(function (response) {
+          this.$http.post('student/api/documentation/' + this.id, {documentation: this.text}).then(function (response) {
             if (response.data.success) {
               self.original = self.text;
               self.saveError = null;
