@@ -11,6 +11,8 @@ use App\Repositories\RoomRepository;
 use App\Services\ConfigService;
 use App\Services\RoomService;
 use App\Services\WebUntisService;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class RoomServiceImpl implements RoomService {
 
@@ -54,34 +56,39 @@ class RoomServiceImpl implements RoomService {
     // Load list of rooms
     $rooms = Room::whereNotNull('shortname')->get(['id', 'shortname']);
 
-    // Load and map offdays from WebUntis
-    $loaded = $rooms->flatMap(function($room) use ($start, $end, $times, $teachers) {
-      return $this->untisService
-          ->getRoomOccupations($room->shortname, $start, $end)
-          ->flatMap(function($item) use ($times, $teachers, $room) {
-            $date = Date::instance($item['start']);
-            if (empty($times[$date->dayOfWeek])) {
-              // Ignore lessons if there is no flex on the given day
-              return [];
-            }
-
-            $teacher = $teachers[$item['teacher']] ?? null;
-            $result = [];
-            foreach ($times[$date->dayOfWeek] as $n => $time) {
-              if ($date->toDateTime($time['start']) < $item['end']
-                  && $date->toDateTime($time['end']) > $item['start']) {
-                // Given lesson is intersecting the timeframe of this flex lesson
-                $result[] = new RoomOccupation([
-                    'room_id'    => $room->id,
-                    'date'       => $date,
-                    'number'     => $n,
-                    'teacher_id' => $teacher ? $teacher->id : null
-                ]);
+    // Load and map room occupations from WebUntis
+    try {
+      $loaded = $rooms->flatMap(function($room) use ($start, $end, $times, $teachers) {
+        return $this->untisService
+            ->getRoomOccupations($room->shortname, $start, $end)
+            ->flatMap(function($item) use ($times, $teachers, $room) {
+              $date = Date::instance($item['start']);
+              if (empty($times[$date->dayOfWeek])) {
+                // Ignore lessons if there is no flex on the given day
+                return [];
               }
-            }
-            return $result;
-          });
-    })->buildDictionary(['room_id', 'date', 'number'], false);
+
+              $teacher = $teachers[$item['teacher']] ?? null;
+              $result = [];
+              foreach ($times[$date->dayOfWeek] as $n => $time) {
+                if ($date->toDateTime($time['start']) < $item['end']
+                    && $date->toDateTime($time['end']) > $item['start']) {
+                  // Given lesson is intersecting the timeframe of this flex lesson
+                  $result[] = new RoomOccupation([
+                      'room_id'    => $room->id,
+                      'date'       => $date,
+                      'number'     => $n,
+                      'teacher_id' => $teacher ? $teacher->id : null
+                  ]);
+                }
+              }
+              return $result;
+            });
+      })->buildDictionary(['room_id', 'date', 'number'], false);
+    } catch (Exception $e) {
+      Log::error("Could not load room occupations from WebUntis. Error message: {$e->getMessage()}");
+      return;
+    }
 
     $existing = $this->roomRepository
         ->queryOccupations(new DateConstraints($start, $end))

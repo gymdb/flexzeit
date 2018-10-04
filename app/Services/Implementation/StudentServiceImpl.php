@@ -9,6 +9,7 @@ use App\Repositories\StudentRepository;
 use App\Services\ConfigService;
 use App\Services\StudentService;
 use App\Services\WebUntisService;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class StudentServiceImpl implements StudentService {
@@ -49,7 +50,13 @@ class StudentServiceImpl implements StudentService {
   }
 
   public function loadAbsences(Date $date) {
-    $absences = $this->untisService->getAbsences($date);
+    try {
+      $absences = $this->untisService->getAbsences($date);
+    } catch (Exception $e) {
+      Log::error("Could not load absences for {$date} from WebUntis. Error message: {$e->getMessage()}");
+      return;
+    }
+
     $times = $this->configService->getLessonTimes();
 
     $this->studentRepository->deleteAbsences($date);

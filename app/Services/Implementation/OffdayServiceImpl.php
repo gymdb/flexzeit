@@ -11,6 +11,7 @@ use App\Repositories\OffdayRepository;
 use App\Services\ConfigService;
 use App\Services\OffdayService;
 use App\Services\WebUntisService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -47,10 +48,16 @@ class OffdayServiceImpl implements OffdayService {
   }
 
   public function loadOffdays() {
-    $loaded = $this->untisService->getOffdays()
-        ->mapWithKeys(function(Date $date) {
-          return [$date->toDateString() => new Offday(['date' => $date])];
-        });
+    try {
+      $loaded = $this->untisService->getOffdays();
+    } catch (Exception $e) {
+      Log::error("Could not load offdays from WebUntis. Error message: {$e->getMessage()}");
+      return;
+    }
+
+    $loaded = $loaded->mapWithKeys(function(Date $date) {
+      return [$date->toDateString() => new Offday(['date' => $date])];
+    });
 
     $existing = $this->offdayRepository->queryWithoutGroup()
         ->get(['id', 'date'])
@@ -86,38 +93,43 @@ class OffdayServiceImpl implements OffdayService {
     $forms = Form::with('group:id,name')->get(['group_id']);
 
     // Load and map offdays from WebUntis
-    $loaded = $forms->flatMap(function($form) use ($start, $end, $times, $timetable, $groups) {
-      return $this->untisService
-          ->getGroupTimetable($form->group->name, $start, $end)
-          ->flatMap(function($item) use ($times, $timetable, $groups, $form) {
-            if ($item['flex'] ? !$item['cancelled'] : $item['cancelled']) {
-              // Only consider cancelled flex lessons and non-cancelled non-flex lessons
-              return [];
-            }
+    try {
+      $loaded = $forms->flatMap(function($form) use ($start, $end, $times, $timetable, $groups) {
+        return $this->untisService
+            ->getGroupTimetable($form->group->name, $start, $end)
+            ->flatMap(function($item) use ($times, $timetable, $groups, $form) {
+              if ($item['flex'] ? !$item['cancelled'] : $item['cancelled']) {
+                // Only consider cancelled flex lessons and non-cancelled non-flex lessons
+                return [];
+              }
 
-            $date = Date::instance($item['start']);
-            if (empty($times[$date->dayOfWeek])) {
-              // Ignore lessons if there is no flex on the given day
-              return [];
-            }
+              $date = Date::instance($item['start']);
+              if (empty($times[$date->dayOfWeek])) {
+                // Ignore lessons if there is no flex on the given day
+                return [];
+              }
 
-            $groupId = $item['group'] ? ($groups[$item['group']] ?? null) : $form->group_id;
-            $result = [];
-            foreach ($times[$date->dayOfWeek] as $n => $time) {
-              if (!empty($timetable[$form->group_id][$date->dayOfWeek][$n])
-                  && $date->toDateTime($time['start']) < $item['end']
-                  && $date->toDateTime($time['end']) > $item['start']) {
-                // Given lesson is intersecting the timeframe of this flex lesson
-                if ($groupId) {
-                  $result[] = new Offday(['group_id' => $groupId, 'date' => $date, 'number' => $n]);
-                } else {
-                  Log::warning("Could not find group with name {$item['group']} for lesson {$n} on {$date}.");
+              $groupId = $item['group'] ? ($groups[$item['group']] ?? null) : $form->group_id;
+              $result = [];
+              foreach ($times[$date->dayOfWeek] as $n => $time) {
+                if (!empty($timetable[$form->group_id][$date->dayOfWeek][$n])
+                    && $date->toDateTime($time['start']) < $item['end']
+                    && $date->toDateTime($time['end']) > $item['start']) {
+                  // Given lesson is intersecting the timeframe of this flex lesson
+                  if ($groupId) {
+                    $result[] = new Offday(['group_id' => $groupId, 'date' => $date, 'number' => $n]);
+                  } else {
+                    Log::warning("Could not find group with name {$item['group']} for lesson {$n} on {$date}.");
+                  }
                 }
               }
-            }
-            return $result;
-          });
-    })->buildDictionary(['group_id', 'date', 'number'], false);
+              return $result;
+            });
+      })->buildDictionary(['group_id', 'date', 'number'], false);
+    } catch (Exception $e) {
+      Log::error("Could not load group offdays from WebUntis. Error message: {$e->getMessage()}");
+      return;
+    }
 
     $existing = $this->offdayRepository
         ->queryWithGroup(new DateConstraints($start, $end))

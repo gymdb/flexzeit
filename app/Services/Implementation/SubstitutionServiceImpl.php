@@ -11,6 +11,7 @@ use App\Services\ConfigService;
 use App\Services\LessonService;
 use App\Services\SubstitutionService;
 use App\Services\WebUntisService;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -52,6 +53,14 @@ class SubstitutionServiceImpl implements SubstitutionService {
       return;
     }
 
+    // Load substitution data from WebUntis
+    try {
+      $substitutions = $this->untisService->getSubstitutions($start, $end);
+    } catch (Exception $e) {
+      Log::error("Could not load substitutions from WebUntis. Error message: {$e->getMessage()}");
+      return;
+    }
+
     // Get global lesson times
     $times = $this->configService->getLessonTimes();
 
@@ -59,12 +68,10 @@ class SubstitutionServiceImpl implements SubstitutionService {
     $teachers = Teacher::get(['id', 'shortname'])->buildDictionary(['shortname'], false);
     $rooms = Room::get(['id', 'shortname'])->buildDictionary(['shortname'], false);
 
-    // Load and map substitution data from WebUntis
-    $substitutions = $this->untisService
-        ->getSubstitutions($start, $end)
-        ->flatMap(function($substitution) use ($times, $teachers, $rooms) {
-          $this->mapSubstitution($substitution, $times, $teachers, $rooms);
-        });
+    // Map substitution data
+    $substitutions = $substitutions->flatMap(function($substitution) use ($times, $teachers, $rooms) {
+      $this->mapSubstitution($substitution, $times, $teachers, $rooms);
+    });
 
     // Load the lessons corresponding to the substitution data
     $lessons = $this->lessonRepository->queryForSubstitutions($substitutions)
