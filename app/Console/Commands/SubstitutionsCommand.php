@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\LessonService;
+use App\Services\SubstitutionService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -23,12 +23,12 @@ class SubstitutionsCommand extends Command {
    */
   protected $description = 'Load substitutions from WebUntis';
 
-  /** @var LessonService */
-  private $lessonService;
+  /** @var SubstitutionService */
+  private $substitutionService;
 
-  public function __construct(LessonService $lessonService) {
+  public function __construct(SubstitutionService $substitutionService) {
     parent::__construct();
-    $this->lessonService = $lessonService;
+    $this->substitutionService = $substitutionService;
   }
 
   /**
@@ -36,7 +36,7 @@ class SubstitutionsCommand extends Command {
    */
   public function handle() {
     try {
-      $this->lessonService->loadSubstitutions();
+      $this->substitutionService->loadSubstitutions();
       Log::notice('untis:substitutions executed successfully.');
       $this->line('Loaded substitutions from WebUntis.');
     } catch (Exception $e) {

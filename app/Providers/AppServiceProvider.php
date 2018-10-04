@@ -31,6 +31,7 @@ use App\Services\Implementation\OffdayServiceImpl;
 use App\Services\Implementation\RegistrationServiceImpl;
 use App\Services\Implementation\RoomServiceImpl;
 use App\Services\Implementation\StudentServiceImpl;
+use App\Services\Implementation\SubstitutionServiceImpl;
 use App\Services\Implementation\WebUntisServiceImpl;
 use App\Services\LessonService;
 use App\Services\MiscService;
@@ -38,6 +39,7 @@ use App\Services\OffdayService;
 use App\Services\RegistrationService;
 use App\Services\RoomService;
 use App\Services\StudentService;
+use App\Services\SubstitutionService;
 use App\Services\WebUntisService;
 use App\Validators\CourseValidator;
 use Illuminate\Console\Scheduling\Schedule;
@@ -153,6 +155,7 @@ class AppServiceProvider extends ServiceProvider {
     $this->app->singleton(RegistrationService::class, RegistrationServiceImpl::class);
     $this->app->singleton(RoomService::class, RoomServiceImpl::class);
     $this->app->singleton(StudentService::class, StudentServiceImpl::class);
+    $this->app->singleton(SubstitutionService::class, SubstitutionServiceImpl::class);
     $this->app->singleton(WebUntisService::class, WebUntisServiceImpl::class);
   }
 

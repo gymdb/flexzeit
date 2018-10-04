@@ -27,11 +27,6 @@ interface LessonService {
   public function reinstateLesson(Lesson $lesson);
 
   /**
-   * Load substitutions from WebUntis
-   */
-  public function loadSubstitutions();
-
-  /**
    * @param Teacher $teacher
    * @param DateConstraints $constraints
    * @param bool $showCancelled Also include cancelled lessons in the result
