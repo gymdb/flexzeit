@@ -23,4 +23,14 @@ class Schedule extends BaseSchedule {
     return $event;
   }
 
+  /**
+   * Get all of the events on the schedule that are due.
+   *
+   * @param  \Illuminate\Contracts\Foundation\Application $app
+   * @return \Illuminate\Support\Collection
+   */
+  public function dueEvents($app) {
+    return parent::dueEvents($app)->unique('command');
+  }
+
 }
