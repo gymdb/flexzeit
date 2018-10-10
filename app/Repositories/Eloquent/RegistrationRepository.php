@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationRepository implements \App\Repositories\RegistrationRepository {
@@ -87,6 +88,22 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
     $this->excludeOffdays($query);
 
     return $query;
+  }
+
+  public function queryMissingForLesson(Lesson $lesson, Collection $groups) {
+    return Student::query()
+        ->whereHas('groups', function($query) use ($groups) {
+          $query->whereIn('id', $groups->pluck('id'));
+        })
+        ->whereNotExists(function($exists) use ($lesson) {
+          $exists->select(DB::raw(1))
+              ->from('registrations as r')
+              ->join('lessons as l', 'l.id', 'r.lesson_id')
+              ->whereColumn('r.student_id', 'students.id')
+              ->where('l.date', $lesson->date)
+              ->where('l.number', $lesson->number)
+              ->where('l.cancelled', false);
+        });
   }
 
   public function queryByTeacher($student = null, DateConstraints $constraints) {

@@ -83,6 +83,7 @@ class WebUntisServiceImpl implements WebUntisService {
 
     return collect($result)->map(function($item) {
       return [
+          'untisId'   => $item['id'],
           'start'     => $this->getDateTime($item['date'], $item['startTime']),
           'end'       => $this->getDateTime($item['date'], $item['endTime']),
           'cancelled' => $this->isCancelled($item),
@@ -110,12 +111,14 @@ class WebUntisServiceImpl implements WebUntisService {
               'originalRoom' => $room['orgname'] ?? null
           ];
         });
+        $groups = collect($item['kl'])->pluck('name');
         return [
             'untisId'         => $item['lsid'],
             'start'           => $this->getDateTime($item['date'], $item['startTime']),
             'end'             => $this->getDateTime($item['date'], $item['endTime']),
             'type'            => $item['type'],
             'rooms'           => $rooms,
+            'groups'          => $groups,
             'originalTeacher' => $teacher['orgname'] ?? null,
             'teacher'         => $teacher['name']
         ];

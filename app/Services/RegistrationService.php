@@ -61,6 +61,14 @@ interface RegistrationService {
   public function registerStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type);
 
   /**
+   * Registers all students from the given groups for the lesson, if they are not registered anywhere else
+   *
+   * @param Lesson $lesson
+   * @param Collection $groups
+   */
+  public function registerGroupsForLesson(Lesson $lesson, Collection $groups);
+
+  /**
    * @param Lesson $lesson Lesson loaded from the database
    * @param Student $student Student loaded from the database
    * @param RegistrationType $type The registration parameters

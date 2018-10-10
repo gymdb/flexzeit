@@ -124,6 +124,15 @@ class RegistrationServiceImpl implements RegistrationService {
     $this->doRegister(collect([$lesson->id]), collect([$student->id]), $type);
   }
 
+  public function registerGroupsForLesson(Lesson $lesson, Collection $groups) {
+    if ($groups->isNotEmpty()) {
+      $students = $this->registrationRepository->queryMissingForLesson($lesson, $groups)->pluck('id');
+      if ($students->isNotEmpty()) {
+        $this->registerStudentsForLesson($lesson, $students, RegistrationType::SUBSTITUTED());
+      }
+    }
+  }
+
   public function validateStudentForLesson(Lesson $lesson, Student $student, RegistrationType $type) {
     if ($type->ignoreValidation()) {
       return null;
@@ -197,15 +206,15 @@ class RegistrationServiceImpl implements RegistrationService {
 
     $now = Carbon::now();
     $registrations = $lessons->flatMap(function($lesson) use ($students, $type, $existing, $now) {
-      return $students->flatMap(function($student) use ($lesson, $type, $existing, $now) {
-        return empty($existing[$lesson][$student]) ? [[
+      return $students->map(function($student) use ($lesson, $type, $existing, $now) {
+        return empty($existing[$lesson][$student]) ? [
             'lesson_id'     => $lesson,
             'student_id'    => $student,
             'obligatory'    => $type->isObligatory(),
             'byteacher'     => $type->isByTeacher(),
             'registered_at' => $now
-        ]] : [];
-      });
+        ] : null;
+      })->filter();
     });
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     Registration::insert($registrations->all());

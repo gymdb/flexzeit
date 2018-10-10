@@ -33,7 +33,7 @@ interface WebUntisService {
    * @param string $name
    * @param Date $start
    * @param Date $end
-   * @return array List of lessons
+   * @return Collection<array> List of lessons
    */
   public function getGroupTimetable($name, Date $start, Date $end);
 
@@ -42,7 +42,7 @@ interface WebUntisService {
    *
    * @param Date $start
    * @param Date $end
-   * @return array
+   * @return Collection<array>
    */
   public function getSubstitutions(Date $start, Date $end);
 
@@ -52,7 +52,7 @@ interface WebUntisService {
    * @param $name
    * @param Date $start
    * @param Date $end
-   * @return array List of occupied lessons for the room
+   * @return Collection<array> List of occupied lessons for the room
    */
   public function getRoomOccupations($name, Date $start, Date $end);
 

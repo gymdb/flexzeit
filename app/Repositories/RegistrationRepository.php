@@ -12,6 +12,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 
 /**
  * Repository for accessing the students table
@@ -48,6 +49,13 @@ interface RegistrationRepository {
    * @return Builder
    */
   public function queryMissing(Group $group = null, Student $student = null, DateConstraints $constraints);
+
+  /**
+   * @param Lesson $lesson
+   * @param Collection $groups
+   * @return Builder
+   */
+  public function queryMissingForLesson(Lesson $lesson, Collection $groups);
 
   /**
    * @param Student|Group|null $student
