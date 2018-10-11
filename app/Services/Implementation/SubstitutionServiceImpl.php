@@ -91,20 +91,23 @@ class SubstitutionServiceImpl implements SubstitutionService {
       $lesson = $lessons->nestedGet([$substitution['teacher']->id, $substitution['date']->toDateString(), $substitution['number']]);
 
       if (!empty($substitution['add'])) {
-        $this->handleAdd($lesson, $substitution);
-      } else if (!$lesson) {
+        $lesson = $this->handleAdd($lesson, $substitution);
+      }
+
+      if (!$lesson) {
         // The lesson to substitute does not exist
         Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} does not exist.");
-      } else {
-        if (!empty($substitution['room'])) {
-          $this->handleRoomChange($lesson, $substitution);
-        }
+        return;
+      }
 
-        if (!empty($substitution['subst'])) {
-          $this->handleSubstitution($lesson, $substitution, $lessons);
-        } else if (!empty($substitution['cancel'])) {
-          $this->handleCancellation($lesson, $substitution);
-        }
+      if (!empty($substitution['room'])) {
+        $this->handleRoomChange($lesson, $substitution);
+      }
+
+      if (!empty($substitution['subst'])) {
+        $this->handleSubstitution($lesson, $substitution, $lessons);
+      } else if (!empty($substitution['cancel'])) {
+        $this->handleCancellation($lesson, $substitution);
       }
     });
   }
@@ -164,14 +167,23 @@ class SubstitutionServiceImpl implements SubstitutionService {
           return [];
         }
 
-        $substGroups = $substitution['groups']->map(function($group) use ($groups) {
-          return $groups[$group] ?? null;
+        $substGroups = $substitution['groups']->map(function($group) use ($groups, $substitution) {
+          if (empty($groups[$group])) {
+            Log::warning("Could not find group {$group} for lesson {$substitution['teacher']}/{$substitution['start']}.");
+            return null;
+          }
+          return $groups[$group];
         })->filter();
 
         if ($substGroups->isNotEmpty()) {
-          $lesson = $this->untisService->getGroupTimetable($substGroups[0]->name, $date, $date)->firstWhere('untisId', $substitution['untisId']);
+          $lesson = $this->untisService->getGroupTimetable($substGroups[0]->name, $date, $date)->firstWhere('hash', $substitution['hash']);
           if ($lesson && $lesson['group']) {
-            $substGroups = collect($groups[$lesson['group']] ?? null);
+            if (empty($groups[$lesson['group']])) {
+              Log::warning("Could not find group {$lesson['group']} for lesson {$substitution['teacher']}/{$substitution['start']}.");
+              $substGroups = collect([]);
+            } else {
+              $substGroups = collect([$groups[$lesson['group']]]);
+            }
           }
         }
 
@@ -200,7 +212,11 @@ class SubstitutionServiceImpl implements SubstitutionService {
   }
 
   private function handleRoomChange(Lesson $lesson, array $substitution) {
-    if ($lesson->room->id !== $substitution['room']->id) {
+    if ($lesson->room->id === $substitution['room']->id) {
+      // Room is already set, do nothing
+    } else if ($lesson->untis_id && $lesson->untis_id !== $substitution['untisId']) {
+      Log::info("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} has a room change, but is already bound to another untis lesson.");
+    } else {
       // Change room if a new room is given
       if (!empty($substitution['originalRoom']) && $lesson->room->id !== $substitution['originalRoom']->id) {
         Log::warning("Lesson {$substitution['date']->toDateString()}/{$substitution['number']} for teacher {$substitution['teacher']->shortname} is in room {$lesson->room->shortname}, but expected to be in {$substitution['originalRoom']->shortname}.");
@@ -235,12 +251,15 @@ class SubstitutionServiceImpl implements SubstitutionService {
           'date'       => $substitution['date'],
           'number'     => $substitution['number'],
           'room_id'    => $substitution['room']->id,
-          'teacher_id' => $substitution['teacher']->id
+          'teacher_id' => $substitution['teacher']->id,
+          'untis_id'   => $substitution['untisId']
       ]);
     } else if ($lesson->cancelled) {
+      $lesson->untis_id = $substitution['untisId'];
       $this->lessonService->reinstateLesson($lesson);
     }
     $this->registrationService->registerGroupsForLesson($lesson, $substitution['groups']);
+    return $lesson;
   }
 
   private function handleCancellation(Lesson $lesson, array $substitution) {

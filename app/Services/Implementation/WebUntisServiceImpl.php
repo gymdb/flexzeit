@@ -83,7 +83,7 @@ class WebUntisServiceImpl implements WebUntisService {
 
     return collect($result)->map(function($item) {
       return [
-          'untisId'   => $item['id'],
+          'hash'      => $this->buildHash($item),
           'start'     => $this->getDateTime($item['date'], $item['startTime']),
           'end'       => $this->getDateTime($item['date'], $item['endTime']),
           'cancelled' => $this->isCancelled($item),
@@ -114,6 +114,7 @@ class WebUntisServiceImpl implements WebUntisService {
         $groups = collect($item['kl'])->pluck('name');
         return [
             'untisId'         => $item['lsid'],
+            'hash'            => $this->buildHash($item),
             'start'           => $this->getDateTime($item['date'], $item['startTime']),
             'end'             => $this->getDateTime($item['date'], $item['endTime']),
             'type'            => $item['type'],
@@ -188,6 +189,26 @@ class WebUntisServiceImpl implements WebUntisService {
    */
   protected function isCancelled($item) {
     return !empty($item['code']) && $item['code'] === 'cancelled';
+  }
+
+  /**
+   * @param $item
+   * @return string
+   */
+  protected function buildHash($item) {
+    $hash = [
+        'date'  => $item['date'],
+        'start' => $item['startTime'],
+        'end'   => $item['endTime']
+    ];
+
+    foreach (['kl', 'te', 'ro'] as $key) {
+      if (!empty($item[$key])) {
+        $hash[$key] = collect($item[$key])->pluck('id')->sort();
+      }
+    }
+
+    return md5(json_encode($hash));
   }
 
 }
