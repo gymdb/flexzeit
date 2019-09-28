@@ -118,11 +118,14 @@ class DocumentationServiceImpl implements DocumentationService {
   }
 
 
-  public function getMappedFeedbackForGroup(DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null) {
+  public function getMappedFeedbackForGroup(Teacher $homeRoomTeacher, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null) {
     return $this->registrationRepository
         ->queryForAllStudents($constraints, false, $teacher, $subject)
         ->whereNotNull('feedback')
-        ->join('students','students.id','student_id',"feedback is not null")
+        ->join('students','students.id','registrations.student_id',"feedback is not null")
+        ->join('group_student','group_student.student_id','registrations.student_id')
+        ->join('forms','forms.group_id','group_student.group_id')
+        ->where("kv_id",$homeRoomTeacher->id)
         ->with('lesson:id,date,teacher_id', 'lesson.teacher:id,teachers.lastname,teachers.firstname','student:id,lastname,firstname')
         ->get(['feedback', 'lesson_id','registrations.student_id'])
         ->map(function (Registration $reg) {

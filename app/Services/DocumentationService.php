@@ -77,6 +77,6 @@ interface DocumentationService {
      * @param Subject|null $subject
      * @return Collection<array>
      */
-  public function getMappedFeedbackForGroup(DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
+  public function getMappedFeedbackForGroup(Teacher $homeRoomTeacher, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
 }

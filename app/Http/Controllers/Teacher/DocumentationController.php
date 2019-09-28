@@ -173,7 +173,7 @@ class DocumentationController extends Controller {
       if (strpos($student, 'id') !== false) {
           $feedback = $this->documentationService->getMappedFeedback($student, $constraints, $teacher, $subject);
       } else {
-          $feedback = $this->documentationService->getMappedFeedbackForGroup($constraints, $teacher, $subject);
+          $feedback = $this->documentationService->getMappedFeedbackForGroup($this->getTeacher(),$constraints, $teacher, $subject);
       }
 
     return response()->json($feedback);
