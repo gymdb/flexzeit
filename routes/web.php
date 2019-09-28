@@ -76,7 +76,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
         ->middleware('params:group;i|student?;i|teacher?;i|start?;d|end?;d')
         ->name('teacher.api.documentation.missing');
     Route::get('/feedback', 'DocumentationController@getFeedbackForStudent')
-        ->middleware('params:student;i|subject?;i|teacher?;i|start?;d|end?;d')
+        ->middleware('params:student?;i|subject?;i|teacher?;i|start?;d|end?;d')
         ->name('teacher.api.feedback');
     Route::get('/feedback/{registration}', 'DocumentationController@getFeedbackForRegistration');
     Route::post('/feedback/{registration}', 'DocumentationController@setFeedback')

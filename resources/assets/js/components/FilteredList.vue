@@ -104,8 +104,8 @@
       <dd v-if="end">{{end.format('L')}}</dd>
     </dl>
 
-    <slot v-if="!filter" name="chooseStudent">
-      <div class="alert alert-info">{{$t(requireStudent ? 'messages.chooseStudent' : 'messages.chooseGroup')}}</div>
+   <slot v-if="!filter" name="chooseStudent">
+     <div class="alert alert-info">{{$t(requireStudent ? 'messages.chooseStudent' : 'messages.chooseGroup')}}</div>
     </slot>
     <p v-else-if="loading" class="lead text-center"><span class="glyphicon glyphicon-refresh spin"></span></p>
     <slot v-else-if="!hasData" name="empty" :studentName="studentName">
@@ -238,7 +238,7 @@
       },
       requireStudent: {
         'type': Boolean,
-        'default': true
+        'default': false
       },
       showStudent: {
         'type': Boolean,

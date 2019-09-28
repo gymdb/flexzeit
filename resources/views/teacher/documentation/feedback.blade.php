@@ -17,18 +17,20 @@
         <div slot="empty" class="alert alert-warning">@lang('registrations.feedback.none')</div>
         <template scope="props">
           <div class="table-responsive">
-            <table class="table table-squeezed">
+            <table class="table">
               <thead>
               <tr>
                 <th>@lang('messages.date')</th>
                 <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.feedback')</th>
+                <th>@lang('messages.student')</th>
               </tr>
               </thead>
               <tr v-for="reg in props.data">
                 <td>@{{$d(moment(reg.date), 'short')}}</td>
                 <td>@{{reg.teacher}}</td>
                 <td class="wrap">@{{reg.feedback}}</td>
+                <td>@{{reg.student}}</td>
               </tr>
             </table>
           </div>

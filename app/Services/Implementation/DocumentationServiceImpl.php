@@ -111,9 +111,28 @@ class DocumentationServiceImpl implements DocumentationService {
           return [
               'feedback' => $reg->feedback,
               'date'     => $reg->lesson->date->toDateString(),
-              'teacher'  => $reg->lesson->teacher->name()
+              'teacher'  => $reg->lesson->teacher->name(),
+              'student'  => ''
           ];
         });
   }
+
+
+  public function getMappedFeedbackForGroup(DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null) {
+    return $this->registrationRepository
+        ->queryForAllStudents($constraints, false, $teacher, $subject)
+        ->whereNotNull('feedback')
+        ->join('students','students.id','student_id',"feedback is not null")
+        ->with('lesson:id,date,teacher_id', 'lesson.teacher:id,teachers.lastname,teachers.firstname','student:id,lastname,firstname')
+        ->get(['feedback', 'lesson_id','registrations.student_id'])
+        ->map(function (Registration $reg) {
+          return [
+              'feedback' => $reg->feedback,
+              'date'     => $reg->lesson->date->toDateString(),
+              'teacher'  => $reg->lesson->teacher->name(),
+              'student'  => $reg->student->name()
+          ];
+        });
+    }
 
 }

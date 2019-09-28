@@ -31,6 +31,17 @@ interface RegistrationRepository {
    */
   public function queryForStudent($student = null, DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
 
+
+
+  /**
+   * @param DateConstraints $constraints
+   * @param bool $showCancelled
+   * @param Teacher|null $teacher
+   * @param Subject|null $subject
+   * @return Builder
+   */
+  public function queryForAllStudents( DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null);
+
   /**
    * Query registrations where no documentation was added
    *

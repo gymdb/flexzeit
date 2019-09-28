@@ -44,7 +44,34 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         });
       });
     }
+      return $query;
+  }
 
+  public function queryForAllStudents(DateConstraints $constraints, $showCancelled = false, Teacher $teacher = null, Subject $subject = null) {
+    $baseQuery =  Registration::query();
+    $query = $this->inRange($baseQuery, $constraints, 'l.')
+        ->join('lessons as l', 'l.id', 'lesson_id');
+
+    if (!$showCancelled) {
+      $query->where('l.cancelled', false);
+    }
+    if ($teacher) {
+      $query->where('l.teacher_id', $teacher->id);
+    }
+    if ($subject) {
+      $query->where(function($q1) use ($subject) {
+        $q1->whereIn('l.course_id', function($q2) use ($subject) {
+          $q2->select('c.id')
+           ->from('courses as c')
+           ->where('c.subject_id', $subject->id);
+        });
+        $q1->orWhereIn('l.teacher_id', function($q2) use ($subject) {
+        $q2->select('s.teacher_id')
+          ->from('subject_teacher as s')
+          ->where('s.subject_id', $subject->id);
+        });
+      });
+    }
     return $query;
   }
 

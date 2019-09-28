@@ -70,4 +70,13 @@ interface DocumentationService {
    */
   public function getMappedFeedback(Student $student, DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
 
+    /**
+     * Get feedback for a student for returning as JSON
+     * @param DateConstraints $constraints
+     * @param Teacher|null $teacher
+     * @param Subject|null $subject
+     * @return Collection<array>
+     */
+  public function getMappedFeedbackForGroup(DateConstraints $constraints, Teacher $teacher = null, Subject $subject = null);
+
 }

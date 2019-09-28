@@ -167,13 +167,15 @@ class DocumentationController extends Controller {
    * @return JsonResponse
    */
   public function getFeedbackForStudent(Student $student, Teacher $teacher = null, Subject $subject = null, Date $start = null, Date $end = null) {
-    $this->authorize('showFeedback', $student);
-
     $start = $start ?: $this->configService->getYearStart();
     $end = $end ?: Date::today();
     $constraints = new DateConstraints($start, $end);
+      if (strpos($student, 'id') !== false) {
+          $feedback = $this->documentationService->getMappedFeedback($student, $constraints, $teacher, $subject);
+      } else {
+          $feedback = $this->documentationService->getMappedFeedbackForGroup($constraints, $teacher, $subject);
+      }
 
-    $feedback = $this->documentationService->getMappedFeedback($student, $constraints, $teacher, $subject);
     return response()->json($feedback);
   }
 
