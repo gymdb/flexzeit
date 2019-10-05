@@ -32,7 +32,8 @@ CREATE TABLE `courses` (
   `subject_id` int(10) UNSIGNED DEFAULT NULL,
   `maxstudents` smallint(5) UNSIGNED DEFAULT NULL,
   `yearfrom` tinyint(3) UNSIGNED DEFAULT NULL,
-  `yearto` tinyint(3) UNSIGNED DEFAULT NULL
+  `yearto` tinyint(3) UNSIGNED DEFAULT NULL,
+  `category` int(10) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `course_group` (
