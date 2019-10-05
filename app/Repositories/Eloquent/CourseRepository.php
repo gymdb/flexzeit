@@ -29,7 +29,7 @@ class CourseRepository implements \App\Repositories\CourseRepository {
         ->orderBy('last')
         ->orderBy('number')
         ->orderBy('name')
-        ->select(['id', 'name', 'maxstudents'])
+        ->select(['id', 'name', 'maxstudents', 'category'])
         ->addSelect(DB::raw('(SELECT MIN(date) FROM lessons WHERE course_id = courses.id) as first'))
         ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'))
         ->addSelect(DB::raw('(SELECT MIN(number) FROM lessons WHERE course_id = courses.id) as number'));
@@ -67,7 +67,7 @@ class CourseRepository implements \App\Repositories\CourseRepository {
               ->where('l.cancelled', false);
           $this->inRange($join, $constraints, 'l.');
         })
-        ->select(['courses.id', 'name', 'description', 'maxstudents', 'l.date', 'l.number'])
+        ->select(['courses.id', 'name', 'description', 'maxstudents', 'l.date', 'l.number', 'category'])
         ->addSelect(DB::raw('(SELECT MAX(date) FROM lessons WHERE course_id = courses.id) as last'));
 
     // The student must not have offdays for all lessons of the course

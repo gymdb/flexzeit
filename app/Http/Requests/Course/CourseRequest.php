@@ -39,7 +39,8 @@ abstract class CourseRequest extends FormRequest {
         'name'        => 'required|string|max:50',
         'description' => 'nullable|string',
         'room'        => 'required|integer|exists:rooms,id',
-        'lastDate'    => 'nullable|bail|date|edit_allowed'
+        'lastDate'    => 'nullable|bail|date|edit_allowed',
+        'category'    => 'required|int'
     ], $this->typeSpecificRules());
   }
 
@@ -67,6 +68,7 @@ abstract class CourseRequest extends FormRequest {
   public function populateCourse(Course $course) {
     $course->name = $this->input('name');
     $course->description = $this->input('description') ?: '';
+    $course->category = $this->input('category');
 
     return $this->typeSpecificPopulate($course);
   }

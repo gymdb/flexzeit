@@ -7,6 +7,15 @@
         unregisterError: null
       }
     },
+    computed: {
+      categoryOptionsList() {
+      const options = [];
+        for (let i = 0; i <= 5; i++) {
+         options.push({ label: this.$t('courses.category')[i]});
+        }
+        return options;
+      },
+    },
     methods: {
       setUnregisterSuccess() {
         location.reload();

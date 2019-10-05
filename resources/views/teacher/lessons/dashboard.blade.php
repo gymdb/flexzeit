@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
   <section class="panel panel-default">
     <h2 class="panel-heading">@lang('lessons.dashboard.heading', ['date' => \App\Helpers\Date::today()])</h2>
@@ -15,11 +14,12 @@
               <th>@lang('messages.course')</th>
               <th>@lang('messages.room')</th>
               <th>@lang('messages.participants')</th>
+              <th>@lang('messages.category')</th>
               <th></th>
             </tr>
             </thead>
             @foreach($lessons as $lesson)
-              <tr @if($lesson->cancelled)class="text-muted"@endif>
+            <tr @if($lesson->course && !$lesson->cancelled) class= "category{{$lesson->course->category}}" @endif @if ($lesson->course && $lesson->cancelled)class=" text-muted category{{$lesson->course->category}}" @endif @if (!$lesson->course && $lesson->canceld) class="text-muted"  @endif>
                 <td>@lang('messages.format.range', $lesson->time)</td>
                 <td class="course">
                   @if($lesson->course)
@@ -29,6 +29,10 @@
                 <td class="room">{{$lesson->room->name}}</td>
                 <td>
                   {{$lesson->participants}}{{!$lesson->course ? "/{$lesson->room->capacity}" : ($lesson->course->maxstudents ? "/{$lesson->course->maxstudents}" : '')}}
+                </td><td>
+                  @if($lesson->course)
+                    @lang('messages.categories.'.$lesson->course->category)
+                  @endif
                 </td>
                 <td>
                   @if($lesson->cancelled)

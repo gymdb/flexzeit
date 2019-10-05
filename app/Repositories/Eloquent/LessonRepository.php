@@ -46,6 +46,10 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     return $this->queryInRange($constraints, $showCancelled, $withCourse, $student->lessons());
   }
 
+    public function queryForAllStudents( DateConstraints $constraints, $showCancelled = false, $withCourse = false) {
+      return $this->queryInRange($constraints, $showCancelled, $withCourse);
+    }
+
   public function queryForSubstitutions(Collection $substitutions) {
     return $this->restrictToLessons(Lesson::query(), $substitutions, true);
   }

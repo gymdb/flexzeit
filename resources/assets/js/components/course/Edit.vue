@@ -11,6 +11,7 @@
         name: this.old.name,
         room: this.old.room,
         description: this.old.description,
+        category: this.old.category,
         yearFrom: this.old.yearFrom,
         yearTo: this.old.yearTo,
         maxStudents: this.old.maxStudents,
@@ -106,6 +107,13 @@
         }
         return options;
       },
+      categoryOptionsList() {
+        const options = [];
+        for (let i = 0; i <= 5; i++) {
+          options.push({value: i, label: this.$t('courses.category')[i]});
+        }
+        return options;
+      },
       buttonDisabled() {
         if (!this.changed || this.error || this.loading) {
           return true;
@@ -116,7 +124,7 @@
       },
       changed() {
         if (this.lastDate !== this.data.lastDate ||
-            this.name !== this.data.name || this.room !== this.data.room || this.description !== this.data.description) {
+            this.name !== this.data.name || this.room !== this.data.room || this.description !== this.data.description || this.category !== this.data.category) {
           return true;
         }
         return this.obligatory

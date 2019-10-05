@@ -133,7 +133,6 @@
               }
             });
       }
-
       let group = this.groups && this.groups.length === 1 ? this.groups[0].id : (params.group || this.defaultGroup);
       if (group) {
         this.loadStudents(group);
@@ -144,6 +143,7 @@
         groupsList: this.groups,
         studentsList: [],
         teachersList: this.teachers,
+        categoryList: this.category,
         subjectsList: this.subjects,
         typesList: this.roomTypes,
         group: group,

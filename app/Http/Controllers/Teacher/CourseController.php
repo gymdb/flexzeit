@@ -118,7 +118,7 @@ class CourseController extends Controller {
 
     return view('teacher.courses.obligatory', compact(
         'groups', 'teachers', 'subjects', 'defaultGroup', 'defaultStartDate', 'defaultEndDate',
-        'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek'));
+        'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek','category'));
   }
 
   /**
@@ -306,14 +306,16 @@ class CourseController extends Controller {
         'number'      => $firstLesson->number,
         'name'        => $course->name,
         'room'        => $firstLesson->room_id,
-        'description' => $course->description
+        'description' => $course->description,
+        'category'    => $course->category
     ];
 
     $old = [
         'lastDate'    => $this->parseOldDate('lastDate') ?: $courseData['lastDate'],
         'name'        => old('name') ?: $courseData['name'],
         'room'        => $this->parseOldNumber('room') ?: $courseData['room'],
-        'description' => old('description') ?: $courseData['description']
+        'description' => old('description') ?: $courseData['description'],
+        'category'    => old('category') ? : $courseData['category']
     ];
 
     $oldGroups = $course->groups()->pluck('id');

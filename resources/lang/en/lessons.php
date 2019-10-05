@@ -38,7 +38,7 @@ return [
         'confirm' => 'Really unregister :student?'
     ],
     'feedback'      => [
-        'button' => 'Feedback'
+        'button' => 'Feedback to homeroom teacher'
     ],
     'cancel'        => [
         'submit'  => 'Cancel lesson',

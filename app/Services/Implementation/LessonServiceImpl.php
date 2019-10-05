@@ -70,7 +70,7 @@ class LessonServiceImpl implements LessonService {
   public function getMappedForTeacher(Teacher $teacher = null, DateConstraints $constraints, $showCancelled = false, $withCourse = false) {
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, $constraints, $showCancelled, $withCourse)
-        ->with('course:id,name,maxstudents', 'room:id,name,capacity', 'teacher:id,lastname,firstname')
+        ->with('course:id,name,maxstudents,category', 'room:id,name,capacity', 'teacher:id,lastname,firstname')
         ->select('lessons.id', 'date', 'number', 'cancelled', 'course_id', 'room_id', 'teacher_id');
 
     if (!$teacher) {
@@ -97,7 +97,8 @@ class LessonServiceImpl implements LessonService {
           if ($lesson->course) {
             $data['course'] = [
                 'id'   => $lesson->course->id,
-                'name' => $lesson->course->name
+                'name' => $lesson->course->name,
+                'category' => $lesson->course->category
             ];
             $data['maxstudents'] = $lesson->course->maxstudents;
           } else {
@@ -110,7 +111,7 @@ class LessonServiceImpl implements LessonService {
   public function getForDay(Teacher $teacher, Date $date = null) {
     $query = $this->lessonRepository
         ->queryForTeacher($teacher, new DateConstraints($date ?: Date::today()), true)
-        ->with('course:id,name,maxstudents', 'room:id,name,capacity')
+        ->with('course:id,name,maxstudents,category', 'room:id,name,capacity')
         ->select('id', 'number', 'cancelled', 'course_id', 'room_id');
 
     return $this->lessonRepository
@@ -139,7 +140,7 @@ class LessonServiceImpl implements LessonService {
         ->with(['course.lessons' => function($query) {
           $query->orderBy('date')->orderBy('number')->select('id', 'date', 'course_id');
         }])
-        ->with('room:id,name', 'teacher:id,lastname,firstname,info,image', 'teacher.subjects', 'course:id,name,description')
+        ->with('room:id,name', 'teacher:id,lastname,firstname,info,image', 'teacher.subjects', 'course:id,name,description,category')
         ->get()
         ->map(function(Lesson $lesson) use ($student) {
           $this->configService->setTime($lesson);
@@ -165,6 +166,7 @@ class LessonServiceImpl implements LessonService {
                 'id'          => $lesson->course->id,
                 'name'        => $lesson->course->name,
                 'description' => $lesson->course->description,
+                'category'    => $lesson->course->category,
                 'lessons'     => $associated
             ];
           }

@@ -20,6 +20,8 @@ return [
             'higher' => 'Grade :year and higher',
             'lower'  => 'Grade :year and lower'
         ],
+        'category'      => 'Category',
+        'selectCategory' => 'Select category',
         'maxStudents'   => 'Max. participants',
         'subject'       => 'Subject',
         'selectSubject' => 'Select subject',

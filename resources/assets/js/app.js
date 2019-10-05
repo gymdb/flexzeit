@@ -113,5 +113,14 @@ Vue.options.components.popover.options.methods.position = function () {
 // noinspection JSUnusedLocalSymbols
 const app = new Vue({
   i18n,
-  el: '#app'
-});
+  el: '#app',
+  computed: {
+    categoryOptionsList() {
+      const options = [];
+      for (let i = 0; i <= 5; i++) {
+        options.push({ label: this.$t('courses.category')[i]});
+      }
+      return options;
+    },
+  }
+},);

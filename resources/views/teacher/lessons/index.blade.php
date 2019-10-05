@@ -33,7 +33,7 @@
                 <th class="hidden-print"></th>
               </tr>
               </thead>
-              <tr v-for="lesson in props.data" :class="{'text-muted': lesson.cancelled}">
+              <tr v-for="lesson in props.data" :class="[{'text-muted':lesson.cancelled}, [typeof(lesson.course) !== 'undefined' ? 'category'+{{'lesson.course.category'}} : '']]">
                 <td>@{{$d(moment(lesson.date), 'short')}}</td>
                 <td>@{{$t('messages.range', lesson.time)}}</td>
                 @if($teachers)

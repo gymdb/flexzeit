@@ -207,6 +207,12 @@
               </div>
             @endif
 
+            <div class="form-group col-sm-3 col-xs-12 required">
+              <label for="category">@lang('courses.data.category')</label>
+              <v-select v-model="category" name="category" class="select-container" placeholder="@lang('courses.data.selectCategory')"
+                        :options="categoryOptionsList"></v-select>
+            </div>
+
             <div class="col-xs-12">
               <button class="btn btn-success" :disabled="buttonDisabled">@lang('courses.create.submit')</button>
             </div>

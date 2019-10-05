@@ -96,7 +96,7 @@
                   @endif
                 </tr>
                 </thead>
-                <tr v-for="(lesson, key) in props.data">
+                <tr v-for="(lesson, key) in props.data" :class="typeof(lesson.course) !== 'undefined' ? 'category'+{{'lesson.course.category'}} : ''">
                   <td>@{{$t('messages.range', lesson.time)}}</td>
                   <td>
                     <popover trigger="hover" placement="right" :ref="'popover-' + key">

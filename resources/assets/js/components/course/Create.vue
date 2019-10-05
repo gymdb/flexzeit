@@ -10,6 +10,7 @@
         firstDate: null,
         lastDate: null,
         frequency: null,
+        category: null,
         number: this.oldNumber,
         name: this.oldName,
         room: this.oldRoom,
@@ -130,6 +131,13 @@
         }
         return options;
       },
+      categoryOptionsList() {
+        const options = [];
+        for (let i = 0; i <= 5; i++) {
+            options.push({value: i, label: this.$t('courses.category')[i]});
+        }
+        return options;
+      },
       lessonsOnDay() {
         return (this.firstDate && this.lessons[this.firstDate.day()]) ? this.lessons[this.firstDate.day()] : null;
       },
@@ -160,6 +168,7 @@
             firstDate: this.firstDate.format('YYYY-MM-DD'),
             lastDate: this.lastDate ? this.lastDate.format('YYYY-MM-DD') : null,
             frequency: this.frequency,
+            category: this.category,
             number: this.number,
             groups: this.groups.length ? this.groups : null,
             teacher: this.teacher || null

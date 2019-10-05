@@ -39,7 +39,7 @@ return [
         'confirm' => 'Soll :student wirklich abgemeldet werden?'
     ],
     'feedback'      => [
-        'button' => 'Rückmeldung schreiben'
+        'button' => 'Rückmeldung an KV'
     ],
     'cancel'        => [
         'submit'  => 'Einheit absagen',

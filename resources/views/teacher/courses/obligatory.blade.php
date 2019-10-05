@@ -30,22 +30,23 @@
                 <th>@lang('messages.teacher')</th>
                 <th>@lang('messages.course')</th>
                 <th>@lang('messages.group')</th>
+                <th>@lang('messages.category')</th>
                 <th class="hidden-print"></th>
               </tr>
               </thead>
-              <tr v-for="course in props.data">
+               <tr v-for="course in props.data" :class="'category'+course.category">
                 <td v-if="course.last">@{{$d(moment(course.first), 'short')}} &ndash; @{{$d(moment(course.last), 'short')}}</td>
                 <td v-else>@{{$d(moment(course.first), 'short')}}</td>
                 <td>@{{$t('messages.range', course.time)}}</td>
                 <td>@{{course.teacher}}</td>
                 <td class="course">@{{course.name}}</td>
-                <td>@{{course.groups.join(', ')}}</td>
+                <td>@{{course.groups.join(', ')}}</td><td>@{{ categoryOptionsList[course.category].label}}
                 <td class="hidden-print">
                   <a :href="'{{route('teacher.courses.show', '')}}/' + course.id">@lang('courses.index.details')</a>
                 </td>
               </tr>
             </table>
-          </div>
+           </div>
         </template>
       </filtered-list>
     </div>

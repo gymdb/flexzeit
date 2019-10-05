@@ -15,5 +15,14 @@ return [
     'room'          => 'Raum',
     'participants'  => 'Anmeldungen',
     'documentation' => 'Dokumentation',
-    'feedback'      => 'Rückmeldung'
+    'feedback'      => 'Rückmeldung',
+    'category'      => 'Kategorie',
+    'categories'           => [
+        '0' => 'Nawi',
+        '1' => 'Sprachen',
+        '2' => 'Kreativ',
+        '3' => 'Sport',
+        '4' => 'Gewi',
+        '5' => 'Anderes'
+    ]
 ];

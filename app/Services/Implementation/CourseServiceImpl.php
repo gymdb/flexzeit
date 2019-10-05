@@ -512,7 +512,8 @@ class CourseServiceImpl implements CourseService {
               'time'        => $first->time,
               'teacher'     => $course->teacher->first()->name(),
               'students'    => $course->participants,
-              'maxstudents' => $course->maxstudents
+              'maxstudents' => $course->maxstudents,
+              'category'    => $course->category
           ];
         });
   }
@@ -532,7 +533,8 @@ class CourseServiceImpl implements CourseService {
               'last'    => $course->last !== $course->first ? $course->last : null,
               'time'    => $first->time,
               'teacher' => $course->teacher->first()->name(),
-              'groups'  => $course->groups->pluck('name')
+              'groups'  => $course->groups->pluck('name'),
+              'category' => $course->category
           ];
         });
   }
@@ -561,7 +563,8 @@ class CourseServiceImpl implements CourseService {
                   'subjects' => $teacher->subjects->implode('name', ', ')
               ],
               'students'    => $course->participants,
-              'maxstudents' => $course->maxstudents
+              'maxstudents' => $course->maxstudents,
+              'category'    => $course->category
           ];
         });
   }

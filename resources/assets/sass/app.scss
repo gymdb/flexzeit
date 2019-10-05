@@ -151,6 +151,12 @@ h2.panel-heading {
   }
 }
 
+@media (min-width: 1400px) {
+  .container {
+    width: 1370px;
+  }
+}
+
 @media (min-width: 424px) {
   .date-range {
     width: 100%;
@@ -314,6 +320,28 @@ dt:after {
   span {
     display: none;
   }
+}
+/**
+* Category colors
+ */
+
+.category0 {
+  background-color: #fcf3cf;
+}
+.category1 {
+  background-color: #f5f5f5;
+}
+.category2 {
+  background-color: #e8daef;
+}
+.category3 {
+  background-color:  #d4e6f1 ;
+}
+.category4 {
+  background-color:  #d1f2eb ;
+}
+.category5 {
+  background-color: #d4efdf;
 }
 
 /**

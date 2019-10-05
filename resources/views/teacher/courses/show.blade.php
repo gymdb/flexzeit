@@ -32,6 +32,8 @@
             <dt>@lang('courses.data.maxStudents')</dt>
             <dd>{{$course->maxstudents}}</dd>
           @endif
+          <dt>@lang('courses.data.category')</dt>
+          <dd>@{{categoryOptionsList[{!! json_encode($course->category) !!}].label}}</dd>
         </dl>
 
         @if($allowDestroy)

@@ -21,6 +21,8 @@ return [
             'higher' => ':year. Klasse und höher',
             'lower'  => ':year. Klasse und niedriger'
         ],
+        'category'      => 'Kategorie',
+        'selectCategory' => 'Kategorie auswählen',
         'maxStudents'   => 'Max. Teilnehmer',
         'subject'       => 'Fach',
         'selectSubject' => 'Fach auswählen',
