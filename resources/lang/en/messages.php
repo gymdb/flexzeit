@@ -14,5 +14,13 @@ return [
     'room'          => 'Room',
     'participants'  => 'Participants',
     'documentation' => 'Documentation',
-    'feedback'      => 'Feedback'
+    'feedback'      => 'Feedback',
+    'categories'           => [
+        '0' => 'Science',
+        '1' => 'Languages',
+        '2' => 'Creative',
+        '3' => 'Sports',
+        '4' => 'Humanities',
+        '5' => 'Others'
+    ]
 ];
