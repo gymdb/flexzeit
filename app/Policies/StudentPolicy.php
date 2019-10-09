@@ -23,6 +23,17 @@ class StudentPolicy {
     return $user->isTeacher();
   }
 
+
+  /**
+  * Determine whether the user can view missing registrations for sports category
+  *
+  * @param User $user
+  * @param Group|null $group
+  * @return bool
+  */
+  public function showMissingSportsRegistration(User $user, Group $group = null) {
+    return $this->isFormTeacher($user, $group);
+  }
   /**
    * Determine whether the user can view missing registrations
    *

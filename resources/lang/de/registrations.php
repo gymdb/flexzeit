@@ -9,6 +9,7 @@ return [
     ],
     'missing'       => [
         'heading' => 'Fehlende Anmeldungen',
+        'headingSport' => 'Fehlende Anmeldungen für einen Sportkurs',
         'error'   => 'Fehler beim Laden der fehlenden Anmeldungen.',
         'none'    => 'Zu den ausgewählten Filtern gibt es keine fehlenden Anmeldungen.'
     ],

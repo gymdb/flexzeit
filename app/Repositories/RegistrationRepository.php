@@ -69,6 +69,13 @@ interface RegistrationRepository {
   public function queryMissingForLesson(Lesson $lesson, Collection $groups);
 
   /**
+   * @param Lesson $lesson
+   * @param Collection $groups
+   * @return Builder
+   */
+   public function queryMissingSportsRegistration(Group $group = null, DateConstraints $constraints);
+
+  /**
    * @param Student|Group|null $student
    * @param DateConstraints $constraints
    * @return Builder

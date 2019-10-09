@@ -26,6 +26,7 @@ return [
     'registrations' => [
         'list'      => 'Show registrations',
         'missing'   => 'Show missing registrations',
+        'missingSportRegistration' => 'Show missing sports registrations',
         'absent'    => 'Show absences',
         'byteacher' => 'Show registrations by teachers'
     ],

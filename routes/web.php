@@ -39,6 +39,7 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
   // Registration related pages
   Route::get('/registrations', 'RegistrationController@showRegistrations')->name('teacher.registrations.list');
   Route::get('/registrations/missing', 'RegistrationController@showMissing')->name('teacher.registrations.missing');
+  Route::get('/registrations/missingSportsRegistration', 'RegistrationController@showMissingSportsRegistration')->name('teacher.registrations.missingSportsRegistration');
   Route::get('/registrations/absent', 'RegistrationController@showAbsent')->name('teacher.registrations.absent');
   Route::get('/registrations/byteacher', 'RegistrationController@showByTeacher')->name('teacher.registrations.byteacher');
 
@@ -93,6 +94,9 @@ Route::group(['prefix' => 'teacher', 'namespace' => 'Teacher', 'middleware' => [
     Route::get('/registrations/missing', 'RegistrationController@getMissing')
         ->middleware('params:group?;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.missing');
+    Route::get('/registrations/missingSportsRegistration', 'RegistrationController@getMissingSportsRegistration')
+          ->middleware('params:group?;i|start?;d|end?;d')
+          ->name('teacher.api.registrations.missingSportsRegistration');
     Route::get('/registrations/absent', 'RegistrationController@getAbsent')
         ->middleware('params:group;i|student?;i|start?;d|end?;d')
         ->name('teacher.api.registrations.absent');

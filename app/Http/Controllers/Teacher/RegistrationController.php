@@ -89,6 +89,36 @@ class RegistrationController extends Controller {
     ));
   }
 
+
+  /**
+    * Show the overview page for registrations of the students
+    *
+    * @return View
+    * @throws AuthorizationException
+    */
+  public function showMissingSportsRegistration() {
+    $subjects = $this->getTeacher()->subjects;
+    $isSportsTeacher = false;
+    if (strpos($subjects, 'Sport') !== false) {
+      $isSportsTeacher = true;
+    }
+    $user = $this->getTeacher();
+    $this->authorize('showMissingSportsRegistration', Student::class);
+
+    $isAdmin = $user->admin;
+    $groups = ($isAdmin || $isSportsTeacher) ? $this->miscService->getGroups() : [$user->form->group];
+    //$defaultGroup = !$user->admin && $user->form ? $user->form->group_id : null;
+    $minDate = $this->configService->getYearStart();
+    $maxDate = $this->configService->getYearEnd();
+    $offdays = $this->offdayService->getInRange($minDate, $maxDate);
+    $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+
+    //set start and end date (monday / friday of selected week)
+    $defaultStartDate=Date::checkedCreate(date('Y-m-d', strtotime("this week")));
+    $defaultEndDate = $defaultStartDate->copy()->addDays(4);
+    return view('teacher.registrations.missingSportsRegistration', compact('isAdmin','groups', 'minDate', 'maxDate', 'offdays','disabledDaysOfWeek','defaultStartDate','defaultEndDate'));
+  }
+
   /**
    * Show the list of missing registrations
    *
@@ -338,6 +368,33 @@ class RegistrationController extends Controller {
     $constraints = new DateConstraints($start, $end);
 
     $missing = $this->registrationService->getMissing($group, $student, $constraints);
+    return response()->json($missing);
+  }
+
+  /**
+  * Get students with missing sports registrations (1. and 2. form only)
+  *
+  * @param Group|null $group
+  * @param Student|null $student
+  * @param Date|null $start
+  * @param Date|null $end
+  * @return JsonResponse
+  * @throws AuthorizationException
+  */
+  public function getMissingSportsRegistration(Group $group = null, Date $start = null, Date $end = null) {
+    if ($group) {
+      $this->authorize('showMissingSportsRegistration', $group);
+    } else {
+      $this->authorize('showMissingSportsRegistration', Group::class);
+    }
+    if (!$group && !$start && !$end && $this->getTeacher()->admin) {
+      $start = $end = Date::today();
+    } else {
+      $start = $start ?: $this->configService->getYearStart();
+      $end = $end ?: $this->configService->getFirstRegisterDate()->copy()->addDay(-1);
+    }
+    $constraints = new DateConstraints($start, $end);
+    $missing = $this->registrationService->getMissingSportsRegistration($group, $constraints);
     return response()->json($missing);
   }
 

@@ -73,6 +73,11 @@
                       <a href="{{route('teacher.registrations.missing')}}">@lang('nav.registrations.missing')</a>
                     </li>
                   @endcan
+                  @can('showMissingSportsRegistration', \App\Models\Student::class)
+                    <li>
+                      <a href="{{route('teacher.registrations.missingSportsRegistration')}}">@lang('nav.registrations.missingSportRegistration')</a>
+                    </li>
+                  @endcan
                   @can('showAbsent', \App\Models\Student::class)
                     <li>
                       <a href="{{route('teacher.registrations.absent')}}">@lang('nav.registrations.absent')</a>
@@ -83,12 +88,12 @@
                       <a href="{{route('teacher.registrations.byteacher')}}">@lang('nav.registrations.byteacher')</a>
                     </li>
                   @endcan
-                  <li>
+<!--                  <li>
                     <a href="{{route('teacher.documentation.list')}}">@lang('nav.documentation.list')</a>
                   </li>
                   <li>
                     <a href="{{route('teacher.documentation.missing')}}">@lang('nav.documentation.missing')</a>
-                  </li>
+                  </li> -->
                   @can('showFeedback', \App\Models\Student::class)
                     <li>
                       <a href="{{route('teacher.feedback')}}">@lang('nav.feedback.list')</a>

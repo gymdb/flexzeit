@@ -133,6 +133,27 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
         });
   }
 
+  public function queryMissingSportsRegistration(Group $group=null, DateConstraints $constraints) {
+    if ($group) {
+      $baseQuery = $group->students();
+    } else {
+      $baseQuery = Student::query();
+    }
+    $myQuery=$baseQuery->join('group_student as g','g.student_id','students.id')
+    ->WHERE('g.group_id','<',11)
+    ->whereNotIn('g.student_id', function($in) use ($constraints) {
+        $in->select('r.student_id')
+           ->from('registrations as r')
+           ->join('lessons as l', 'l.id','r.lesson_id')
+           ->join('courses as c', function($join) {
+               $join->on('c.id', 'l.course_id');
+            })
+           ->where('c.category', 3)
+         ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);
+    })->orderBy('g.group_id')->orderBy('lastname');
+    return $myQuery;
+  }
+
   public function queryByTeacher($student = null, DateConstraints $constraints) {
     return $this->queryForStudent($student, $constraints)->where('byteacher', true);
   }

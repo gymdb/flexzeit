@@ -8,6 +8,7 @@ return [
     ],
     'missing'       => [
         'heading' => 'Missing registrations',
+        'headingSport' => 'Missing registration for sports course.',
         'error'   => 'Error loading the missing registrations.',
         'none'    => 'No missing registrations for the given criteria.'
     ],

@@ -364,6 +364,20 @@ class RegistrationServiceImpl implements RegistrationService {
         });
   }
 
+  public function getMissingSportsRegistration(Group $group = null, DateConstraints $constraints ) {
+    return $this->registrationRepository->queryMissingSportsRegistration($group, $constraints)
+      ->get(['id', 'firstname', 'lastname'])
+      ->map(function(Student $student) use ($group) {
+        $lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
+        $this->configService->setTime($lesson);
+        $name = $group ? $student->name() : $student->name() . $student->formsString();
+        return [
+          'name' => $name,
+          'id'   => $student->id,
+        ];
+    });
+  }
+
   public function getMissing(Group $group = null, Student $student = null, DateConstraints $constraints) {
     return $this->registrationRepository->queryMissing($group, $student, $constraints)
         ->get(['id', 'firstname', 'lastname', 'date', 'number'])

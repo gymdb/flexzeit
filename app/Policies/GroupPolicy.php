@@ -34,6 +34,26 @@ class GroupPolicy {
     return $this->isFormTeacher($user, $group);
   }
 
+
+  /**
+   * Determine whether the user can view missing registrations for sports category
+   *
+   * @param User $user
+   * @param Group|null $group
+   * @return bool
+   */
+  public function showMissingSportsRegistration(User $user, Group $group = null) {
+    $sportsTeacher = false;
+    if (strpos($user->subjects, 'Sport') !== false) {
+      $sportsTeacher = true;
+    }
+    if ($sportsTeacher) {
+      return true  ;
+    } else {
+      return ($user->form && $user->form->group_id < 11) || ($user->admin);
+    }
+  }
+
   /**
    * Determine whether the user can absent students for this group
    *
