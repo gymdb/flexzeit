@@ -19,6 +19,7 @@ Die Systemvoraussetzungen orientieren sich im Wesentlichen an [jenen von Laravel
 ## Installation für Entwicklungssystem
 * Repository klonen: `git clone https://github.com/gymdb/flexzeit.git`
 * PHP-Dependencies installieren: `composer install`
+* npm install, npm install saas, npm install laravel-mix, npm run dev
 * Korrekte Einstellungen in der Datei `.env` eintragen (siehe eigener Abschnitt)
 * Datenbankstruktur erstellen: `php artisan migrate` (siehe auch [Laravel Migrations](https://laravel.com/docs/5.5/migrations#running-migrations))
 * Testdaten generieren (optional): `php artisan db:seed` (siehe auch [Laravel Seeding](https://laravel.com/docs/5.5/seeding#running-seeders))
