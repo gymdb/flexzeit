@@ -103,7 +103,7 @@ class RegistrationController extends Controller {
       $isSportsTeacher = true;
     }
     $user = $this->getTeacher();
-    $this->authorize('showMissingSportsRegistration', Student::class);
+    $this->authorize('showMissingSportsRegistration', Group::class);
 
     $isAdmin = $user->admin;
     $groups = ($isAdmin || $isSportsTeacher) ? $this->miscService->getGroups() : [$user->form->group];
