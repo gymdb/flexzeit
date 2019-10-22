@@ -73,7 +73,7 @@
                       <a href="{{route('teacher.registrations.missing')}}">@lang('nav.registrations.missing')</a>
                     </li>
                   @endcan
-                  @can('showMissingSportsRegistration', \App\Models\Student::class)
+                  @can('showMissingSportsRegistration', \App\Models\Group::class)
                     <li>
                       <a href="{{route('teacher.registrations.missingSportsRegistration')}}">@lang('nav.registrations.missingSportRegistration')</a>
                     </li>
