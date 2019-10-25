@@ -33,5 +33,8 @@ return [
     'bugreports'    => [
         'create' => 'Create bug report',
         'list'   => 'Show bug reports'
+    ],
+    'sportsCategory'  => [
+      'missing'   => 'Students with no sports course'
     ]
 ];

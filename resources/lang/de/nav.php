@@ -34,5 +34,8 @@ return [
     'bugreports'    => [
         'create' => 'Rückmeldung zum System',
         'list'   => 'Rückmeldungen zum System anzeigen'
+    ],
+    'sportsCategory'  => [
+         'missing'   => 'Schüler ohne Sportkurs'
     ]
 ];
