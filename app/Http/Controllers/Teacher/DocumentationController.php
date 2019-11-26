@@ -17,6 +17,7 @@ use App\Services\LessonService;
 use App\Services\OffdayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
+use Mail;
 
 class DocumentationController extends Controller {
 
@@ -196,17 +197,37 @@ class DocumentationController extends Controller {
   }
 
   /**
-   * Save feedback for a specific lesson and student
+   * Save feedback for a specific lesson and student and send email to home room teacher
    *
    * @param Registration $registration
    * @param string $feedback
    * @return JsonResponse
    */
-  public function setFeedback(Registration $registration, $feedback = null) {
+   public function setFeedback(Registration $registration, $feedback = null) {
     $this->authorize('writeFeedback', $registration);
-
     $this->documentationService->setFeedback($registration, $feedback);
-    return response()->json(['success' => true]);
+
+    $retVal= response()->json(['success' => true]);
+      $kvId=$registration->student->forms[0]->kv_id;
+      $params['mailTo']=Teacher::find($kvId)->username."@dachsberg.at";
+      $params['feedbackFrom']=$this->getTeacher()->firstname." ".$this->getTeacher()->lastname;
+      $params['feedbackFromEmail']=$this->getTeacher()->username."@dachsberg.at";
+      $params['feedbackFor']=$registration->student->firstname." ".$registration->student->lastname;
+      $params['feedback']=$feedback." \r\n\r\nLiebe Grüße\r\n".$params['feedbackFrom'];
+
+      try {
+          Mail::send(array(),array(),
+              function ($message) use ($params) {
+                  $message->from($params['feedbackFromEmail'], $params['feedbackFrom'])
+                      ->subject('Flex Feedback für ' . $params['feedbackFor']);
+                  $message->to($params['mailTo']);
+                  $message->setBody($params['feedback']);
+              });
+      } catch (\Exception $ex) {
+          error_log("Error".$ex);
+      }
+
+      return $retVal;
   }
 
 }
