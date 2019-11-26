@@ -73,7 +73,21 @@
 
   @if($hasMissing)
     <section class="panel panel-default has-popovers">
-      <h2 class="panel-heading">@lang('student.available.heading')</h2>
+      <h2 class="panel-heading">@lang('student.available.heading')<span class="pull-right">
+        <popover trigger="hover" placement="right" :ref="'popover-legend'">
+	  <div slot="content">
+	    <table>
+	      <tr class="category0"><td>Nawi</td></tr>
+	      <tr class="category1"><td>Sprachen</td></tr>
+	      <tr class="category2"><td>Kreativ</td></tr>
+	      <tr class="category3"><td>Sport</td></tr>
+	      <tr class="category4"><td>Gewi</td></tr>
+	      <tr class="category5"><td>Anderes</td></tr>
+	    </table>
+	  </div>
+	  <span> Legende </span>
+	  </popover>
+        </span></h2>
       <div class="panel-body">
         <filtered-list
             url="{{route('student.api.available', $date->toDateString())}}"

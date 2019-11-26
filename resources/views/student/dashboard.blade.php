@@ -33,6 +33,15 @@
                       <td colspan="3">@lang('student.offday')</td>
                     @else
                       <td colspan="3" class="text-danger">@lang('student.missing')</td>
+                       @if(date('Hi')<725)
+                         <td>
+                         <a href="{{route('student.day', $lesson->date->toDateString())}}" title="@lang('student.register.label')"
+                            class="hidden-print">
+                          <span class="glyphicon glyphicon-circle-arrow-right register-link"></span>
+                          <span class="sr-only">@lang('student.register.label')</span>
+                          </a>
+                         </td>
+                       @endif
                     @endif
                   </tr>
                 @endforeach
