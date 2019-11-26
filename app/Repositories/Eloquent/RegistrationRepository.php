@@ -150,7 +150,17 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
             })
            ->where('c.category', 3)
          ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);
-    })->orderBy('g.group_id')->orderBy('lastname');
+    })->whereNotIn('g.student_id', function($in) use ($constraints) {
+        $in->select('r.student_id')
+          ->from('registrations as r')
+          ->join('lessons as l', 'l.id','r.lesson_id')
+          ->join('rooms','rooms.id','l.room_id')
+          ->where(function($query){
+            $query->where ('rooms.name','like','SPm%')
+              ->orWhere('rooms.name','like','SPw%');
+          })
+          ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);})
+        ->orderBy('g.group_id')->orderBy('lastname');
     return $myQuery;
   }
 
