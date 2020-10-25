@@ -26,7 +26,7 @@
               :keepFilter="false"
               :error-text="$t('registrations.student.lessonsError')">
         <div slot="empty" class="alert alert-warning">{{$t('registrations.student.none')}}</div>
-        <template scope="props">
+        <template slot-scope="props">
           <div class="table-responsive">
             <table class="table table-condensed">
               <thead>

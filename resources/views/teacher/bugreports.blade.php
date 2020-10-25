@@ -29,7 +29,7 @@
                   <td>@{{report.author}}</td>
                   <td class="wrap">@{{report.text}}</td>
                   <td>
-                    <teacher-trash-report :id="report.id" :trashed="report.trashed" @success="refresh" @error="setError"></teacher-trash-report>
+                    <teacher-trash-report :id="report.id" :trashed="report.trashed" @success="refresh" :error="setError"></teacher-trash-report>
                   </td>
                 </tr>
               </table>

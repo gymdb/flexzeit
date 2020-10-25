@@ -212,8 +212,9 @@ class DocumentationController extends Controller {
       $params['mailTo']=Teacher::find($kvId)->username."@dachsberg.at";
       $params['feedbackFrom']=$this->getTeacher()->firstname." ".$this->getTeacher()->lastname;
       $params['feedbackFromEmail']=$this->getTeacher()->username."@dachsberg.at";
-      $params['feedbackFor']=$registration->student->firstname." ".$registration->student->lastname;
-      $params['feedback']=$feedback." \r\n\r\nLiebe Grüße\r\n".$params['feedbackFrom'];
+      $params['feedbackFor']=$registration->student->firstname." ".$registration->student->lastname.
+                             " - Flex ".$registration->lesson->number." am ".$registration->lesson->date;
+      $params['feedback']=$feedback." \r\n\r\nLiebe Grüße\r\n".$params['feedbackFrom']; 
 
       try {
           Mail::send(array(),array(),

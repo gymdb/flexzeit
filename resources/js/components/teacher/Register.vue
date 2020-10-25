@@ -16,13 +16,13 @@
                    v-on:filter="setFilter"
                    v-on:data="setData">
       <template slot="chooseStudent"></template>
-      <template slot="empty" scope="props">
+      <template slot="empty" slot-scope="props">
         <p v-if="!saveDisabled" class="text-center">
           <strong>{{$t(course ? 'registrations.register.confirmCourse' : 'registrations.register.confirm')}}</strong>
           <br>{{props.studentName}}
         </p>
       </template>
-      <template scope="props">
+      <template slot-scope="props">
         <div v-for="student in props.sorted">
           <div v-if="isSameLesson(student.data)" class="alert alert-danger">
             <strong>{{student.name}}: {{$t('registrations.warnings.sameLesson')}}</strong>

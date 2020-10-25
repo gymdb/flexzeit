@@ -267,7 +267,9 @@ class RegistrationServiceImpl implements RegistrationService {
   }
 
   public function isRegistrationPossible(Date $value) {
-    return $value >= $this->configService->getFirstRegisterDate() && $value <= $this->configService->getLastRegisterDate();
+    //allow registration on same day until 7:25
+    //return ($value >= $this->configService->getFirstRegisterDate() && $value <= $this->configService->getLastRegisterDate()) ;
+    return ($value >= $this->configService->getFirstRegisterDate() && $value <= $this->configService->getLastRegisterDate()) || ($value == Date::today() && date('Hi')<725);
   }
 
   public function setAttendance(Registration $registration, $attendance, $force = false) {

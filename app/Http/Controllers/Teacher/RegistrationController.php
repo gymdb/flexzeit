@@ -371,7 +371,7 @@ class RegistrationController extends Controller {
     return response()->json($missing);
   }
 
-  /**
+ /**
    * Get students with missing sports registrations (1. and 2. form only)
    *
    * @param Group|null $group

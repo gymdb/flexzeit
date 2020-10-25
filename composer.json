@@ -4,19 +4,19 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=7.0.0",
-        "fguillot/json-rpc": "@stable",
-        "htmlmin/htmlmin": "^5.0",
-        "laravel/framework": "5.5.*",
+        "php": ">=7.4.10",
         "ext-intl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "fguillot/json-rpc": "@stable",
+        "htmlmin/htmlmin": "^7.0",
+        "laravel/framework": "^6.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
         "laravel/tinker": "^1.0",
         "mockery/mockery": "0.9.*",
-        "phpunit/phpunit": "~6.0",
+        "phpunit/phpunit": "7.4",
         "vladahejda/phpunit-assert-exception": "^1.1"
     },
     "autoload": {
@@ -51,7 +51,7 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php": "7.0.24"
+            "php": "7.4.10"
         }
     }
 }

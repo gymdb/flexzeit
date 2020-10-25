@@ -17,14 +17,15 @@ mix.webpackConfig({
   module: {
     rules: [{
       test: /\/vue-strap\/src\/.*.js$/,
+      exclude: /(node_modules|bower_components)/,
       loader: 'babel-loader',
       options: {
-        presets: ['es2015']
+        presets: ['@babel/preset-env']
       }
     }]
   }
 });
 
 mix.setResourceRoot('../');
-mix.js('resources/assets/js/app.js', 'public/js')
-    .sass('resources/assets/sass/app.scss', 'public/css');
+mix.js('resources/js/app.js', 'public/js')
+    .sass('resources/sass/app.scss', 'public/css');

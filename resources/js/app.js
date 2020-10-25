@@ -53,46 +53,46 @@ const i18n = new VueI18n({
 /** @namespace Vue.component */
 
 // Register general components
-Vue.component('bug-report', require('./components/BugReport.vue'));
-Vue.component('confirm', require('./components/Confirm.vue'));
-Vue.component('datepicker', require('./components/Datepicker.vue'));
-Vue.component('daterange', require('./components/Daterange.vue'));
-Vue.component('error', require('./components/Error.vue'));
-Vue.component('filtered-list', require('./components/FilteredList.vue'));
-Vue.component('unregister', require('./components/Unregister.vue'));
+Vue.component('bug-report', require('./components/BugReport.vue').default);
+Vue.component('confirm', require('./components/Confirm.vue').default);
+Vue.component('datepicker', require('./components/Datepicker.vue').default);
+Vue.component('daterange', require('./components/Daterange.vue').default);
+Vue.component('error', require('./components/Error.vue').default);
+Vue.component('filtered-list', require('./components/FilteredList.vue').default);
+Vue.component('unregister', require('./components/Unregister.vue').default);
 
 // Register components for teacher pages
-Vue.component('teacher-absent', require('./components/teacher/Absent.vue'));
-Vue.component('teacher-attendance', require('./components/teacher/Attendance.vue'));
-Vue.component('teacher-bugreports', require('./components/teacher/BugReports.vue'));
-Vue.component('teacher-excused', require('./components/teacher/Excused.vue'));
-Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue'));
-Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue'));
-Vue.component('teacher-register', require('./components/teacher/Register.vue'));
-Vue.component('teacher-register-student', require('./components/teacher/RegisterStudent.vue'));
-Vue.component('teacher-substitute', require('./components/teacher/Substitute.vue'));
-Vue.component('teacher-trash-report', require('./components/teacher/TrashReport.vue'));
-Vue.component('course-create', require('./components/course/Create.vue'));
-Vue.component('course-edit', require('./components/course/Edit.vue'));
-Vue.component('course-show', require('./components/course/Show.vue'));
+Vue.component('teacher-absent', require('./components/teacher/Absent.vue').default);
+Vue.component('teacher-attendance', require('./components/teacher/Attendance.vue').default);
+Vue.component('teacher-bugreports', require('./components/teacher/BugReports.vue').default);
+Vue.component('teacher-excused', require('./components/teacher/Excused.vue').default);
+Vue.component('teacher-feedback', require('./components/teacher/Feedback.vue').default);
+Vue.component('teacher-lesson', require('./components/teacher/Lesson.vue').default);
+Vue.component('teacher-register', require('./components/teacher/Register.vue').default);
+Vue.component('teacher-register-student', require('./components/teacher/RegisterStudent.vue').default);
+Vue.component('teacher-substitute', require('./components/teacher/Substitute.vue').default);
+Vue.component('teacher-trash-report', require('./components/teacher/TrashReport.vue').default);
+Vue.component('course-create', require('./components/course/Create.vue').default);
+Vue.component('course-edit', require('./components/course/Edit.vue').default);
+Vue.component('course-show', require('./components/course/Show.vue').default);
 
 // Register components for student pages
-Vue.component('student-documentation', require('./components/student/Documentation.vue'));
-Vue.component('student-register', require('./components/student/Register.vue'));
-Vue.component('student-registrations', require('./components/student/Registrations.vue'));
+Vue.component('student-documentation', require('./components/student/Documentation.vue').default);
+Vue.component('student-register', require('./components/student/Register.vue').default);
+Vue.component('student-registrations', require('./components/student/Registrations.vue').default);
 
 // Register vue-strap components
 require('vue-strap/dist/vue-strap-lang');
-Vue.component('dropdown', require('vue-strap/src/Dropdown.vue'));
-Vue.component('modal', require('vue-strap/src/Modal.vue'));
-Vue.component('popover', require('vue-strap/src/Popover.vue'));
-Vue.component('v-select', require('vue-strap/src/Select.vue'));
+Vue.component('dropdown', require('vue-strap/src/Dropdown.vue').default);
+Vue.component('modal', require('vue-strap/src/Modal.vue').default);
+Vue.component('popover', require('vue-strap/src/Popover.vue').default);
+Vue.component('v-select', require('vue-strap/src/Select.vue').default);
 
 Vue.prototype.moment = require('moment');
 
 // Workaround: Bug in Popover component
 // noinspection JSUnresolvedVariable
-Vue.options.components.popover.options.methods.position = function () {
+/** Vue.options.components.popover.options.methods.position = function () {
   // noinspection JSUnresolvedFunction
   this.$nextTick(() => {
     // noinspection JSUnresolvedVariable
@@ -108,7 +108,7 @@ Vue.options.components.popover.options.methods.position = function () {
     popover.style.top = this.top + 'px';
     popover.style.left = this.left + 'px';
   });
-};
+}; **/
 
 // noinspection JSUnusedLocalSymbols
 const app = new Vue({

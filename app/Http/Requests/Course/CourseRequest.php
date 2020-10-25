@@ -73,7 +73,7 @@ abstract class CourseRequest extends FormRequest {
     return $this->typeSpecificPopulate($course);
   }
 
-  protected function validationData() {
+  public function validationData() {
     $this->parse($this->getInputSource());
     return parent::validationData();
   }

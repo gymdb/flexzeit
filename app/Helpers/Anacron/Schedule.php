@@ -18,7 +18,9 @@ class Schedule extends BaseSchedule {
       $command .= ' ' . $this->compileParameters($parameters);
     }
 
-    $this->events[] = $event = new Event($this->mutex, $command);
+    //$this->events[] = $event = new Event($this->mutex, $command);
+    // eventMutex or schedulingMutex??
+    $this->events[] = $event = new Event($this->eventMutex, $command);
 
     return $event;
   }
