@@ -92,7 +92,7 @@ Vue.prototype.moment = require('moment');
 
 // Workaround: Bug in Popover component
 // noinspection JSUnresolvedVariable
-/** Vue.options.components.popover.options.methods.position = function () {
+Vue.options.components.popover.options.methods.position = function () {
   // noinspection JSUnresolvedFunction
   this.$nextTick(() => {
     // noinspection JSUnresolvedVariable
@@ -108,7 +108,7 @@ Vue.prototype.moment = require('moment');
     popover.style.top = this.top + 'px';
     popover.style.left = this.left + 'px';
   });
-}; **/
+};
 
 // noinspection JSUnusedLocalSymbols
 const app = new Vue({

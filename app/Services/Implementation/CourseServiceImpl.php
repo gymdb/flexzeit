@@ -325,6 +325,15 @@ class CourseServiceImpl implements CourseService {
   }
 
   public function getDataForEdit(Course $course, Date $lastDate = null, array $groups = null) {
+
+    $withCourse=array();
+    $added=array();
+    $removed=array();
+    $cancelled=array();
+    $withObligatory=array();
+    $timetable=array();
+    $offdays=array();
+
     $firstLesson = $course->firstLesson();
     $lastLesson = $course->lastLesson();
 

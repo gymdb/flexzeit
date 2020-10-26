@@ -80879,24 +80879,28 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('v-select', __webpack_requi
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.prototype.moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"); // Workaround: Bug in Popover component
 // noinspection JSUnresolvedVariable
 
-/** Vue.options.components.popover.options.methods.position = function () {
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.options.components.popover.options.methods.position = function () {
+  var _this = this;
+
   // noinspection JSUnresolvedFunction
-  this.$nextTick(() => {
+  this.$nextTick(function () {
     // noinspection JSUnresolvedVariable
-    const popover = this.$refs.popover;
+    var popover = _this.$refs.popover;
+
     if (!popover) {
       return;
-    }
-    // noinspection JSUnresolvedVariable
-    const trigger = this.$refs.trigger.children[0];
-    const pos = $(trigger).offset();
-    this.left = pos.left + trigger.offsetWidth;
-    this.top = pos.top + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
-    popover.style.top = this.top + 'px';
-    popover.style.left = this.left + 'px';
+    } // noinspection JSUnresolvedVariable
+
+
+    var trigger = _this.$refs.trigger.children[0];
+    var pos = $(trigger).offset();
+    _this.left = pos.left + trigger.offsetWidth;
+    _this.top = pos.top + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
+    popover.style.top = _this.top + 'px';
+    popover.style.left = _this.left + 'px';
   });
-}; **/
-// noinspection JSUnusedLocalSymbols
+}; // noinspection JSUnusedLocalSymbols
+
 
 var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   i18n: i18n,
@@ -83086,8 +83090,8 @@ module.exports = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /home/tom/Desktop/git/flexzeit/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /home/tom/Desktop/git/flexzeit/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /home/tom/flexsvr/flexzeit/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /home/tom/flexsvr/flexzeit/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
