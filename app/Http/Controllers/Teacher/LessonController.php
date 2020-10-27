@@ -83,6 +83,7 @@ class LessonController extends Controller {
     $defaultEndDate = $this->configService->getDefaultListEndDate();
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+    $category = array();
 
     return view('teacher.lessons.index', compact(
         'isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek','category'

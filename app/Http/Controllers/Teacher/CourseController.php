@@ -115,6 +115,8 @@ class CourseController extends Controller {
     $defaultEndDate = $this->configService->getDefaultListEndDate();
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
+    $category=array();
+
 
     return view('teacher.courses.obligatory', compact(
         'groups', 'teachers', 'subjects', 'defaultGroup', 'defaultStartDate', 'defaultEndDate',
