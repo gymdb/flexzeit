@@ -204,7 +204,7 @@ class SubstitutionServiceImpl implements SubstitutionService {
 
     $result = [];
     foreach ($times[$date->dayOfWeek] as $n => $time) {
-      if ($date->toDateTime($time['start']) >= $substitution['start'] && $date->toDateTime($time['end']) <= $substitution['end']) {
+      if ($date->toMyDateTime($time['start']) >= $substitution['start'] && $date->toMyDateTime($time['end']) <= $substitution['end']) {
         $result[] = $data + ['number' => $n];
       }
     }

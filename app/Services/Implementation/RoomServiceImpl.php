@@ -71,8 +71,8 @@ class RoomServiceImpl implements RoomService {
               $teacher = $teachers[$item['teacher']] ?? null;
               $result = [];
               foreach ($times[$date->dayOfWeek] as $n => $time) {
-                if ($date->toDateTime($time['start']) < $item['end']
-                    && $date->toDateTime($time['end']) > $item['start']) {
+                if ($date->toMyDateTime($time['start']) < $item['end']
+                    && $date->toMyDateTime($time['end']) > $item['start']) {
                   // Given lesson is intersecting the timeframe of this flex lesson
                   $result[] = new RoomOccupation([
                       'room_id'    => $room->id,

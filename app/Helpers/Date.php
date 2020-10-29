@@ -62,10 +62,10 @@ class Date extends Carbon {
    * @param string $time
    * @return Carbon
    */
-  /**public function toDateTime($time) {
+  public function toMyDateTime($time) {
     list($hour, $minute) = explode(':', $time);
     return Carbon::create($this->year, $this->month, $this->day, $hour, $minute, 0, $this->timezone);
-  } **/
+  } 
 
   public function __toString() {
     return static::$formatter->format($this);

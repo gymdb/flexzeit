@@ -78,8 +78,8 @@ class StudentServiceImpl implements StudentService {
       for ($date = $start; $date <= $end; $date = $date->copy()->addDay(1)) {
         if (!empty($times[$date->dayOfWeek])) {
           foreach ($times[$date->dayOfWeek] as $n => $time) {
-            if ($date->toDateTime($time['start']) >= $absence['start']
-                && $date->toDateTime($time['end']) <= $absence['end']
+            if ($date->toMyDateTime($time['start']) >= $absence['start']
+                && $date->toMyDateTime($time['end']) <= $absence['end']
                 && !$student->absences->contains($this->matcher($date, $n))
             ) {
               $create[] = ['student_id' => $student->id, 'date' => $date, 'number' => $n];
