@@ -20,6 +20,8 @@
           @endif
           <dt>@lang('messages.room')</dt>
           <dd>{{$lesson->room->name}}</dd>
+          <dt>@lang('messages.numberOfStudents')</dt>
+          <dd>{{sizeof($lesson->students)}}</dd>
         </dl>
 
         @if($allowCancel)
