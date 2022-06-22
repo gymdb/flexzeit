@@ -15,7 +15,7 @@ use Tests\Traits\MockDbTrait;
  *
  * @package Tests\Unit
  */
-class ConfigTest extends TestCase {
+class ConfigServiceTest extends TestCase {
 
   use MockDbTrait;
 
