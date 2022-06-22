@@ -12,6 +12,7 @@ return [
     'student'       => 'SchülerIn',
     'teacher'       => 'Lehrkraft',
     'course'        => 'Kurs',
+    'numberOfStudents'        => 'Anzahl SuS.',
     'room'          => 'Raum',
     'participants'  => 'Anmeldungen',
     'documentation' => 'Dokumentation',

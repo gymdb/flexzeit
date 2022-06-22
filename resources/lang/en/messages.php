@@ -11,6 +11,7 @@ return [
     'student'       => 'Student',
     'teacher'       => 'Teacher',
     'course'        => 'Course',
+    'numberOfStudents'        => '# Students',
     'room'          => 'Room',
     'participants'  => 'Participants',
     'documentation' => 'Documentation',
