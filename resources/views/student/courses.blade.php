@@ -36,25 +36,28 @@
                 </td>
                 <td>@{{$t('messages.range', course.time)}}</td>
                 <td class="course">
-                  <popover trigger="hover" placement="right" :ref="'popover-' + key">
-                    <div slot="content">
-                      <p v-if="course.teacher.subjects">@{{course.teacher.subjects}}</p>
-                      <p v-if="course.teacher.info">@{{course.teacher.info}}</p>
-                      <p>
-                        <img class="popover-image" src="{{url('/images/avatar.png')}}"
-                             :src="course.teacher.image || '{{url('/images/avatar.png')}}'"
-                             @load="$refs['popover-' + key][0].position()"/>
-                      </p>
-                    </div>
-                    <span>@{{course.teacher.name}}</span>
-                  </popover>
+
+                  <div :id="'popover-'+key" ref="'popover-'+key" >@{{course.teacher.name}}</div>
+                  <b-popover :target="'popover-'+key" triggers="hover focus" placement="right" >
+                  <!--<div slot="content"> -->
+                    <p v-if="course.teacher.subjects">@{{course.teacher.subjects}}</p>
+                    <p v-if="course.teacher.info">@{{course.teacher.info}}</p>
+                    <p>
+                      <img class="popover-image" src="{{url('/images/avatar.png')}}"
+                           :src="course.teacher.image || '{{url('/images/avatar.png')}}'"
+                           @load="$refs['popover-' + key][0].position()"/>
+                    </p>
+                  <!--</div> -->
+                  </b-popover>
+
                 </td>
                 <td class="course">
-                  <popover v-if="course.description" trigger="hover" placement="right">
+                  <span :id="'desc-'+key" ref="'popover-'+key">@{{course.name}}</span>
+                  <b-popover v-if="course.description" triggers="hover" :target="'desc-'+key" placement="right">
                     <div slot="content"> @{{course.description}}</div>
-                    <span>@{{course.name}}</span>
-                  </popover>
-                  <span v-else>@{{course.name}}</span>
+                    <span>@{{course.description}}</span>
+                  </b-popover>
+                  <b-popover v-else triggers="hover" :target="'desc-'+key" placement="right">@{{course.name}}</b-popover>
                 </td>
                 <td>@{{course.students}}<span
                       v-if="course.maxstudents">/@{{course.maxstudents}}</span></td>

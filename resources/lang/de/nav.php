@@ -27,7 +27,7 @@ return [
     'registrations' => [
         'list'      => 'Anmeldungen anzeigen',
         'missing'   => 'Fehlende Anmeldungen anzeigen',
-        'missingSportRegistration' => 'Fehlende Sportanmeldungen anzeigen',
+        'missingSportRegistration' => 'Fehlende Kursanmeldungen anzeigen',
         'absent'    => 'Abwesenheiten anzeigen',
         'byteacher' => 'Anmeldungen durch Lehrkräfte anzeigen'
     ],

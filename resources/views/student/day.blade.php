@@ -74,8 +74,8 @@
   @if($hasMissing)
     <section class="panel panel-default has-popovers">
       <h2 class="panel-heading">@lang('student.available.heading')<span class="pull-right">
-        <popover trigger="hover" placement="right" :ref="'popover-legend'">
-	  <div slot="content">
+          <span id="popoverLegend"> Legende </span>
+        <b-popover triggers="hover" placement="right" target="popoverLegend" :ref="'popover-legend'">
 	    <table>
 	      <tr class="category0"><td>Nawi</td></tr>
 	      <tr class="category1"><td>Sprachen</td></tr>
@@ -84,9 +84,7 @@
 	      <tr class="category4"><td>Gewi</td></tr>
 	      <tr class="category5"><td>Anderes</td></tr>
 	    </table>
-	  </div>
-	  <span> Legende </span>
-	  </popover>
+	  </b-popover>
         </span></h2>
       <div class="panel-body">
         <filtered-list
@@ -113,20 +111,30 @@
                 <tr v-for="(lesson, key) in props.data" :class="typeof(lesson.course) !== 'undefined' ? 'category'+{{'lesson.course.category'}} : ''">
                   <td>@{{$t('messages.range', lesson.time)}}</td>
                   <td>
-                    <popover trigger="hover" placement="right" :ref="'popover-' + key">
-                      <div slot="content">
-                        <p v-if="lesson.teacher.subjects">@{{lesson.teacher.subjects}}</p>
-                        <p v-if="lesson.teacher.info">@{{lesson.teacher.info}}</p>
-                        <p>
-                          <img class="popover-image" src="{{url('/images/avatar.png')}}"
-                               :src="lesson.teacher.image || '{{url('/images/avatar.png')}}'"
-                               @load="$refs['popover-' + key][0].position()"/>
-                        </p>
-                      </div>
-                      <span>@{{lesson.teacher.name}}</span>
-                    </popover>
+
+                    <span :id="'popover-'+key" :ref="'popover-'+key" >@{{lesson.teacher.name}}</span>
+                    <b-popover :target="'popover-'+key" triggers="hover" placement="right" >
+                      <!--<div slot="content"> bla -->
+                      <p v-if="lesson.teacher.subjects">@{{lesson.teacher.subjects}}</p>
+                      <p v-if="lesson.teacher.info">@{{lesson.teacher.info}}</p>
+                      <p>
+                        <img class="popover-image" src="{{url('/images/avatar.png')}}"
+                             :src="lesson.teacher.image || '{{url('/images/avatar.png')}}'"/>
+                      </p>
+                      <!--</div> -->
+                    </b-popover>
+
+
                   </td>
-                  <td class="course">@{{lesson.course ? lesson.course.name : ''}}</td>
+                   <td class="course">
+                    <span :id="'popoverDesc-'+key">@{{lesson.course ? lesson.course.name : ''}}</span>
+                    <b-popover triggers="hover" placement="right" :target="'popoverDesc-'+key" :ref="'popoverDesc-' + key">
+                        <p v-if="lesson.course && lesson.course.yearfrom">Für Jahrgang @{{lesson.course.yearfrom}} bis  @{{lesson.course.yearto}} </p>
+                        <p v-else>Für alle offen.</p>
+                    </b-popover>
+                   </td>
+
+
                   <td class="room">@{{lesson.room}}</td>
                   @if ($allowRegistration)
                     <td class="hidden-print">

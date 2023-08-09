@@ -20,7 +20,6 @@
         yearFrom: this.oldYearFrom,
         yearTo: this.oldYearFrom,
         subject: this.oldSubject,
-        groups: this.oldGroups,
         teacher: this.oldTeacher,
         withCourse: [],
         forNewCourse: [],
@@ -29,6 +28,7 @@
         withObligatory: [],
         timetable: [],
         offdays: [],
+        groups: [],
         loading: false,
         error: null
       };
@@ -127,14 +127,14 @@
 
         const options = [];
         for (let i = 1; i <= this.frequencyMax; i++) {
-          options.push({value: i, label: this.$tc('courses.frequency', i, {count: i})});
+          options.push({value: i, text: this.$tc('courses.frequency', i, {count: i})});
         }
         return options;
       },
       categoryOptionsList() {
         const options = [];
         for (let i = 0; i <= 5; i++) {
-            options.push({value: i, label: this.$t('courses.category')[i]});
+            options.push({value: i, text: this.$t('courses.category')[i]});
         }
         return options;
       },
@@ -144,8 +144,9 @@
       parsedRooms() {
         return _.map(this.rooms, (room) => {
           return {
-            id: room.id,
-            label: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length) ? '<span class="text-muted">' + room.name + '</span>' : room.name
+            value: room.id,
+            text: room.name,
+            disabled: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length)
           };
         });
       },
@@ -178,11 +179,11 @@
       buttonDisabled() {
         if (this.obligatory) {
           return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room || !this.subject || !this.groups.length
-              || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0
+              || this.withCourse.length > 0 || this.withObligatory.length > 0 || this.timetable.length > 0 || this.offdays.length > 0 || (this.category == null)
               || !this.forNewCourse.length;
         }
 
-        return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room
+        return this.error || this.loading || !this.firstDate || !this.number || !this.name || !this.room || (this.category == null)
             || this.withCourse.length > 0 || !this.forNewCourse.length;
       }
     },

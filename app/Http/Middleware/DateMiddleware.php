@@ -30,7 +30,7 @@ class DateMiddleware {
     foreach ($route->signatureParameters(Carbon::class) as $parameter) {
       if (!$route->parameter($parameter->name) instanceof Date) {
         if (empty($parameters[$parameter->name])) {
-          if (!$parameter->isDefaultValueAvailable()) {
+          if (!$parameter->isDefaultValueAvailable()&& $parameter->name != "lastDate") {
             throw new NotFoundHttpException("Missing parameter " . $parameter->name);
           }
         } else {

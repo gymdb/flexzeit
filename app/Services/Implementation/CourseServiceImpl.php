@@ -261,11 +261,12 @@ class CourseServiceImpl implements CourseService {
 
       foreach ($constraints->getDateRange() as $date) {
         foreach ($constraints->getNumbers() as $n) {
-          if ($offdays->contains($this->matcher($date, $n))) {
+          $d = new Date($date); //convert to Carbon Date
+          if ($offdays->contains($this->matcher($d, $n))) {
             continue;
           }
-          if (!$lessons->contains($this->matcher($date, $n))) {
-            $lesson = new Lesson(['date' => $date, 'number' => $n, 'generated' => true, 'room_id' => $room]);
+          if (!$lessons->contains($this->matcher($d, $n))) {
+            $lesson = new Lesson(['date' => $d, 'number' => $n, 'generated' => true, 'room_id' => $room]);
             $lesson->teacher()->associate($teacher);
             $lessons->push($lesson);
           }
@@ -325,7 +326,7 @@ class CourseServiceImpl implements CourseService {
   }
 
   public function getDataForEdit(Course $course, Date $lastDate = null, array $groups = null) {
-
+    // fix compact issue
     $withCourse=array();
     $added=array();
     $removed=array();

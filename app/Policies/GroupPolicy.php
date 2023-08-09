@@ -43,15 +43,16 @@ class GroupPolicy {
    * @return bool
    */
   public function showMissingSportsRegistration(User $user, Group $group = null) {
-    $sportsTeacher = false;
-    if (strpos($user->subjects, 'Sport') !== false) {
-      $sportsTeacher = true;
-    }
-    if ($sportsTeacher) {
-      return true  ;
-    } else {
-      return ($user->form && $user->form->group_id < 11) || ($user->admin);
-    }
+    return $this->isFormTeacher($user, $group);
+    //$sportsTeacher = false;
+    //if (strpos($user->subjects, 'Sport') !== false) {
+      //$sportsTeacher = true;
+    //}
+    //if ($sportsTeacher) {
+      //return true  ;
+    //} else {
+      //return ($user->form && $user->form->group_id < 11) || ($user->admin);
+    //}
   }
 
   /**

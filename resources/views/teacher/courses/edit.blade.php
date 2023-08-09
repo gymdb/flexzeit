@@ -11,6 +11,7 @@
                    :old='@json($old)'
                    @if($obligatory)
                    obligatory
+                   :groups='@json($groups)'
                    @else
                    :min-year="{{$minYear}}"
                    :max-year="{{$maxYear}}"
@@ -147,8 +148,8 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <v-select v-model="room" name="room" class="select-container" placeholder="@lang('courses.data.selectRoom')" search
-                        :options="parsedRooms" options-value="id"></v-select>
+              <b-form-select v-model="room" name="room" class="form-control" placeholder="@lang('courses.data.selectRoom')" search
+                             :options="parsedRooms" options-value="id"></b-form-select>
             </div>
 
             <div class="form-group col-xs-12">
@@ -160,16 +161,26 @@
             @if($obligatory)
               <div class="form-group col-sm-3 col-xs-12 required">
                 <label for="subject">@lang('courses.data.subject')</label>
-                <v-select name="subject" class="select-container" placeholder="@lang('courses.data.selectSubject')" search
-                          v-model="subject" :options='@json($subjects)' options-value="id" options-label="name"></v-select>
+                <select id="room" name="subject" v-model="subject" class="form-control">
+                  <option :value="null">@lang('courses.data.selectSubject')</option>
+                  @foreach($subjects as $subject)
+                    <option :value="{{$subject['id']}}">{{$subject['name']}}</option>
+                  @endforeach
+                </select>
               </div>
 
               <div class="form-group col-sm-3 col-xs-12 required">
                 <label for="groups">@lang('courses.data.groups')</label>
                 @if($allowGroupsChange)
-                  <v-select name="groups[]" class="select-container" placeholder="@lang('courses.data.selectGroups')" multiple search
+                  <!--<b-form-select name="groups[]" class="form-control" placeholder="@lang('courses.data.selectGroups')" multiple search
                             v-model="groups" :options='@json($groups)' options-value="id" options-label="name"
-                            @if(!$allowGroupsChange) readonly @endif></v-select>
+                            @if(!$allowGroupsChange) readonly @endif></b-form-select> -->
+                  <b-form-select name="groups[]"  class="multiselect" multiple :select-size="4" v-model="groups">
+                    <option :value=null>@lang('courses.data.selectGroups')</option>
+                    <option v-for="group in {{$groups}}" :value="group.id">
+                      @{{group.name}}
+                    </option>
+                  </b-form-select>
                 @else
                   <input id="groups" class="form-control" value="{{$groupNames}}" readonly/>
                   @foreach($courseData['groups'] as $group)
@@ -198,8 +209,8 @@
             @endif
             <div class="form-group col-sm-3 col-xs-12 required">
               <label for="category">@lang('courses.data.category')</label>
-              <v-select v-model="category" name="category" class="select-container" placeholder="@lang('courses.data.selectCategory')"
-                        :options="categoryOptionsList" v-model.number="category" id="category"></v-select>
+              <b-form-select v-model="category" name="category" class="form-control" placeholder="@lang('courses.data.selectCategory')"
+                        :options="categoryOptionsList" v-model.number="category" id="category"></b-form-select>
             </div>
 
             <div class="col-xs-12">

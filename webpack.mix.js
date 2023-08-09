@@ -26,6 +26,9 @@ mix.webpackConfig({
   }
 });
 
-mix.setResourceRoot('../');
-mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css');
+const ASSET_URL = process.env.APP_URL || '/';
+
+mix.setResourceRoot(ASSET_URL);
+
+mix.js('resources/js/app.js', 'public/js').vue()
+      .sass('resources/sass/app.scss', 'public/css');

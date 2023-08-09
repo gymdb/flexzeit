@@ -317,17 +317,20 @@ class RegistrationServiceImpl implements RegistrationService {
 
   public function getSlots(Student $student, DateConstraints $constraints) {
     $lessons = $this->registrationRepository->querySlots($student, $constraints)
-        ->with('teacher:id,lastname,firstname', 'course:id,name', 'room:id,name')
+        ->with('teacher:id,lastname,firstname', 'course:id,name,description', 'room:id,name')
         ->get(['l.id', 'l.teacher_id', 'l.course_id', 'l.room_id', 'r.obligatory', 'r.id as registration_id', 'd.date', 'd.number']);
     $offdays = $this->offdayRepository->queryForLessonsWithStudent($lessons, $student)->get();
 
     $lessons->each(function(Lesson $lesson) use ($offdays, $student) {
       $this->configService->setTime($lesson);
+      $now = Carbon::now()->addDay()->toDateString();
+
 
       $lesson->unregisterPossible = !$lesson->obligatory
           && $this->isRegistrationPossible($lesson->course ? $lesson->course->firstLesson()->date : $lesson->date);
       if ($lesson->course && $lesson->unregisterPossible) {
-        $lesson->unregisterPossible = !$this->isObligatoryFor($lesson->course, $student);
+        $lesson->unregisterPossible = (!$this->isObligatoryFor($lesson->course, $student) && $now != $lesson->date->toDateString());
+
       }
 
       $lesson->isOffday = $offdays->contains($this->matcher($lesson->date, $lesson->number));
@@ -340,7 +343,7 @@ class RegistrationServiceImpl implements RegistrationService {
     return $this->registrationRepository
         ->queryWithExcused($student ?: $group, $constraints, true, $teacher, $subject)
         ->with('lesson', 'lesson.teacher:id,lastname,firstname', 'lesson.course:id,name', 'lesson.room:id,name', 'student:id,lastname,firstname')
-        ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'attendance'])
+        ->addSelect(['registrations.id', 'registrations.student_id', 'lesson_id', 'attendance','registrations.obligatory'])
         ->get()
         ->map(function(Registration $registration) {
           $lesson = $registration->lesson;
@@ -354,7 +357,8 @@ class RegistrationServiceImpl implements RegistrationService {
               'room'       => $lesson->room->name,
               'teacher'    => $lesson->teacher->name(),
               'student'    => $registration->student->name(),
-              'cancelled'  => $lesson->cancelled
+              'cancelled'  => $lesson->cancelled,
+              'obligatory'  => boolval($registration->obligatory)
           ];
           if ($lesson->course) {
             $data['course'] = [
@@ -368,16 +372,31 @@ class RegistrationServiceImpl implements RegistrationService {
 
   public function getMissingSportsRegistration(Group $group = null, DateConstraints $constraints ) {
     return $this->registrationRepository->queryMissingSportsRegistration($group, $constraints)
-      ->get(['id', 'firstname', 'lastname'])
-      ->map(function(Student $student) use ($group) {
-        $lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
-        $this->configService->setTime($lesson);
-        $name = $group ? $student->name() : $student->name() . $student->formsString();
-        return [
-          'name' => $name,
-          'id'   => $student->id,
-        ];
-    });
+      ->get(['id', 'firstname', 'lastname', 'name'])
+     // ->map(function(Student $student) {
+      ->map(function(Registration $registration) {
+          return [
+              'name' => $registration->lastname." ".$registration->firstname." ".$registration->name,
+              'klasse' => $registration->name
+          ];
+        });
+
+      //  return [
+      //    'name' => $name,
+      //    'id'   => $student->id,
+      //  ];
+
+      //});
+
+      //->map(function(Student $student) use ($group) {
+        //$lesson = new Lesson(['date' => $student->date, 'number' => $student->number]);
+        //$this->configService->setTime($lesson);
+        //$name = $group ? $student->name() : $student->name() . $student->formsString();
+        //return [
+          //'name' => $name,
+          //'id'   => $student->id,
+        //];
+    //});
   }
 
   public function getMissing(Group $group = null, Student $student = null, DateConstraints $constraints) {

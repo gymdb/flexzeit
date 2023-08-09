@@ -1,11 +1,13 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
-  <modal v-if="shown" :value="show" effect="fade" @cancel="cancel" large
-         :title="$t(course ? 'registrations.register.headingCourse' : 'registrations.register.heading')">
-    <div class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
-      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
-    </div>
+  <div class="modal fade in" id="registerDlg" @cancel="cancel">
+
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="exampleModalLabel">{{ $t(course ? 'registrations.register.headingCourse' : 'registrations.register.heading') }}</h4>
+        </div>
+        <div class="modal-body">
 
     <filtered-list ref="filter"
                    :url="url"
@@ -57,7 +59,16 @@
     <error v-if="errors" v-for="(error,i) in errors" :key="i" :error="error">
       {{$t('registrations.register.saveError')}}
     </error>
-  </modal>
+        </div>
+
+
+    <div class="modal-footer" slot="modal-footer">
+      <button type="button" class="btn btn-default" @click="cancel">{{ $t('messages.cancel') }}</button>
+      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{ submitLabel }}</button>
+    </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -110,9 +121,11 @@
       open() {
         this.show = true;
         this.shown = true;
+        $("#registerDlg").show();
       },
       cancel() {
         this.show = false;
+        $("#registerDlg").hide();
         if (this.reload) {
           location.reload();
         }

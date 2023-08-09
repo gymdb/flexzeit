@@ -96,11 +96,11 @@
               @foreach($registrations as $reg)
                 <tr>
                   <td>
-                    <popover trigger="hover" placement="right" ref="popover-{{$reg->student->id}}">
-                      <img slot="content" class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}"
-                           @load="resizePopover({{$reg->student->id}})"/>
-                      <span>{{$reg->student->name()}}{{$reg->student->formsString()}}</span>
-                    </popover>
+                    <span id="popover-{{$reg->student->id}}">{{$reg->student->name()}}{{$reg->student->formsString()}} </span>
+                    <b-popover triggers="hover" target="popover-{{$reg->student->id}}" placement="right" ref="popover-{{$reg->student->id}}">
+                      <img class="popover-image" src="{{url($reg->student->image ?: '/images/avatar.png')}}" />
+                           <!--@load="resizePopover({{$reg->student->id}})"/> -->
+                    </b-popover>
                   </td>
                   @if($showRegister)
                     <td class="hidden-print">

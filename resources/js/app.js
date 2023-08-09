@@ -6,6 +6,14 @@ import Vue from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueI18n from 'vue-i18n';
+import {BButton, BPopover} from 'bootstrap-vue';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+//import BugReport from "./components/BugReport.vue";
+
+import { BFormSelect } from 'bootstrap-vue';
+import BootstrapVue from "bootstrap-vue";
+//import BootstrapVue from 'bootstrap-vue'
 
 /** @namespace Vue.config */
 Vue.config.debug = true;
@@ -14,6 +22,7 @@ Vue.config.devtools = true;
 /** @namespace Vue.use */
 Vue.use(VueAxios, axios);
 Vue.use(VueI18n);
+//Vue.use(BootstrapVue);
 
 const messages = {};
 ['en', 'de'].forEach(lang => {
@@ -54,6 +63,8 @@ const i18n = new VueI18n({
 
 // Register general components
 Vue.component('bug-report', require('./components/BugReport.vue').default);
+//Vue.component('bug-report', BugReport);
+
 Vue.component('confirm', require('./components/Confirm.vue').default);
 Vue.component('datepicker', require('./components/Datepicker.vue').default);
 Vue.component('daterange', require('./components/Daterange.vue').default);
@@ -82,33 +93,20 @@ Vue.component('student-register', require('./components/student/Register.vue').d
 Vue.component('student-registrations', require('./components/student/Registrations.vue').default);
 
 // Register vue-strap components
-require('vue-strap/dist/vue-strap-lang');
-Vue.component('dropdown', require('vue-strap/src/Dropdown.vue').default);
-Vue.component('modal', require('vue-strap/src/Modal.vue').default);
-Vue.component('popover', require('vue-strap/src/Popover.vue').default);
-Vue.component('v-select', require('vue-strap/src/Select.vue').default);
+//require('vue-strap/dist/vue-strap-lang');
+//require('bootstrap');
+//Vue.component('dropdown', require('vue-strap/src/Dropdown.vue').default);
+//Vue.component('modal', require('vue-strap/src/Modal.vue').default);
+//Vue.component('popover', require('vue-strap/src/Popover.vue').default);
+//Vue.component('v-select', require('vue-strap/src/Select.vue').default);
+//require('bootstrap-vue/dist/bootstrap-vue.js');
+//Vue.component('b-modal',BModal)
+//Vue.directive('b-modal', VBModal)
+Vue.component('b-button',BButton);
+Vue.component('b-popover', BPopover);
+Vue.component('b-form-select', BFormSelect)
 
 Vue.prototype.moment = require('moment');
-
-// Workaround: Bug in Popover component
-// noinspection JSUnresolvedVariable
-Vue.options.components.popover.options.methods.position = function () {
-  // noinspection JSUnresolvedFunction
-  this.$nextTick(() => {
-    // noinspection JSUnresolvedVariable
-    const popover = this.$refs.popover;
-    if (!popover) {
-      return;
-    }
-    // noinspection JSUnresolvedVariable
-    const trigger = this.$refs.trigger.children[0];
-    const pos = $(trigger).offset();
-    this.left = pos.left + trigger.offsetWidth;
-    this.top = pos.top + trigger.offsetHeight / 2 - popover.offsetHeight / 2;
-    popover.style.top = this.top + 'px';
-    popover.style.left = this.left + 'px';
-  });
-};
 
 // noinspection JSUnusedLocalSymbols
 const app = new Vue({

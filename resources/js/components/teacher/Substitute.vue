@@ -1,10 +1,13 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
-  <modal v-if="shown" :value="show" effect="fade" :title="$t('lessons.substitute.heading')" @cancel="cancel" large>
-    <div class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
-      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
-    </div>
+  <div id="substituteDlg" class="modal fade in" >
+
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content ">
+        <div class="modal-header">
+          <h4 class="modal-title" id="exampleModalLabel">{{ $t('lessons.substitute.heading') }}</h4>
+        </div>
+        <div class="modal-body">
 
     <filtered-list ref="filter"
                    :url="url"
@@ -36,7 +39,16 @@
     </filtered-list>
 
     <error :error="error">{{$t('lessons.substitute.saveError')}}</error>
-  </modal>
+        </div>
+
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
+      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
+    </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -79,9 +91,11 @@
       open() {
         this.show = true;
         this.shown = true;
+        $("#substituteDlg").show();
       },
       cancel() {
         this.show = false;
+        $("#substituteDlg").hide();
         if (this.reload) {
           location.reload();
         }

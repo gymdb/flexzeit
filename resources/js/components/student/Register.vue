@@ -1,30 +1,39 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction -->
 <template>
-  <modal :value="show" effect="fade" :title="heading" @cancel="cancel" large>
-    <div class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
-      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('student.register.submit')}}</button>
+  <div class="modal fade in" id="registerDlg"   @cancel="cancel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{heading}}</h4>
+        </div>
+        <div class="modal-body">
+          <error :error="error">{{$t('student.register.saveError')}}</error>
+          <template v-if="lesson">
+            <template v-if="lesson.course">
+              <p>{{$t('student.register.course.info', {teacher: lesson.teacher.name, course: lesson.course.name})}}</p>
+              <ul>
+                <li v-for="date in lesson.course.lessons">{{$d(moment(date), 'short')}}</li>
+              </ul>
+              <p>{{lesson.course.description}}</p>
+            </template>
+            <template v-else>
+              <p>{{$t('student.register.lesson.info', {
+                teacher: lesson.teacher.name,
+                date: $d(moment(lesson.date), 'short'),
+                time: $t('messages.range', lesson.time)
+              })}}</p>
+            </template>
+          </template>
+        </div>
+        <div class="modal-footer" slot="modal-footer">
+          <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
+          <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('student.register.submit')}}</button>
+        </div>
+
+      </div>
     </div>
+  </div>
 
-    <error :error="error">{{$t('student.register.saveError')}}</error>
-
-    <template v-if="lesson">
-      <template v-if="lesson.course">
-        <p>{{$t('student.register.course.info', {teacher: lesson.teacher.name, course: lesson.course.name})}}</p>
-        <ul>
-          <li v-for="date in lesson.course.lessons">{{$d(moment(date), 'short')}}</li>
-        </ul>
-        <p>{{lesson.course.description}}</p>
-      </template>
-      <template v-else>
-        <p>{{$t('student.register.lesson.info', {
-          teacher: lesson.teacher.name,
-          date: $d(moment(lesson.date), 'short'),
-          time: $t('messages.range', lesson.time)
-        })}}</p>
-      </template>
-    </template>
-  </modal>
 </template>
 
 <script>
@@ -55,9 +64,11 @@
       open(lesson) {
         this.lesson = lesson;
         this.show = !!lesson;
+        $("#registerDlg").show();
       },
       cancel() {
         this.show = false;
+        $("#registerDlg").hide();
       },
       save() {
         if (!this.saveDisabled) {

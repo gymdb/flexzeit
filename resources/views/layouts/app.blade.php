@@ -73,7 +73,7 @@
                       <a href="{{route('teacher.registrations.missing')}}">@lang('nav.registrations.missing')</a>
                     </li>
                   @endcan
-                  @can('showMissingSportsRegistration', \App\Models\Group::class)
+                  @can('showMissingSportsRegistration', \App\Models\Student::class)
                     <li>
                       <a href="{{route('teacher.registrations.missingSportsRegistration')}}">@lang('nav.registrations.missingSportRegistration')</a>
                     </li>
@@ -124,6 +124,7 @@
 
           <ul class="nav navbar-nav navbar-right">
             <!-- Authentication Links -->
+            <bug-report ref="bugReportModal"></bug-report>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                 {{ Illuminate\Support\Facades\Auth::user()->name() }} <span class="caret"></span>
@@ -134,13 +135,13 @@
                   <a href="{{ route('logout') }}">@lang('auth.logout')</a>
                 </li>
                 <li>
-                  <a href="#" @click.prevent="$refs.bugReportModal.open()">@lang('nav.bugreports.create')</a>
+                    <a href="#" @click.prevent="$refs.bugReportModal.open()">@lang('nav.bugreports.create')</a>
                 </li>
               </ul>
             </li>
           </ul>
 
-          <bug-report ref="bugReportModal"></bug-report>
+
         </div>
       @endauth
     </div>

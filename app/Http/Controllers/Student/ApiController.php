@@ -104,7 +104,7 @@ class ApiController extends Controller {
    * @return JsonResponse
    */
   public function getAvailableLessons(Date $date, Teacher $teacher = null, Subject $subject = null, $type = null) {
-    $constraints = new DateConstraints($date);
+    $constraints = new DateConstraints($date->startOfDay());
     $lessons = $this->lessonService->getAvailableLessons($this->getStudent(), $constraints, $teacher, $subject, $type);
     return response()->json($lessons);
   }

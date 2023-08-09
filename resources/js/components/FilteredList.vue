@@ -4,48 +4,50 @@
     <div class="row clearfix hidden-print">
       <div v-if="showGroup" class="form-group col-sm-3 col-xs-6">
         <label for="group" class="sr-only">{{$t('messages.group')}}</label>
-        <select class="form-control" id="group" v-model="group">
+        <b-form-select class="form-control" id="group" v-model="group">
           <option :value="null">{{$t('messages.group')}}</option>
           <option v-for="g in groupsList" :value="g.id">{{g.name}}</option>
-        </select>
+        </b-form-select>
       </div>
 
       <div v-if="!multipleStudents && groupsList && showStudent" class="form-group col-sm-3 col-xs-6">
         <label for="student" class="sr-only">{{$t('messages.student')}}</label>
-        <select class="form-control" id="student" :disabled="!group" v-model="student">
+        <b-form-select class="form-control" id="student" :disabled="!group" v-model="student">
           <option :value="null">{{$t('messages.student')}}</option>
           <option v-for="s in studentsList" :value="s.id">{{s.name}}</option>
-        </select>
+        </b-form-select>
       </div>
       <div v-if="multipleStudents && groupsList && showStudent" class="form-group col-sm-3 col-xs-6">
         <label for="students" class="sr-only">{{$t('messages.student')}}</label>
-        <v-select class="select-container" id="students" :disabled="!group" v-model="students" multiple search
-            :placeholder="$t('messages.student')" :options="studentsList" options-value="id" options-label="name">
-        </v-select>
+        <b-form-select class="select-container" id="students" :disabled="!group" v-model="students" multiple search
+            :placeholder="$t('messages.student')">
+          <option :value="null">{{$t('messages.student')}}</option>
+          <option v-for="s in studentsList" :value="s.id">{{s.name}}</option>
+        </b-form-select>
       </div>
 
       <div v-if="teachersList" class="form-group col-sm-3 col-xs-6">
         <label for="teacher" class="sr-only">{{$t('messages.teacher')}}</label>
-        <select class="form-control" id="teacher" v-model="teacher">
+        <b-form-select class="form-control" id="teacher" v-model="teacher">
           <option :value="null">{{$t('messages.teacher')}}</option>
           <option v-for="t in teachersList" :value="t.id">{{t.name}}</option>
-        </select>
+        </b-form-select>
       </div>
 
       <div v-if="subjectsList" class="form-group col-sm-3 col-xs-6">
         <label for="subject" class="sr-only">{{$t('messages.subject')}}</label>
-        <select class="form-control" id="subject" v-model="subject">
+        <b-form-select class="form-control" id="subject" v-model="subject">
           <option :value="null">{{$t('messages.subject')}}</option>
           <option v-for="s in subjectsList" :value="s.id">{{s.name}}</option>
-        </select>
+        </b-form-select>
       </div>
 
       <div v-if="typesList" class="form-group col-sm-3 col-xs-6">
         <label for="type" class="sr-only">{{$t('messages.type')}}</label>
-        <select class="form-control" id="type" v-model="type">
+        <b-form-select class="form-control" id="type" v-model="type">
           <option :value="null">{{$t('messages.type')}}</option>
           <option v-for="type in typesList">{{type}}</option>
-        </select>
+        </b-form-select>
       </div>
 
       <daterange v-if="minDate"

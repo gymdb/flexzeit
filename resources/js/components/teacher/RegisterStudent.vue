@@ -1,14 +1,15 @@
 <!--suppress JSUnresolvedVariable, JSUnresolvedFunction, CommaExpressionJS -->
 <template>
-  <modal v-if="shown" :value="show" effect="fade" :title="title" @cancel="cancel" large>
-    <div v-if="!lesson" class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
-      <button type="button" class="btn btn-primary" :disabled="true">{{$t('registrations.register.submit')}}</button>
-    </div>
-    <div v-else class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="selectLesson(null)">{{$t('registrations.student.back')}}</button>
-      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
-    </div>
+  <div id="registerStudentDlg" class="modal fade in" :title="title" @cancel="cancel" large>
+
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="exampleModalLabel">{{ title }}</h4>
+        </div>
+        <div class="modal-body">
+
+
 
     <div v-show="!lesson">
       <p v-if="date">
@@ -77,7 +78,20 @@
         </ul>
       </div>
     </div>
-  </modal>
+        </div>
+          <div v-if="!lesson" class="modal-footer" slot="modal-footer">
+            <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
+            <button type="button" class="btn btn-primary" :disabled="true">{{$t('registrations.register.submit')}}</button>
+          </div>
+          <div v-else class="modal-footer" slot="modal-footer">
+            <button type="button" class="btn btn-default" @click="selectLesson(null)">{{$t('registrations.student.back')}}</button>
+            <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{submitLabel}}</button>
+          </div>
+
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -197,12 +211,14 @@
         this.lesson = null;
         this.show = true;
         this.shown = true;
+        $("#registerStudentDlg").show();
       },
       selectLesson(lesson) {
         this.lesson = lesson;
       },
       cancel() {
         this.show = false;
+        $("#registerStudentDlg").hide();
         if (this.reload) {
           location.reload();
         }

@@ -9,7 +9,8 @@
         "ext-json": "*",
         "fguillot/json-rpc": "@stable",
         "htmlmin/htmlmin": "^8.0",
-        "laravel/framework": "^8.0"
+        "laravel/framework": "^8.0",
+        "laravel/ui": "^3.4"
     },
     "require-dev": {
         "filp/whoops": "~2.0",

@@ -15,6 +15,7 @@
                      obligatory
                      :old-subject='@json($oldSubject)'
                      :old-groups='@json($oldGroups)'
+                     :groups='@json($groups)'
                      @else
                      :old-max-students='@json($oldMaxStudents)'
                      :min-year="{{$minYear}}"
@@ -66,8 +67,9 @@
 
             <div class="form-group col-sm-3 col-xs-12">
               <label for="frequency">@lang('courses.data.frequency')</label>
-              <v-select v-model="frequency" name="frequency" class="select-container" :placeholder="$tc('courses.frequency', 0)" :disabled="frequencyDisabled"
-                        :options="frequencyOptions"></v-select>
+              <b-form-select v-model="frequency" name="frequency" class="form-control" :placeholder="$tc('courses.frequency', 0)" :disabled="frequencyDisabled"
+                        :options="frequencyOptions">
+              </b-form-select>
             </div>
 
             <div class="form-group col-sm-3 col-xs-12 required">
@@ -165,8 +167,8 @@
 
             <div class="form-group col-sm-6 col-xs-12 required">
               <label for="room">@lang('courses.data.room')</label>
-              <v-select v-model="room" name="room" class="select-container" placeholder="@lang('courses.data.selectRoom')" search
-                        :options="parsedRooms" options-value="id"></v-select>
+              <b-form-select v-model="room" name="room" class="form-control" placeholder="@lang('courses.data.selectRoom')" search
+                        :options="parsedRooms" options-value="id"></b-form-select>
             </div>
 
             <div class="form-group col-xs-12">
@@ -178,14 +180,25 @@
             @if($obligatory)
               <div class="form-group col-sm-3 col-xs-12 required">
                 <label for="subject">@lang('courses.data.subject')</label>
-                <v-select name="subject" class="select-container" placeholder="@lang('courses.data.selectSubject')" search
-                          v-model="subject" :options='@json($subjects)' options-value="id" options-label="name"></v-select>
+                <select id="subject" name="subject" v-model="subject" class="form-control">
+                  <option :value="null">@lang('courses.data.selectSubject')</option>
+                  @foreach($subjects as $subject)
+                    <option :value="{{$subject['id']}}">{{$subject['name']}}</option>
+                  @endforeach
+                </select>
+
+                <!--<b-form-select name="subject" class="select-container" placeholder="@lang('courses.data.selectSubject')" search
+                          v-model="subject" :options='@json($subjects)' options-value="id" options-label="name"></b-form-select> -->
               </div>
 
               <div class="form-group col-sm-3 col-xs-12 required">
-                <label>@lang('courses.data.groups')</label>
-                <v-select name="groups[]" class="select-container" placeholder="@lang('courses.data.selectGroups')" multiple search
-                          v-model="groups" :options='@json($groups)' options-value="id" options-label="name"></v-select>
+                <label>@lang('courses.data.groups')asdf</label>
+                <b-form-select name="groups[]"  class="multiselect" multiple :select-size="4" v-model="groups">
+                  <option :value=null>@lang('courses.data.selectGroups')</option>
+                  <option v-for="group in {{$groups}}" :value="group.id">
+                    @{{group.name}}
+                  </option>
+                </b-form-select>
               </div>
             @else
               <div class="form-group col-sm-3 col-xs-12 ">
@@ -209,8 +222,8 @@
 
             <div class="form-group col-sm-3 col-xs-12 required">
               <label for="category">@lang('courses.data.category')</label>
-              <v-select v-model="category" name="category" class="select-container" placeholder="@lang('courses.data.selectCategory')"
-                        :options="categoryOptionsList"></v-select>
+              <b-form-select v-model="category" name="category" class="form-control" placeholder="@lang('courses.data.selectCategory')"
+                        :options="categoryOptionsList"></b-form-select>
             </div>
 
             <div class="col-xs-12">

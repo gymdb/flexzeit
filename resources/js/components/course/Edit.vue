@@ -81,8 +81,9 @@
       parsedRooms() {
         return _.map(this.rooms, (room) => {
           return {
-            id: room.id,
-            label: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length) ? '<span class="text-muted">' + room.name + '</span>' : room.name
+            value: room.id,
+            text: room.name,
+            disabled: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length)
           };
         });
       },
@@ -110,7 +111,7 @@
       categoryOptionsList() {
         const options = [];
         for (let i = 0; i <= 5; i++) {
-          options.push({value: i, label: this.$t('courses.category')[i]});
+          options.push({value: i, text: this.$t('courses.category')[i]});
         }
         return options;
       },

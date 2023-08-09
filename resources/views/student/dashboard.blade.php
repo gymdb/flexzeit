@@ -27,7 +27,11 @@
                     <td>@lang('messages.format.range', $lesson->time)</td>
                     @if($lesson->id)
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}
+                       @if($lesson->course)
+                          <span class="glyphicon glyphicon-info-sign" title="{{$lesson->course->description}}"></span>
+                       @endif
+                      </td>
                       <td class="room">{{$lesson->room->name}}</td>
                     @elseif($lesson->isOffday)
                       <td colspan="3">@lang('student.offday')</td>
@@ -78,7 +82,11 @@
                     <td>@lang('messages.format.range', $lesson->time)</td>
                     @if($lesson->id)
                       <td>{{$lesson->teacher->name()}}</td>
-                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}</td>
+                      <td class="course">{{$lesson->course ? $lesson->course->name : ''}}
+                       @if($lesson->course)
+                         <span class="glyphicon glyphicon-info-sign" title="{{$lesson->course->description}}"></span>
+                       @endif
+                      </td>
                       <td class="room">{{$lesson->room->name}}</td>
                       <td>
                         @if($lesson->unregisterPossible)

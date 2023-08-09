@@ -33,7 +33,8 @@
                 <th></th>
               </tr>
               </thead>
-              <tr v-for="reg in props.data" :class="{'text-muted': reg.cancelled}">
+              <!--<tr v-for="reg in props.data" :class="{'text-muted': reg.cancelled}"> -->
+              <tr v-for="reg in props.data" :class="reg.obligatory ? 'category2' :''"> <!--// highlight all obligatory courses (not select by student him/herself)-->
                 <td>@{{$d(moment(reg.date), 'short')}}</td>
                 <td>@{{$t('messages.range', reg.time)}}</td>
                 <td>@{{reg.teacher}}</td>

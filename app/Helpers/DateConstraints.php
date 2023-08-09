@@ -26,8 +26,13 @@ class DateConstraints {
    * @param int|null $frequency
    */
   public function __construct(Date $firstDate, Date $lastDate = null, $numbers = null, int $frequency = null) {
-    $this->firstDate = $firstDate;
-    $this->lastDate = $lastDate;
+    $this->firstDate = $firstDate->startOfDay(); //make sure to set time to 0:0:0
+    if ($lastDate != null) {
+        $this->lastDate = $lastDate->startOfDay();
+    } else {
+        $this->lastDate = $lastDate;
+    }
+
     $this->dayOfWeek = $lastDate && $frequency ? $firstDate->dayOfWeek : null;
     $this->frequency = $lastDate && $frequency ? $frequency : null;
     $this->numbers = $numbers ? (array)$numbers : null;

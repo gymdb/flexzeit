@@ -134,33 +134,56 @@ class RegistrationRepository implements \App\Repositories\RegistrationRepository
   }
 
   public function queryMissingSportsRegistration(Group $group=null, DateConstraints $constraints) {
+
+    $baseQuery=Registration::select(DB::raw(' students.id,firstname,lastname,students.untis_id, g.name, count(l.course_id) AS anz'));
+    $myQuery=$baseQuery->join('students','registrations.student_id','students.id')
+    ->join('lessons as l','registrations.lesson_id','l.id')
+    ->join('group_student as gs','gs.student_id','registrations.student_id')
+    ->join('forms as f','f.group_id','gs.group_id')
+    ->join('groups as g','gs.group_id','g.id')
+    ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()])
+    ->where('registrations.obligatory','0');
     if ($group) {
-      $baseQuery = $group->students();
+       $myQuery=$myQuery->where('g.id',$group->id);
     } else {
-      $baseQuery = Student::query();
+
     }
-    $myQuery=$baseQuery->join('group_student as g','g.student_id','students.id')
-    ->WHERE('g.group_id','<',11)
-    ->whereNotIn('g.student_id', function($in) use ($constraints) {
-        $in->select('r.student_id')
-           ->from('registrations as r')
-           ->join('lessons as l', 'l.id','r.lesson_id')
-           ->join('courses as c', function($join) {
-               $join->on('c.id', 'l.course_id');
-            })
-           ->where('c.category', 3)
-         ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);
-    })->whereNotIn('g.student_id', function($in) use ($constraints) {
-        $in->select('r.student_id')
-          ->from('registrations as r')
-          ->join('lessons as l', 'l.id','r.lesson_id')
-          ->join('rooms','rooms.id','l.room_id')
-          ->where(function($query){
-            $query->where ('rooms.name','like','SPm%')
-              ->orWhere('rooms.name','like','SPw%');
-          })
-          ->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);})
-        ->orderBy('g.group_id')->orderBy('lastname');
+    $myQuery=$myQuery->groupBy('students.id')
+    ->groupBy('students.untis_id')
+    ->groupBy('students.lastname')
+    ->groupBy('students.firstname')
+    ->groupBy('g.name')
+    ->orderBy('g.id')->orderBy('lastname')->orderBy('firstname')
+    ->having('anz','<',2);
+
+    //if ($group) {
+      //$baseQuery = $group->students();
+    //} else {
+      //$baseQuery = Student::query();
+    //}
+    //$myQuery=$baseQuery->join('group_student as g','g.student_id','students.id')
+    //->WHERE('g.group_id','<',11)
+    //->whereNotIn('g.student_id', function($in) use ($constraints) {
+        //$in->select('r.student_id')
+           //->from('registrations as r')
+           //->join('lessons as l', 'l.id','r.lesson_id')
+           //->join('courses as c', function($join) {
+               //$join->on('c.id', 'l.course_id');
+            //})
+           //->where('c.category', 3)
+         //->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);
+    //})->whereNotIn('g.student_id', function($in) use ($constraints) {
+        //$in->select('r.student_id')
+          //->from('registrations as r')
+          //->join('lessons as l', 'l.id','r.lesson_id')
+          //->join('rooms','rooms.id','l.room_id')
+          //->where(function($query){
+            //$query->where ('rooms.name','like','SPm%')
+              //->orWhere('rooms.name','like','SPw%');
+          //})
+          //->whereBetween('l.date', [$constraints->getFirstDate(), $constraints->getLastDate()]);})
+        //->orderBy('g.group_id')->orderBy('lastname');
+    //error_log("--------".$myQuery->toSql());
     return $myQuery;
   }
 

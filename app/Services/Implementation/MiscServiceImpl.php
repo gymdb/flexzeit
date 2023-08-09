@@ -58,7 +58,7 @@ class MiscServiceImpl implements MiscService {
   }
 
   public function getRooms() {
-    return $this->roomRepository->query()
+    return $this->roomRepository->query()->where('capacity','>',0)
         ->orderBy('name')
         ->get(['id', 'name', 'capacity'])
         ->map(function(Room $room) {

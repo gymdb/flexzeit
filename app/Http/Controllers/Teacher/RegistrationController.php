@@ -97,16 +97,23 @@ class RegistrationController extends Controller {
     * @throws AuthorizationException
     */
   public function showMissingSportsRegistration() {
-    $subjects = $this->getTeacher()->subjects;
-    $isSportsTeacher = false;
-    if (strpos($subjects, 'Sport') !== false) {
-      $isSportsTeacher = true;
-    }
-    $user = $this->getTeacher();
-    $this->authorize('showMissingSportsRegistration', Group::class);
+    $this->authorize('showByTeacherRegistrations', Student::class);
 
+    $user = $this->getTeacher();
     $isAdmin = $user->admin;
-    $groups = ($isAdmin || $isSportsTeacher) ? $this->miscService->getGroups() : [$user->form->group];
+    $groups = $isAdmin ? $this->miscService->getGroups() : [$user->form->group];
+    $subjects = $this->getTeacher()->subjects;
+
+//    $isSportsTeacher = false;
+//    if (strpos($subjects, 'Sport') !== false) {
+//      $isSportsTeacher = true;
+//    }
+//    $user = $this->getTeacher();
+//    $this->authorize('showMissingSportsRegistration', Group::class);
+//
+//    $isAdmin = $user->admin;
+//    $groups = ($isAdmin || $isSportsTeacher) ? $this->miscService->getGroups() : [$user->form->group];
+    //$groups = $isAdmin ? $this->miscService->getGroups() : [$user->form->group];
     //$defaultGroup = !$user->admin && $user->form ? $user->form->group_id : null;
     $minDate = $this->configService->getYearStart();
     $maxDate = $this->configService->getYearEnd();
@@ -391,7 +398,7 @@ class RegistrationController extends Controller {
     if ($group) {
       $this->authorize('showMissingSportsRegistration', $group);
     } else {
-      $this->authorize('showMissingSportsRegistration', Group::class);
+      $this->authorize('showMissingSportsRegistration', Student::class);
     }
     $constraints = new DateConstraints($start, $end);
     $missing = $this->registrationService->getMissingSportsRegistration($group, $constraints);

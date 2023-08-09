@@ -1,20 +1,34 @@
 <!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
 <template>
-  <modal :value="show" effect="fade" :title="title" @cancel="cancel">
-    <div class="modal-footer" slot="modal-footer">
-      <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
-      <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('student.documentation.submit')}}</button>
-    </div>
 
-    <form>
-      <error :error="loadError">{{$t('student.documentation.loadError')}}</error>
-      <error :error="saveError">{{$t('student.documentation.saveError')}}</error>
-      <div class="form-group">
-        <label for="feedback" class="sr-only">{{$t('student.documentation.label')}}</label>
-        <textarea id="feedback" class="form-control" v-model.trim="text" :disabled="loading || loadError"></textarea>
+  <div>
+    <slot></slot>
+    <div class="modal fade in" id="DocumentationDlg" @cancel="cancel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{{$t('student.documentation.label')}}</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <error :error="loadError">{{$t('student.documentation.loadError')}}</error>
+              <error :error="saveError">{{$t('student.documentation.saveError')}}</error>
+              <div class="form-group">
+                <label for="feedback" class="sr-only">{{$t('student.documentation.label')}}</label>
+                <textarea id="feedback" class="form-control" v-model.trim="text" :disabled="loading || loadError"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer" slot="modal-footer">
+            <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
+            <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('student.documentation.submit')}}</button>
+          </div>
+
+        </div>
       </div>
-    </form>
-  </modal>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -69,9 +83,11 @@
         this.teacher = teacher || null;
         this.el = el || null;
         this.show = !!this.id;
+        $("#DocumentationDlg").show();
       },
       cancel() {
         this.show = false;
+        $("#DocumentationDlg").hide();
         if (this.el) {
           this.el.classList.remove(this.text ? 'btn-danger' : 'btn-default');
           this.el.classList.add(this.text ? 'btn-default' : 'btn-danger');
