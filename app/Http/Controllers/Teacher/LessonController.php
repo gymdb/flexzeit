@@ -84,9 +84,10 @@ class LessonController extends Controller {
     $offdays = $this->offdayService->getInRange($minDate, $maxDate);
     $disabledDaysOfWeek = $this->configService->getDaysWithoutLessons();
     $category = array();
+    $number = array();
 
     return view('teacher.lessons.index', compact(
-        'isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek','category'
+        'isAdmin', 'teachers', 'defaultStartDate', 'defaultEndDate', 'minDate', 'maxDate', 'offdays', 'disabledDaysOfWeek','category','number'
     ));
   }
 
@@ -154,7 +155,7 @@ class LessonController extends Controller {
    * @param int|null $number
    * @return JsonResponse
    */
-  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null, $number = null) {
+  public function getForTeacher(Teacher $teacher = null, Date $start = null, Date $end = null, int $number = null) {
     if (!$teacher) {
       $user = $this->getTeacher();
       $teacher = $user->admin ? null : $user;
@@ -164,7 +165,6 @@ class LessonController extends Controller {
     $start = $start ?: $this->configService->getDefaultListStartDate($end);
     $end = $end ?: $this->configService->getDefaultListEndDate($start);
     $constraints = new DateConstraints($start, $end, $number);
-
     $lessons = $this->lessonService->getMappedForTeacher($teacher, $constraints, true);
     return response()->json($lessons);
   }

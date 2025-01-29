@@ -1,6 +1,30 @@
 <!--suppress JSUnresolvedFunction, JSUnresolvedVariable -->
 <template>
-  <modal :value="show" effect="fade" :title="title" @cancel="cancel">
+
+  <div id="feedbackDlg5" class="modal fade in" :title="title" @cancel="cancel" large>
+
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="exampleModalLabel">{{ title }}</h4>
+        </div>
+        <div class="modal-body">
+          <form>
+            <error :error="loadError">{{$t('registrations.feedback.loadError')}}</error>
+            <error :error="saveError">{{$t('registrations.feedback.saveError')}}</error>
+            <div class="form-group">
+              <label for="feedback" class="sr-only">{{$t('registrations.feedback.label')}}</label>
+              <textarea id="feedback" class="form-control" v-model.trim="text" :disabled="loading || loadError"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" slot="modal-footer">
+          <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
+          <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('registrations.feedback.submit')}}</button>
+        </div>
+      </div>
+    </div>
+  <!--<b-modal :value="show" ref="myModal" effect="fade" :title="title" @cancel="cancel">
     <div class="modal-footer" slot="modal-footer">
       <button type="button" class="btn btn-default" @click="cancel">{{$t('messages.cancel')}}</button>
       <button type="button" class="btn btn-primary" @click="save" :disabled="saveDisabled">{{$t('registrations.feedback.submit')}}</button>
@@ -14,7 +38,15 @@
         <textarea id="feedback" class="form-control" v-model.trim="text" :disabled="loading || loadError"></textarea>
       </div>
     </form>
-  </modal>
+  </b-modal>
+  <b-modal ref="feedbackModal" hide-footer title="Using Component Methods">
+    <div class="d-block text-center">
+      <h3>Hello From My Modal!</h3>
+    </div>
+
+  -->
+  </div>
+
 </template>
 
 <script>
@@ -67,10 +99,12 @@
     methods: {
       open(id) {
         this.id = id;
-        this.show = !!this.id;
+        //this.$refs['feedbackModal1'].show();
+        $("#feedbackDlg5").show();
       },
       cancel() {
         this.show = false;
+        $("#feedbackDlg5").hide();
       },
       save() {
         if (!this.saveDisabled) {

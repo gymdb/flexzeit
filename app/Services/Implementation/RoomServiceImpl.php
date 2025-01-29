@@ -40,7 +40,7 @@ class RoomServiceImpl implements RoomService {
 
   public function loadRoomOccupations() {
     // Get start and end date for Untis query
-    $start = $this->configService->getYearStart(Date::today());
+    $start = $this->configService->getYearStart(Date::today()->addWeek(-1));
     $end = $this->configService->getYearEnd();
 
     if ($start > $end) {

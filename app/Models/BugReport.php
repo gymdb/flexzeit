@@ -41,7 +41,7 @@ class BugReport extends Model {
    * @param  mixed $value
    * @return BugReport|null
    */
-  public function resolveRouteBinding($value) {
+  public function resolveRouteBinding($value, $field=null) {
     return $this->withTrashed()->where($this->getRouteKeyName(), $value)->first();
   }
 

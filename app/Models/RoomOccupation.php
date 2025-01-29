@@ -17,7 +17,7 @@ use App\Helpers\Date;
 class RoomOccupation extends Model {
 
   public $timestamps = false;
-  protected $casts = ['date' => 'date'];
+  protected $casts = ['date' => 'date:Y-m-d'];
   protected $fillable = ['room_id', 'date', 'number', 'teacher_id'];
 
   public function room() {

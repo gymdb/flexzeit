@@ -167,6 +167,8 @@ class LessonServiceImpl implements LessonService {
                 'name'        => $lesson->course->name,
                 'description' => $lesson->course->description,
                 'category'    => $lesson->course->category,
+                'yearfrom'    => $lesson->course->yearfrom,
+                'yearto'      => $lesson->course->yearto,
                 'lessons'     => $associated
             ];
           }

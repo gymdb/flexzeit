@@ -42,7 +42,7 @@ body {
 TOM new
  */
 .form-control {
-  height:34px !important;
+  height:35px !important;
   font-size: 14px !important;
 }
 .popover {
@@ -50,7 +50,7 @@ TOM new
 }
 
 div.labels-hidden {
-  height: 34px;
+  height: 35px;
 }
 .multiselect {
   width:100%;
@@ -126,9 +126,21 @@ textarea.form-control {
 */
 
 
+select option:disabled {
+  color: #bcbcbc;
+  background-color: #f1f1f1;
+  font-style: italic;
+  cursor: not-allowed;
+}
+
+
 .navbar-default  {
   background-color: #fff !important;
   border-color: #d3e0e9;
+}
+
+.navbar-static-top {
+  height: 50px;
 }
 //.container {
 //  width: 1370px !important;
@@ -310,7 +322,7 @@ h2.panel-heading {
         border-bottom: 1px solid $input-group-addon-border-color;
         position: relative;
         top: 25px;
-        height:34px;
+        height:35px;
 
         &.labels-hidden {
           top: 0;
@@ -366,7 +378,7 @@ h2.panel-heading {
 
 .popover-image {
   max-width: 200px;
-  max-height: 200px;
+  max-: 200px;
 }
 
 /**
@@ -438,6 +450,9 @@ dt:after {
   span {
     display: none;
   }
+}
+.flex_change_separator {
+  border-top: 3px double;
 }
 /**
 * Category colors

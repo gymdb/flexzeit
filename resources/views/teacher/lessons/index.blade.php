@@ -9,6 +9,7 @@
           @if($teachers)
           :teachers='@json($teachers)'
           @endif
+          :show-flex-selector=true
           default-start-date='{{$defaultStartDate->toDateString()}}'
           default-end-date='{{$defaultEndDate->toDateString()}}'
           min-date='{{$minDate->toDateString()}}'
@@ -33,9 +34,13 @@
                 <th class="hidden-print"></th>
               </tr>
               </thead>
-              <tr v-for="lesson in props.data" :class="[{'text-muted':lesson.cancelled}, [typeof(lesson.course) !== 'undefined' ? 'category'+{{'lesson.course.category'}} : '']]">
-                <td>@{{$d(moment(lesson.date), 'short')}}</td>
-                <td>@{{$t('messages.range', lesson.time)}}</td>
+
+                 <tr v-for="(lesson, index) in props.data" :key="lesson.id"
+                     :class="[{ 'text-muted': lesson.cancelled }, typeof lesson.course !== 'undefined' ? 'category' + lesson.course.category : '',
+                        index > 0 && props.data[index-1].time.number !== lesson.time.number ? 'flex_change_separator':'']">
+
+                  <td>@{{$d(moment(lesson.date), 'short')}}</td>
+                  <td>@{{$t('messages.range', lesson.time)}}</td>
                 @if($teachers)
                   <td>@{{lesson.teacher}}</td>
                 @endif

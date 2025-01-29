@@ -9,18 +9,18 @@
           <p><strong>@lang('lessons.show.cancelled')</strong></p>
         @endif
 
-        <dl class="dl-horizontal dl-narrow">
+        <dl class="dl-horizontal dl-narrow" >
           @if($isAdmin)
-            <dt>@lang('messages.teacher')</dt>
+            <dt style="text-align:left" >@lang('messages.teacher')</dt>
             <dd>{{$lesson->teacher->name()}}</dd>
           @endif
           @if($lesson->course)
-            <dt>@lang('messages.course')</dt>
+            <dt style="text-align:left" >@lang('messages.course')</dt>
             <dd><a href="{{route('teacher.courses.show', $lesson->course->id)}}">{{$lesson->course->name}}</a></dd>
           @endif
-          <dt>@lang('messages.room')</dt>
+          <dt style="text-align:left">@lang('messages.room')</dt>
           <dd>{{$lesson->room->name}}</dd>
-          <dt>@lang('messages.numberOfStudents')</dt>
+          <dt style="text-align:left">@lang('messages.numberOfStudents')</dt>
           <dd>{{sizeof($lesson->students)}}</dd>
         </dl>
 

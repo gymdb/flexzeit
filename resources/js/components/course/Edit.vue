@@ -82,7 +82,7 @@
         return _.map(this.rooms, (room) => {
           return {
             value: room.id,
-            text: room.name,
+            text: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length) ? "["+room.name+" ("+this.getRoomCapacity(room.id)+")]" : room.name+" ("+this.getRoomCapacity(room.id)+")",
             disabled: (this.roomOccupation[room.id] && this.roomOccupation[room.id].length)
           };
         });

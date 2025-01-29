@@ -15,7 +15,7 @@ use App\Helpers\Date;
 class Offday extends Model {
 
   public $timestamps = false;
-  protected $casts = ['date' => 'date'];
+  protected $casts = ['date' => 'date:Y-m-d'];
   protected $fillable = ['group_id', 'date', 'number'];
 
   public function group() {

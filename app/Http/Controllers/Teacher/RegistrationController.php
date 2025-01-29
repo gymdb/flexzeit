@@ -398,6 +398,7 @@ class RegistrationController extends Controller {
     if ($group) {
       $this->authorize('showMissingSportsRegistration', $group);
     } else {
+      $this->authorize('showMissingSportsRegistration', Group::class);
       $this->authorize('showMissingSportsRegistration', Student::class);
     }
     $constraints = new DateConstraints($start, $end);

@@ -192,7 +192,7 @@
               </div>
 
               <div class="form-group col-sm-3 col-xs-12 required">
-                <label>@lang('courses.data.groups')asdf</label>
+                <label>@lang('courses.data.groups')</label>
                 <b-form-select name="groups[]"  class="multiselect" multiple :select-size="4" v-model="groups">
                   <option :value=null>@lang('courses.data.selectGroups')</option>
                   <option v-for="group in {{$groups}}" :value="group.id">

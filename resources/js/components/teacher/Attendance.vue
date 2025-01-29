@@ -1,7 +1,21 @@
 <!--suppress JSValidateTypes, JSUnresolvedVariable -->
+
 <template>
-  <dropdown v-if="changeable" size="xs">
-    <template slot="button">
+  <b-dropdown v-if="changeable" size="xs" variant="white">
+    <template #button-content>
+      <span class="glyphicon" :class="iconClass"></span> {{text}}
+    </template>
+    <b-dropdown-item href="#" @click.prevent="setPresent()">{{label('present')}}</b-dropdown-item>
+    <b-dropdown-item href="#" @click.prevent="setAbsent()">{{label(excused ? 'excused' : 'absent')}}</b-dropdown-item>
+  </b-dropdown>
+  <span v-else>
+    <span class="glyphicon" :class="iconClass"></span> {{text}}
+  </span>
+
+</template>
+  <!--
+  <b-dropdown v-if="changeable" size="xs">
+    <template v-slot="button">
       <span class="glyphicon" :class="iconClass"></span> {{text}}
     </template>
     <ul slot="dropdown-menu" class="dropdown-menu">
@@ -9,11 +23,11 @@
       <li :class="{active: !computedAttendance}"><a href="#" @click.prevent="setAbsent()">{{label(excused ? 'excused' : 'absent')}}</a>
       </li>
     </ul>
-  </dropdown>
+  </b-dropdown> -
   <span v-else>
     <span class="glyphicon" :class="iconClass"></span> {{text}}
-  </span>
-</template>
+  </span> -->
+<!--</template> -->
 
 <script>
   export default {

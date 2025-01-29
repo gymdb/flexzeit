@@ -42,6 +42,12 @@
         </b-form-select>
       </div>
 
+      <div v-if="showFlexSelector" class="form-group col-sm-3 col-xs-6">
+        <b-form-select class="form-control" id="flex" v-model="number">
+          <option v-for="n in numberList" :value="n.type">{{n.name}}</option>
+        </b-form-select>
+      </div>
+
       <div v-if="typesList" class="form-group col-sm-3 col-xs-6">
         <label for="type" class="sr-only">{{$t('messages.type')}}</label>
         <b-form-select class="form-control" id="type" v-model="type">
@@ -142,10 +148,12 @@
 
       return {
         // Workaround for some weird behaviour: Property fires change event on parent re-rendering
+        number:null,
         groupsList: this.groups,
         studentsList: [],
         teachersList: this.teachers,
         categoryList: this.category,
+        numberList: [ {name: 'Alle', type:null}, {name: 'Flex 1', type:'1'},{name: 'Flex 2', type:'2'}],
         subjectsList: this.subjects,
         typesList: this.roomTypes,
         group: group,
@@ -246,6 +254,10 @@
         'type': Boolean,
         'default': true
       },
+      showFlexSelector: {
+        type: Boolean,
+        default: false
+      },
       multipleStudents: {
         'type': Boolean,
         'default': false
@@ -311,6 +323,11 @@
         if (this.typesList) {
           filter.type = this.type;
         }
+        if (this.numberList>0) {
+          filter.number = this.number;
+        } else {
+          filter.number=null;
+        }
         if (this.date) {
           filter.start = this.date;
           filter.end = this.date;
@@ -341,6 +358,10 @@
         if (this.teachersList && this.teacher) {
           params.teacher = this.teacher;
         }
+        if (this.numberList && this.number) {
+          params.number = this.number;
+        }
+
         if (this.subjectsList && this.subject) {
           params.subject = this.subject;
         }

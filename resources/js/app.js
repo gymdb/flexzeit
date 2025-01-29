@@ -6,13 +6,13 @@ import Vue from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueI18n from 'vue-i18n';
-import {BButton, BPopover} from 'bootstrap-vue';
+import {BButton, BModal, BPopover, DropdownPlugin, ModalPlugin} from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 //import BugReport from "./components/BugReport.vue";
 
 import { BFormSelect } from 'bootstrap-vue';
-import BootstrapVue from "bootstrap-vue";
+//import BootstrapVue from "bootstrap-vue";
 //import BootstrapVue from 'bootstrap-vue'
 
 /** @namespace Vue.config */
@@ -103,6 +103,9 @@ Vue.component('student-registrations', require('./components/student/Registratio
 //Vue.component('b-modal',BModal)
 //Vue.directive('b-modal', VBModal)
 Vue.component('b-button',BButton);
+Vue.use(DropdownPlugin);
+Vue.use(ModalPlugin)
+//Vue.component('modal', VBModal)
 Vue.component('b-popover', BPopover);
 Vue.component('b-form-select', BFormSelect)
 

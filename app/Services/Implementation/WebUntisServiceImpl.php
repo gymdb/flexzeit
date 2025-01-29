@@ -60,8 +60,12 @@ class WebUntisServiceImpl implements WebUntisService {
   public function getOffdays() {
     $result = $this->authenticatedConnection()->getHolidays();
     $this->logout();
+    $filteredArray = array_filter($result, function ($value) {
+       $today = date('Ymd');
+       return $value['startDate'] >= $today;
+    });
 
-    return collect($result)->flatMap(function($item) {
+    return collect($filteredArray)->flatMap(function($item) {
       return DateRange::getCollection($this->getDate($item['startDate']), $this->getDate($item['endDate']));
     });
   }
