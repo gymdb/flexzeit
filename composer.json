@@ -4,20 +4,20 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=7.4.10",
+        "php": ">=8.1",
         "ext-intl": "*",
         "ext-json": "*",
+        "abordage/laravel-html-min": "^0.2.1",
         "fguillot/json-rpc": "@stable",
-        "htmlmin/htmlmin": "^8.0",
-        "laravel/framework": "^8.0",
-        "laravel/ui": "^3.4"
+        "laravel/framework": "^10.0",
+        "laravel/ui": "^4.6."
     },
     "require-dev": {
-        "filp/whoops": "~2.0",
-        "fakerphp/faker": "^1.13.0",
-        "laravel/tinker": "^2.0",
-        "mockery/mockery": "1.3.*",
-        "phpunit/phpunit": "9.0",
+        "filp/whoops": "~2.16",
+        "fakerphp/faker": "^1.24.1",
+        "laravel/tinker": "^v2.10.1",
+        "mockery/mockery": "1.6.12",
+        "phpunit/phpunit": "10.5.40",
         "vladahejda/phpunit-assert-exception": "^1.1"
     },
     "autoload": {
@@ -42,7 +42,7 @@
         "post-create-project-cmd": [
             "@php artisan key:generate"
         ],
-        "post-autoload-dump": [
+	"post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover"
         ]
@@ -52,7 +52,7 @@
         "sort-packages": true,
         "optimize-autoloader": true,
         "platform": {
-            "php": "7.4.10"
+            "php": "8.1.12"
         }
     }
 }
