@@ -42,10 +42,13 @@ class OffdayServiceImpl implements OffdayService {
   public function getInRange(Date $start, Date $end = null, $frequency = null) {
     return $this->offdayRepository->queryInRange(new DateConstraints($start, $end, null, $frequency))
         ->pluck('date')
-        ->map(function(Date $date) {
-          return $date->toDateString();
+        ->map(function ($date) {
+            $d = new Date($date);
+            return $d->toDateString();
         });
   }
+
+
 
   public function loadOffdays() {
     try {
@@ -55,8 +58,9 @@ class OffdayServiceImpl implements OffdayService {
       return;
     }
 
-    $loaded = $loaded->mapWithKeys(function(Date $date) {
-      return [$date->toDateString() => new Offday(['date' => $date])];
+    $loaded = $loaded->mapWithKeys(function ($date) {
+      $d = new Date($date);
+      return [$d->toDateString() => new Offday(['date' => $d])];
     });
 
     $existing = $this->offdayRepository->queryWithoutGroup()
