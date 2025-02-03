@@ -217,12 +217,12 @@ class DocumentationController extends Controller {
       $params['feedback']=$feedback." \r\n\r\nLiebe Grüße\r\n".$params['feedbackFrom']; 
 
       try {
-          Mail::send(array(),array(),
-              function ($message) use ($params) {
+          $messageBody = $params['feedback'];
+          Mail::html($messageBody,function ($message) use ($params,$messageBody) {
                   $message->from($params['feedbackFromEmail'], $params['feedbackFrom'])
                       ->subject('Flex Feedback für ' . $params['feedbackFor']);
                   $message->to($params['mailTo']);
-                  $message->setBody($params['feedback']);
+                  $message->html($messageBody);
               });
       } catch (\Exception $ex) {
           error_log("Error".$ex);

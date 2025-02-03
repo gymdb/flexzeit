@@ -65,13 +65,13 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     $query = $this->queryInRange($constraints, false, false, $teacher ? $teacher->lessons() : null)
         // Must not be part of an obligatory course
         ->whereNotExists(function($exists) {
-          $exists->select(DB::raw(1))
+          $exists->selectRaw('1')
               ->from('course_group as c')
               ->whereColumn('c.course_id', 'lessons.course_id');
         })
         // Must be the first lesson of a course
         ->whereNotExists(function($exists) {
-          $exists->select(DB::raw(1))
+          $exists->selectRaw('1')
               ->from('lessons as sub')
               ->whereColumn('sub.course_id', 'lessons.course_id')
               ->whereColumn('sub.date', '<', 'lessons.date');
@@ -79,7 +79,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
 
     // The student must not have registrations or offdays for the lesson (or all lessons for the course)
     $query->whereNotExists(function($exists) use ($student) {
-      $exists->select(DB::raw(1))
+      $exists->selectRaw('1')
           ->from('lessons as d')
           ->where('d.cancelled', false)
           ->where(function($sub) {
@@ -96,10 +96,9 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     // Only show lessons with free spots
     $query->where(function($or) {
       $sub = $this->getParticipantsQuery();
-      $or->whereRaw("({$sub->toSql()}) < ({$this->getMaxStudentsQuery()})")
-          ->addBinding($sub->getBindings())
-          ->orWhereExists(function($exists) {
-            $exists->select(DB::raw(1))
+      $or->whereRaw("({$sub->toRawSql()}) < ({$this->getMaxStudentsQuery()})")
+         ->orWhereExists(function($exists) {
+            $exists->selectRaw('1')
                 ->from('courses')
                 ->whereColumn('courses.id', 'lessons.course_id')
                 ->whereNull('courses.maxstudents');
@@ -109,7 +108,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     // Limit to allowed years for course
     $year = $student->forms()->take(1)->pluck('year')->first();
     $query->whereNotExists(function($sub) use ($year) {
-      $sub->select(DB::raw(1))
+      $sub->selectRaw('1')
           ->from('courses as c')
           ->whereColumn('c.id', 'lessons.course_id');
       $this->excludeForYear($sub, $year);
@@ -118,7 +117,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     // Limit to allowed years for room
     $query->where(function($or) use ($year) {
       $or->whereNotExists(function($sub) use ($year) {
-        $sub->select(DB::raw(1))
+        $sub->selectRaw('1')
             ->from('rooms as c')
             ->whereColumn('c.id', 'lessons.room_id');
         $this->excludeForYear($sub, $year);
@@ -146,7 +145,6 @@ class LessonRepository implements \App\Repositories\LessonRepository {
           ->orderBy('t.lastname')
           ->orderBy('t.firstname');
     }
-
     return $query;
   }
 
@@ -159,7 +157,7 @@ class LessonRepository implements \App\Repositories\LessonRepository {
     $course = Course::select('courses.maxstudents')->whereColumn('courses.id', 'lessons.course_id');
     /** @noinspection PhpDynamicAsStaticMethodCallInspection */
     $room = Room::select('rooms.capacity')->whereColumn('rooms.id', 'lessons.room_id');
-    return DB::raw("CASE WHEN lessons.course_id IS NOT NULL THEN ({$course->toSql()}) ELSE ({$room->toSql()}) END");
+    return "SELECT COALESCE ( ({$course->toRawSql()}), ({$room->toRawSql()})) AS max_capacity";
   }
 
   public function queryForGroups(array $groups, Collection $lessons, Course $exclude = null) {
